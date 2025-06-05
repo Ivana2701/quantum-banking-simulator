@@ -20,13 +20,14 @@ results = []
 for cfg in grid:
     # build models
     vqc = make_vqc(
-      reps=cfg["reps"],
-      paulis=cfg["paulis"],
-      feature_dim=Xtr_pca.shape[1]
+        reps=cfg["reps"],
+        paulis=cfg["paulis"],
+        feature_dim=Xtr_pca.shape[1],
+        backend_name='ibm_brisbane'
     )
     svm = make_svm()
 
-    # train
+    # train models
     vqc.fit(Xtr_pca, ytr_bal)
     svm.fit(Xtr_pca, ytr_bal)
 
