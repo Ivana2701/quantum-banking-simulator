@@ -1,0 +1,27 @@
+name: qbank
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - pandas
+  - matplotlib
+  - seaborn
+  - sqlalchemy
+  - psycopg2
+  - pip:
+    - fastapi
+    - uvicorn[standard]
+    - streamlit
+    - python-dotenv
+    - psycopg2-binary
+    - cryptography
+    - oqs
+    - qiskit==0.45.2
+    - qiskit-terra==0.45.2
+    - qiskit-aer==0.13.3
+    - qiskit-machine-learning==0.7.2
+    - scikit-learn
+    - imblearn

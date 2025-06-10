@@ -79,24 +79,24 @@ def evaluate_and_save_metrics(model, X_test, y_test, filepath="./metrics_data/qu
 
 def detect_fraud_vqc(transaction_id: int):
     df = load_data()
+    X_train, X_test, y_train, y_test = preprocess_data(df)
+
+    # Proper scaling and PCA fitting on training data
+    scaler = StandardScaler().fit(df[['amount', 'hour', 'location']])
+    pca = PCA(n_components=2).fit(scaler.transform(df[['amount', 'hour', 'location']]))
+
+    # Extract transaction and transform properly
     transaction = df.iloc[transaction_id]
-    # Preprocess just this one record
     location_encoded = pd.factorize(df['location'])[0][transaction_id]
     features = np.array([[transaction['amount'], transaction['hour'], location_encoded]])
+    features_scaled = scaler.transform(features)
+    features_pca = pca.transform(features_scaled)
 
-    scaler = StandardScaler()
-    features_scaled = scaler.fit_transform(features)
-
-    pca = PCA(n_components=2)
-    features_pca = pca.fit_transform(features_scaled)
-
-    # Train model or load a pretrained one (preferred)
-    X_train, X_test, y_train, y_test = preprocess_data(df)
     model = train_vqc(X_train, y_train)
-    
     prediction = model.predict(features_pca)
-    return int(prediction[0])
-
+    # return int(prediction[0])
+    return int(prediction)
+    # return int(np.array(prediction).item()) # explicitly handle scalar predictions with NumPy:
 
 def run_and_save_vqc_metrics():
     df = load_data()
