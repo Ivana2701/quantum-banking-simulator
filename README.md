@@ -7,7 +7,9 @@ This project provides a quantum-secure banking application utilizing quantum enc
 ### Frontend
 
 * **Login System:** Simple authentication with session management.
-* **Dashboard:** Displays account metrics such as account balance.
+* **Dashboard:** Displays account metrics such as account balance. And in the newer version a transaction encryption.
+The project demonstrates secure transaction encryption using the BB84 Quantum Key Distribution protocol. Transactions between the user and the bank are encrypted with quantum-generated keys, ensuring robust security against quantum computing threats.
+
 * **Transactions:** Verify transactions using quantum algorithms.
 * **Model Evaluation:** Execute quantum machine learning models and display evaluation metrics visually.
 
@@ -88,9 +90,23 @@ quantum-banking-simulator/
 * OQS (Post-quantum encryption)
 * scikit-learn, imblearn, pandas, matplotlib, seaborn, SQLAlchemy
 
+## 🔄 Transaction Mode Toggle:
+
+- **Demo Mode**: Educational only. Temporarily stores quantum-generated BB84 keys for visual understanding. **Not secure**.
+- **Real Mode**: Production-level security. BB84 keys **never stored or reused**, adhering strictly to quantum encryption security practices.
+
 ## Security Notice
 
-Replace default credentials (`admin/password`) with secure authentication methods for production deployments.
+Replace default credentials with secure authentication methods for production deployments.
+
+🔑 Credentials:
+Customer Login:
+Username: customer
+Password: customer
+
+Employee Login:
+Username: employee
+Password: employee
 
 ---
 
