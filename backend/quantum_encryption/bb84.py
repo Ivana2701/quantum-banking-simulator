@@ -4,7 +4,8 @@ import numpy as np
 from cryptography.fernet import Fernet
 from qiskit import QuantumCircuit, Aer, execute
 
-def generate_bb84_key(length=32):
+
+def generate_bb84_key(length=30):
     alice_bits = np.random.randint(2, size=length)
     alice_bases = np.random.randint(2, size=length)
     qc = QuantumCircuit(length, length)

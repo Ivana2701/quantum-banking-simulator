@@ -1,5 +1,7 @@
 import json
 import os
+import numpy as np
+
 from datetime import datetime
 from fastapi import FastAPI, HTTPException, BackgroundTasks
 from backend.encryption.encrypt_data import encrypt
@@ -111,21 +113,34 @@ def get_db_connection():
 def save_real_transaction(data: dict):
     encrypted_data = data["encrypted_data"]
     sender_customer_id = data["sender_customer_id"]
-    recipient_customer_id = data["recipient_customer_id"]
+    recipient_account_id = data["recipient_account_id"]  
     amount = data["amount"]
 
     try:
         conn = get_db_connection()
         cur = conn.cursor()
 
+        # Validate sender customer exists
+        cur.execute("SELECT 1 FROM customers WHERE customer_id = %s;", (sender_customer_id,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=400, detail="Sender customer does not exist")
+
+        # Validate recipient account exists (customer or employee)
+        cur.execute("SELECT 1 FROM accounts WHERE account_id = %s;", (recipient_account_id,))
+        if not cur.fetchone():
+            raise HTTPException(status_code=400, detail="Recipient account does not exist")
+
+        # Insert transaction
         cur.execute("""
             INSERT INTO transactions_encrypted (
-                customer_id, recipient_account, amount, encrypted_data, timestamp
-            ) VALUES (%s, %s, %s, %s, %s)
+                transaction_id, customer_id, recipient_account_id, amount, encrypted_data, timestamp
+            )
+            VALUES (%s, %s, %s, %s, %s, %s)
             RETURNING transaction_id;
         """, (
+            datetime.now().strftime("%Y%m%d%H%M%S%f"),
             sender_customer_id,
-            recipient_customer_id,
+            recipient_account_id,
             amount,
             encrypted_data,
             datetime.now()
@@ -133,17 +148,21 @@ def save_real_transaction(data: dict):
 
         transaction_id = cur.fetchone()[0]
         conn.commit()
-        cur.close()
-        conn.close()
 
         return {
             "transaction_id": transaction_id,
-            "status": "securely stored in DB",
-            "note": "BB84 key was discarded after encryption."
+            "status": "Securely stored in DB",
+            "note": "Encryption key discarded after encryption."
         }
 
+    except HTTPException as e:
+        raise e
     except Exception as e:
+        print(f"Detailed DB error: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to save transaction: {e}")
+    finally:
+        cur.close()
+        conn.close()
 
 @app.get("/transactions/results/{transaction_id}")
 def get_transaction_result(transaction_id: str):
@@ -165,7 +184,7 @@ def get_all_transactions():
             SELECT 
                 transaction_id, 
                 customer_id, 
-                recipient_account, 
+                recipient_account_id, 
                 amount, 
                 encrypted_data, 
                 timestamp
@@ -184,7 +203,7 @@ def get_all_transactions():
         raise HTTPException(status_code=500, detail=f"Failed to fetch transactions: {e}")
 
 @app.get("/generate_bb84_key/")
-def generate_bb84_key_api(length: int = 32):  # <- Renamed function to avoid name conflict
+def generate_bb84_key_api(length: int = 16):  # <- 16 max qubit
     try:
         alice_bits, alice_bases, bob_results = generate_bb84_key(length)  # This now calls the imported one
         return {

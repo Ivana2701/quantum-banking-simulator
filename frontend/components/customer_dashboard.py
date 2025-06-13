@@ -1,4 +1,5 @@
 # frontend/components/customer_dashboard.py
+# frontend/components/customer_dashboard.py
 import streamlit as st
 import requests
 from utils.api_helpers import fetch_balance_with_retry
@@ -8,7 +9,7 @@ def customer_dashboard():
     st.title("Customer Dashboard")
 
     # Get logged-in customer ID from session
-    customer_id = st.session_state.get("customer_id", None)
+    customer_id = st.session_state.get("customer_id")
 
     if not customer_id:
         st.error("Unauthorized. Please log in as a customer.")
@@ -17,19 +18,23 @@ def customer_dashboard():
     # Fetch real account balance from backend
     try:
         balance = fetch_balance_with_retry(customer_id)
-        balance_float = float(str(balance).replace(',', ''))  # Remove commas, ensure float
+        balance_float = float(str(balance).replace(',', ''))
         st.metric("Account Balance", f"${balance_float:,.2f}")
     except Exception as e:
         st.warning(f"Could not load account balance: {e}")
         st.metric("Account Balance", "$0.00")
 
-    recipient = st.text_input("Recipient Customer ID")
+    recipient = st.text_input("Recipient Account ID")
     amount = st.number_input("Amount", min_value=0.01, format="%.2f")
     mode = st.radio("Select Transaction Mode:", ["Demo Mode (educational)", "Real Mode (secure)"])
 
     if st.button("Send Transaction"):
         if not recipient:
-            st.error("Recipient Customer ID is required.")
+            st.error("Recipient Account ID is required.")
+            return
+        
+        if int(recipient) == customer_id:
+            st.error("You cannot send money to your own account.")
             return
 
         with st.spinner("Processing transaction..."):
@@ -43,7 +48,7 @@ def customer_dashboard():
 
                 # 2. Encrypt with BB84 Key
                 encrypt_response = requests.post("http://127.0.0.1:8000/encrypt_with_bb84/", json={
-                    "plaintext": f"Send ${amount:.2f} to customer {recipient}",
+                    "plaintext": f"Send ${amount:.2f} to account {recipient}",
                     "bb84_key": bb84_key_bytes.hex()
                 }, timeout=10)
                 encrypt_response.raise_for_status()
@@ -52,13 +57,18 @@ def customer_dashboard():
                 # 3. Choose Endpoint
                 endpoint = "encrypt_transaction_demo" if mode.startswith("Demo") else "encrypt_transaction_real"
 
-                # 4. Save Encrypted Transaction
+                # 4. Validate customer ID before sending transaction
+                if not customer_id:
+                    st.error("Sender customer ID missing. Transaction aborted.")
+                    return
+
                 payload = {
                     "encrypted_data": encrypted,
-                    "sender_customer_id": st.session_state.get("customer_id", 1),  # fallback for testing
-                    "recipient_customer_id": recipient,
+                    "sender_customer_id": customer_id,
+                    "recipient_account_id": int(recipient),
                     "amount": amount
                 }
+
                 if mode.startswith("Demo"):
                     payload["bb84_key"] = bb84_key_bytes.hex()
 
