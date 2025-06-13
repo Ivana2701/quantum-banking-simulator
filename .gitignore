@@ -9,3 +9,4 @@ __pycache__/
 .ipynb_checkpoints/
 transaction_results/
 
+backend/fraud_detection/transactions/creditcard.csv
