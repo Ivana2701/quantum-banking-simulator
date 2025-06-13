@@ -211,3 +211,21 @@ def api_decrypt_with_bb84(data: dict):
     bb84_key = np.frombuffer(bytes.fromhex(bb84_key_hex), dtype=np.uint8)
     decrypted = decrypt_with_bb84(encrypted_data.encode(), bb84_key)
     return {"decrypted_data": decrypted}
+
+@app.get("/account_balance/{customer_id}")
+def get_account_balance(customer_id: int):
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute("SELECT account_balance FROM customers WHERE customer_id = %s;", (customer_id,))
+        result = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if result:
+            return {"balance": float(result[0])}
+        else:
+            raise HTTPException(status_code=404, detail="Customer not found")
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch balance: {e}")

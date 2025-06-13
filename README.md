@@ -32,6 +32,9 @@ conda activate qbank
 
 ### Backend
 
+Always launch the backend first and wait until you see:
+INFO:     Application startup complete.
+
 Run the backend FastAPI server:
 
 ```bash
