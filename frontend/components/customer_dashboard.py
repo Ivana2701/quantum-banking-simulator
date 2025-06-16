@@ -1,21 +1,18 @@
-# frontend/components/customer_dashboard.py
-# frontend/components/customer_dashboard.py
 import streamlit as st
 import requests
 from utils.api_helpers import fetch_balance_with_retry
-
+from animation.quantum_safe_banking import quantum_security_simulation  # Adjust import as needed
 
 def customer_dashboard():
     st.title("Customer Dashboard")
 
-    # Get logged-in customer ID from session
     customer_id = st.session_state.get("customer_id")
 
     if not customer_id:
         st.error("Unauthorized. Please log in as a customer.")
         st.stop()
 
-    # Fetch real account balance from backend
+    # Fetch real account balance
     try:
         balance = fetch_balance_with_retry(customer_id)
         balance_float = float(str(balance).replace(',', ''))
@@ -37,49 +34,50 @@ def customer_dashboard():
             st.error("You cannot send money to your own account.")
             return
 
-        with st.spinner("Processing transaction..."):
-            try:
-                # 1. Generate BB84 Key
-                key_response = requests.get("http://127.0.0.1:8000/generate_bb84_key/", timeout=10)
-                key_response.raise_for_status()
-                key_data = key_response.json()
-                shared_key = key_data["bob_results"]
-                bb84_key_bytes = bytes(shared_key)
+        # First Pop-up
+        st.info("🔐 Quantum-Safe Banking Security Demonstration")
+        if st.button("OK", key="quantum_security_intro"):
+            # Second Pop-up
+            demo_interest = st.radio("Would you like to see a live quantum security demo?", ["Yes", "No"], key="demo_interest")
+            if demo_interest == "Yes":
+                quantum_security_simulation()
 
-                # 2. Encrypt with BB84 Key
-                encrypt_response = requests.post("http://127.0.0.1:8000/encrypt_with_bb84/", json={
-                    "plaintext": f"Send ${amount:.2f} to account {recipient}",
-                    "bb84_key": bb84_key_bytes.hex()
-                }, timeout=10)
-                encrypt_response.raise_for_status()
-                encrypted = encrypt_response.json()["encrypted_data"]
+            # Proceed with transaction after demo (or without demo)
+            with st.spinner("Processing transaction..."):
+                try:
+                    key_response = requests.get("http://127.0.0.1:8000/generate_bb84_key/", timeout=10)
+                    key_response.raise_for_status()
+                    key_data = key_response.json()
+                    shared_key = key_data["bob_results"]
+                    bb84_key_bytes = bytes(shared_key)
 
-                # 3. Choose Endpoint
-                endpoint = "encrypt_transaction_demo" if mode.startswith("Demo") else "encrypt_transaction_real"
+                    encrypt_response = requests.post("http://127.0.0.1:8000/encrypt_with_bb84/", json={
+                        "plaintext": f"Send ${amount:.2f} to account {recipient}",
+                        "bb84_key": bb84_key_bytes.hex()
+                    }, timeout=10)
+                    encrypt_response.raise_for_status()
+                    encrypted = encrypt_response.json()["encrypted_data"]
 
-                # 4. Validate customer ID before sending transaction
-                if not customer_id:
-                    st.error("Sender customer ID missing. Transaction aborted.")
-                    return
+                    endpoint = "encrypt_transaction_demo" if mode.startswith("Demo") else "encrypt_transaction_real"
 
-                payload = {
-                    "encrypted_data": encrypted,
-                    "sender_customer_id": customer_id,
-                    "recipient_account_id": int(recipient),
-                    "amount": amount
-                }
+                    payload = {
+                        "encrypted_data": encrypted,
+                        "sender_customer_id": customer_id,
+                        "recipient_account_id": int(recipient),
+                        "amount": amount
+                    }
 
-                if mode.startswith("Demo"):
-                    payload["bb84_key"] = bb84_key_bytes.hex()
+                    if mode.startswith("Demo"):
+                        payload["bb84_key"] = bb84_key_bytes.hex()
 
-                response = requests.post(f"http://127.0.0.1:8000/{endpoint}/", json=payload, timeout=10)
-                response.raise_for_status()
+                    response = requests.post(f"http://127.0.0.1:8000/{endpoint}/", json=payload, timeout=10)
+                    response.raise_for_status()
 
-                st.success(f"Transaction successfully sent ({mode})!")
+                    st.success(f"Transaction successfully sent ({mode})!")
 
-            except requests.exceptions.ConnectTimeout:
-                st.error("Backend is not responding (connection timeout). Is the server running?")
-            except requests.exceptions.HTTPError as http_err:
-                st.error(f"HTTP error: {http_err}")
-            except Exception as e:
-                st.error(f"Something went wrong: {e}")
+                except requests.exceptions.ConnectTimeout:
+                    st.error("Backend is not responding (connection timeout). Is the server running?")
+                except requests.exceptions.HTTPError as http_err:
+                    st.error(f"HTTP error: {http_err}")
+                except Exception as e:
+                    st.error(f"Something went wrong: {e}")

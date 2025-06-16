@@ -5,9 +5,23 @@ import time
 
 # BB84 QKD animation in Streamlit
 def bb84_qkd_simulation():
-    st.title("🔐 Quantum Key Distribution (BB84) Simulation")
+    st.title("🔐 Quantum Security Demonstration (BB84)")
 
-    st.markdown("### Simulation Steps")
+    st.markdown("""
+    ### 🛡️ Quantum Security Overview
+
+    This simulation demonstrates how our Quantum Key Distribution (QKD) technology, specifically the BB84 protocol, enhances transaction security by reliably detecting interception attempts.
+
+    **Why are you seeing this?**  
+    To provide transparency and build confidence in our advanced security methods, this demo illustrates how QKD ensures secure communications.
+
+    **What you'll observe:**  
+    - Establishment of secure encryption keys between Alice and Bob.
+    - Reliable detection of any interception (by Eve).
+
+    **Recommended viewers:**  
+    IT security specialists, compliance officers, auditors, and employees overseeing security infrastructure.
+    """)
 
     eve_interception = st.checkbox("🔴 Eve intercepts photons")
 
@@ -57,29 +71,24 @@ def bb84_qkd_simulation():
 
         st.markdown("---")
 
-        # Add this at the reconciliation step
         st.markdown("### Reconciliation")
         matched_indices = alice_bases == bob_bases
+
+        st.write(f"Matched Bases: {matched_indices.sum()} out of 10")
 
         alice_key = alice_bits[matched_indices]
         bob_key = df_results.loc[matched_indices, "Bob Measured Bit"].values
 
-        reconciliation_df = pd.DataFrame({
-            "Bit Position": np.arange(1, len(alice_key) + 1),
-            "Alice's Key": alice_key,
-            "Bob's Key": bob_key,
-            "Match": np.where(alice_key == bob_key, "✅", "❌")
-        })
+        st.write("Alice's key: ", alice_key)
+        st.write("Bob's key: ", bob_key)
 
-        st.dataframe(reconciliation_df.style.applymap(
-            lambda val: 'background-color: lightcoral' if val == '❌' else ('background-color: lightgreen' if val == '✅' else ''),
-            subset=['Match']
-        ))
-
-        if eve_interception and not np.array_equal(alice_key, bob_key):
-            st.error("🚨 Interception detected! Errors found in keys above.")
+        if eve_interception:
+            if np.array_equal(alice_key, bob_key):
+                st.error("Unexpected: Eve intercepted, but no errors detected (highly unlikely)!")
+            else:
+                st.error("🚨 **Interception detected!** Errors found in keys.")
         else:
-            st.success("✅ No interception detected! Secure key established.")
+            st.success("✅ **No interception detected!** Secure key established.")
 
 # Run the simulation
 bb84_qkd_simulation()
