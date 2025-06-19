@@ -26,7 +26,7 @@ def quantum_security_simulation():
 
     st.markdown("---")
 
-    eve_interception = st.checkbox("🔴 Eve intercepts photons (simulate QKD interception)")
+    eve_interception = st.checkbox("🔴 Eve intercepts photons (simulate QKD interception)", key="eve_checkbox")
 
     if st.button("🚀 Run Quantum Security Simulation"):
 
@@ -100,5 +100,4 @@ def quantum_security_simulation():
         st.header("🔒 Final Quantum-Secure Transaction")
         st.success("✅ Transaction successfully encrypted with quantum-safe technology!")
 
-# Run the enhanced quantum security simulation
-quantum_security_simulation()
+

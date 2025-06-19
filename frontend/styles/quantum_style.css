@@ -1,0 +1,53 @@
+/* -----------------------
+   👾 Google Fonts
+--------------------------*/
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap');
+
+h1, h2, h3 {
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: #0f0eff;
+}
+
+html, body, p, label, input, textarea {
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 400;
+    color: #eee;
+}
+
+
+.stButton > button {
+    position: relative;
+    border: 1px solid #0f0eff;
+    color: #0f0eff;
+    background-color: transparent;
+    font-weight: 600;
+    padding: 0.5em 1.5em;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: 0.3s ease-in-out;
+    z-index: 1;
+}
+
+.stButton > button::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 200%;
+    height: 0;
+    background: #0f0eff;
+    transform: translate(-50%, -50%) rotate(45deg);
+    transition: 0.5s ease;
+    z-index: -1;
+}
+
+.stButton > button:hover::before {
+    height: 500%;
+}
+
+.stButton > button:hover {
+    color: black !important;
+    background-color: #0f0eff !important;
+}

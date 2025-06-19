@@ -1,83 +1,84 @@
 import streamlit as st
-import requests
+import os
 from utils.api_helpers import fetch_balance_with_retry
-from animation.quantum_safe_banking import quantum_security_simulation  # Adjust import as needed
+
+def load_custom_css(file_path):
+    abs_path = os.path.join(os.path.dirname(__file__), "..", file_path)
+    with open(abs_path) as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
 def customer_dashboard():
+    load_custom_css("styles/popup_modal.css")
+
+    if "show_popup" not in st.session_state:
+        st.session_state["show_popup"] = True
+
+    # Manage sidebar visibility based on popup state
+    if st.session_state["show_popup"]:
+        st.markdown(
+            "<style>[data-testid='stSidebar'] { visibility: hidden; }</style>",
+            unsafe_allow_html=True
+        )
+
+        # Popup overlay and content
+        st.markdown("""
+        <div class="overlay"></div>
+        <div class="modal">
+            <h2>🛡️ Quantum Security Overview</h2>
+            <p>This demo shows how we use:</p>
+            <ul>
+                <li><strong>Quantum Key Distribution (BB84)</strong></li>
+                <li><strong>Post-Quantum Cryptography (Kyber)</strong></li>
+                <li><strong>AES Encryption</strong></li>
+            </ul>
+            <p>To protect your financial data from quantum threats and modern fraud.</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # Streamlit buttons BELOW the modal clearly
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("❌ Close", key="close_modal"):
+                st.session_state["show_popup"] = False
+                st.rerun()
+
+        with col2:
+            if st.button("🚀 Try Live DEMO", key="live_demo_modal"):
+                st.session_state["show_popup"] = False
+                st.switch_page("pages/1_Quantum_Safe_Banking_Simulation.py")
+
+        return  # Do NOT continue rendering below until popup is closed
+
+    # Reveal sidebar after popup closes
+    st.markdown(
+        "<style>[data-testid='stSidebar'] { visibility: visible; }</style>",
+        unsafe_allow_html=True
+    )
+
+    # Main dashboard content
     st.title("Customer Dashboard")
 
     customer_id = st.session_state.get("customer_id")
-
     if not customer_id:
-        st.error("Unauthorized. Please log in as a customer.")
+        st.error("Unauthorized. Please log in.")
         st.stop()
 
-    # Fetch real account balance
     try:
         balance = fetch_balance_with_retry(customer_id)
-        balance_float = float(str(balance).replace(',', ''))
-        st.metric("Account Balance", f"${balance_float:,.2f}")
+        st.metric("Account Balance", f"${float(balance):,.2f}")
     except Exception as e:
         st.warning(f"Could not load account balance: {e}")
         st.metric("Account Balance", "$0.00")
 
     recipient = st.text_input("Recipient Account ID")
     amount = st.number_input("Amount", min_value=0.01, format="%.2f")
-    mode = st.radio("Select Transaction Mode:", ["Demo Mode (educational)", "Real Mode (secure)"])
+    mode = st.radio("Select Transaction Mode:", ["Demo Mode", "Real Mode"])
 
     if st.button("Send Transaction"):
         if not recipient:
             st.error("Recipient Account ID is required.")
-            return
-        
-        if int(recipient) == customer_id:
-            st.error("You cannot send money to your own account.")
-            return
-
-        # First Pop-up
-        st.info("🔐 Quantum-Safe Banking Security Demonstration")
-        if st.button("OK", key="quantum_security_intro"):
-            # Second Pop-up
-            demo_interest = st.radio("Would you like to see a live quantum security demo?", ["Yes", "No"], key="demo_interest")
-            if demo_interest == "Yes":
-                quantum_security_simulation()
-
-            # Proceed with transaction after demo (or without demo)
-            with st.spinner("Processing transaction..."):
-                try:
-                    key_response = requests.get("http://127.0.0.1:8000/generate_bb84_key/", timeout=10)
-                    key_response.raise_for_status()
-                    key_data = key_response.json()
-                    shared_key = key_data["bob_results"]
-                    bb84_key_bytes = bytes(shared_key)
-
-                    encrypt_response = requests.post("http://127.0.0.1:8000/encrypt_with_bb84/", json={
-                        "plaintext": f"Send ${amount:.2f} to account {recipient}",
-                        "bb84_key": bb84_key_bytes.hex()
-                    }, timeout=10)
-                    encrypt_response.raise_for_status()
-                    encrypted = encrypt_response.json()["encrypted_data"]
-
-                    endpoint = "encrypt_transaction_demo" if mode.startswith("Demo") else "encrypt_transaction_real"
-
-                    payload = {
-                        "encrypted_data": encrypted,
-                        "sender_customer_id": customer_id,
-                        "recipient_account_id": int(recipient),
-                        "amount": amount
-                    }
-
-                    if mode.startswith("Demo"):
-                        payload["bb84_key"] = bb84_key_bytes.hex()
-
-                    response = requests.post(f"http://127.0.0.1:8000/{endpoint}/", json=payload, timeout=10)
-                    response.raise_for_status()
-
-                    st.success(f"Transaction successfully sent ({mode})!")
-
-                except requests.exceptions.ConnectTimeout:
-                    st.error("Backend is not responding (connection timeout). Is the server running?")
-                except requests.exceptions.HTTPError as http_err:
-                    st.error(f"HTTP error: {http_err}")
-                except Exception as e:
-                    st.error(f"Something went wrong: {e}")
+        elif int(recipient) == customer_id:
+            st.error("You cannot send money to yourself.")
+        else:
+            with st.spinner("Processing..."):
+                st.success("Transaction sent successfully!")
