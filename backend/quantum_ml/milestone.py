@@ -54,3 +54,6 @@ plt.xlabel("Circuit reps")
 plt.ylabel("VQC F1-score")
 plt.title("Hold-out F1 by circuit depth")
 plt.show()
+
+df.to_csv("backend/quantum_ml/milestone_metrics.csv", index=False)
+
