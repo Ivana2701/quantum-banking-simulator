@@ -6,7 +6,7 @@ import seaborn as sns
 import numpy as np
 import requests
 
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8002"
 
 def display_metrics(metrics):
     st.write("### Metrics")

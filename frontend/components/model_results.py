@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8002"
 
 algorithm = st.selectbox(
     "Choose Algorithm",

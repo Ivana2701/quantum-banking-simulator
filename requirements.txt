@@ -16,3 +16,5 @@ imblearn
 matplotlib
 seaborn
 sqlalchemy
+-e backend/liboqs-python
+fastapi-csrf-protect

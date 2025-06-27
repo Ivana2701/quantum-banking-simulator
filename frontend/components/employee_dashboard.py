@@ -14,7 +14,7 @@ def employee_dashboard():
 
     if menu_choice == "Transactions":
         if st.button("Load All Transactions"):
-            response = requests.get("http://127.0.0.1:8000/transactions/all")
+            response = requests.get("http://127.0.0.1:8002/transactions/all")
             if response.status_code == 200:
                 transactions = response.json()
                 df = pd.DataFrame(transactions)

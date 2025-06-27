@@ -10,8 +10,16 @@ from backend.quantum_encryption.pqc_encrypt_data import pqc_encrypt
 from backend.quantum_encryption.pqc_decrypt_data import pqc_decrypt
 from backend.quantum_encryption.bb84 import generate_bb84_key, encrypt_with_bb84, decrypt_with_bb84
 from backend.fraud_detection.qsvm_fraud_detection import detect_fraud_qsvm, run_and_save_qsvm_metrics
+from backend.authentication.router import router as auth_router
+from fastapi import FastAPI
+import backend.authentication.csrf_config as _csrf  
+from backend.authentication.csrf_config import register_csrf
+# 2) include your auth router (which has /csrf-token and protected /login)
+from backend.authentication.router import router as auth_router
 
 app = FastAPI()
+register_csrf(app)
+app.include_router(auth_router)
 
 @app.get("/")
 def root():

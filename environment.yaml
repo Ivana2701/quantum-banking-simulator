@@ -26,4 +26,8 @@ dependencies:
     - scikit-learn
     - imblearn
     - bcrypt
+    -e backend/liboqs-python
+    - fastapi-csrf-protect
+
+
 

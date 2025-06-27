@@ -1,52 +1,33 @@
 # frontend/components/auth.py
-import sys
-import os
-import streamlit as st
+import os, requests, streamlit as st
 
-# Ensure backend is accessible from frontend
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+API_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
+_session = requests.Session()
 
-from backend.authentication.authentication_service import authenticate_user
+def login_user(username: str, password: str, role: str) -> bool:
+    # 1) fetch CSRF token (cookie + raw token)
+    resp = _session.get(f"{API_URL}/auth/csrf-token", timeout=5)
+    resp.raise_for_status()
+    csrf_token = resp.json()["csrf_token"]
 
-def is_logged_in():
-    return st.session_state.get("logged_in", False)
+    # 2) login with header + cookie
+    payload = {"username": username, "password": password, "role": role.capitalize()}
+    headers = {"X-CSRF-Token": csrf_token}
+    login_resp = _session.post(
+        f"{API_URL}/auth/login",
+        json=payload,
+        headers=headers,
+        timeout=5
+    )
+    if not login_resp.ok:
+        st.error(f"Login failed: {login_resp.text}")
+        return False
 
-def get_user_role():
-    return st.session_state.get("role", None)
-
-def get_customer_id():
-    return st.session_state.get("customer_id", None)
-
-def get_employee_id():
-    return st.session_state.get("employee_id", None)
-
-def assert_customer():
-    if not is_logged_in() or get_user_role() != "Customer" or not get_customer_id():
-        st.error("Unauthorized access. Please log in as a customer.")
-        st.stop()
-
-def assert_employee():
-    if not is_logged_in() or get_user_role() != "Employee":
-        st.error("Unauthorized access. Please log in as an employee.")
-        st.stop()
-
-def login_user(username, password, role):
-    account_id = authenticate_user(username, password, role)
-
-    if account_id:
-        st.session_state["logged_in"] = True
-        st.session_state["role"] = role.capitalize()
-
-        if role.lower() == "customer":
-            st.session_state["customer_id"] = account_id
-        elif role.lower() == "employee":
-            st.session_state["employee_id"] = account_id
-
-        return True
-    return False
-
-def logout_user():
-    st.session_state["logged_in"] = False
-    st.session_state["role"] = None
-    st.session_state["customer_id"] = None
-    st.session_state["employee_id"] = None
+    data = login_resp.json()
+    st.session_state["logged_in"] = True
+    st.session_state["role"]      = data["role"]
+    if role.lower() == "customer":
+        st.session_state["customer_id"] = data["account_id"]
+    else:
+        st.session_state["employee_id"] = data["account_id"]
+    return True

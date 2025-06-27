@@ -2,7 +2,7 @@
 import streamlit as st
 import requests
 
-API_URL = "http://localhost:8000"
+API_URL = "http://localhost:8002"
 
 def show_transactions():
     st.subheader("Transactions")
