@@ -136,7 +136,12 @@ if st.session_state.token is None:
     else:
         register_page()
 else:
-    page = st.sidebar.radio("Dashboard", ["Customer", "Employee", "Logout"])
+    dashboard_pages = ["Customer", "Employee"]
+    page = st.sidebar.radio("Dashboard", dashboard_pages)
+    if st.sidebar.button("Logout"):
+        st.session_state.token = None
+        st.session_state.account_type = None
+        st.rerun()
     if page == "Customer":
         customer_dashboard()
     elif page == "Employee":
