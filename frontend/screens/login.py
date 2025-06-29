@@ -12,7 +12,7 @@ def show_login():
         form_data = {
             "username": username,
             "password": password,
-            "grant_type": "",
+            "grant_type": "password",
             "scope": "",
             "client_id": "",
             "client_secret": "",
