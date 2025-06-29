@@ -136,18 +136,27 @@ if st.session_state.token is None:
     else:
         register_page()
 else:
-    dashboard_pages = ["Customer", "Employee"]
-    page = st.sidebar.radio("Dashboard", dashboard_pages)
-    if st.sidebar.button("Logout"):
-        st.session_state.token = None
-        st.session_state.account_type = None
-        st.rerun()
-    if page == "Customer":
-        customer_dashboard()
-    elif page == "Employee":
-        employee_dashboard()
+    # Show only relevant dashboard based on account type
+    if st.session_state.account_type == "customer":
+        dashboard_pages = ["Home"]
+        page = st.sidebar.radio("Dashboard", dashboard_pages)
+        if st.sidebar.button("Logout"):
+            st.session_state.token = None
+            st.session_state.account_type = None
+            st.rerun()
+        if page == "Home":
+            customer_dashboard()
+    elif st.session_state.account_type == "employee":
+        dashboard_pages = ["Home"]
+        page = st.sidebar.radio("Dashboard", dashboard_pages)
+        if st.sidebar.button("Logout"):
+            st.session_state.token = None
+            st.session_state.account_type = None
+            st.rerun()
+        if page == "Home":
+            employee_dashboard()
     else:
-        # logout
+        # logout if account type is unknown
         st.session_state.token = None
         st.session_state.account_type = None
         st.rerun()
