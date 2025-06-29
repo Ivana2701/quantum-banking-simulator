@@ -1,7 +1,7 @@
 # frontend/components/auth.py
 import os, requests, streamlit as st
 
-API_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
+API_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8002")
 _session = requests.Session()
 
 def login_user(username: str, password: str, role: str) -> bool:

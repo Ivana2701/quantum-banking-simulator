@@ -26,7 +26,9 @@ Ensure you have Conda installed, then create the environment using:
 ```bash
 conda env create -f environment.yml
 conda activate qbank
-```
+``
+save exiisting dependencies into requirements.txt`
+pipreqs . --force
 
 ## Project Setup
 
@@ -38,8 +40,16 @@ INFO:     Application startup complete.
 Run the backend FastAPI server:
 
 ```bash
-uvicorn backend.app:app --reload --host 127.0.0.1 --port 8000
+uvicorn backend.app:app --reload --host 127.0.0.1 --port 8002
 ```
+//new project
+conda deactivate
+conda activate qbank
+cd backend
+uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+
+uvicorn backend.app.main:app --reload --host 127.0.0.1 --port 8000
+
 
 ### Frontend
 
@@ -49,6 +59,17 @@ Run the Streamlit frontend:
 cd frontend
 streamlit run app.py
 ```
+//newproject
+conda deactivate
+conda activate qbank
+cd frontend
+streamlit run streamlit_app.py
+
+//delete cache
+find . -type d -name "__pycache__" -exec rm -r {} +
+or
+find . -name "*.pyc" -delete
+
 
 ### Database
 

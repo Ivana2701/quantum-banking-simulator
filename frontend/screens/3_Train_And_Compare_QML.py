@@ -64,14 +64,24 @@ st.markdown("---")
 st.subheader("📘 Quantum Classifier Math & Theory")
 
 st.markdown("### QSVM: Quantum Support Vector Machine")
-st.latex(r\"\"\"K(x_i, x_j) = |\langle \phi(x_i) | \phi(x_j) \rangle|^2\"\"\")
-st.markdown(\"\"\"QSVM computes a **quantum kernel** using inner products of qubit states \n
-and uses a classical SVM to separate them. The mapping φ is done by a **feature map** quantum circuit.\"\"\")
+# st.latex(r\"\"\"K(x_i, x_j) = |\langle \phi(x_i) | \phi(x_j) \rangle|^2\"\"\")
+# st.latex(r"K(x_i, x_j) = |\langle \phi(x_i) | \phi(x_j) \rangle|^2")
+# st.markdown(""""QSVM computes a **quantum kernel** using inner products of qubit states \n
+# and uses a classical SVM to separate them. The mapping φ is done by a **feature map** quantum circuit.""")
+st.latex(r"K(x_i, x_j) = |\langle \phi(x_i) | \phi(x_j) \rangle|^2")
+st.markdown("""
+QSVM computes a **quantum kernel** using inner products of qubit states  
+and uses a classical SVM to separate them. The mapping φ is done by a **feature map** quantum circuit.
+""")
+
 
 st.markdown("### VQC: Variational Quantum Classifier")
-st.latex(r\"\"\"|\psi(\vec{x}, \vec{\theta})\rangle = U(\vec{\theta}) \cdot \Phi(\vec{x}) |0\rangle\"\"\")
-st.markdown(\"\"\"VQC applies a **parameterized ansatz** after encoding the input with a **feature map**.
-It is trained via a hybrid classical optimizer like COBYLA.\"\"\")
+# st.latex(r\"\"\"|\psi(\vec{x}, \vec{\theta})\rangle = U(\vec{\theta}) \cdot \Phi(\vec{x}) |0\rangle\"\"\")
+st.latex(r"|\psi(\vec{x}, \vec{\theta})\rangle = U(\vec{\theta}) \cdot \Phi(\vec{x}) |0\rangle")
+st.markdown("""VQC applies a **parameterized ansatz** after encoding the input with a **feature map**.
+It is trained via a hybrid classical optimizer like COBYLA.""")
 
 # Optional link to backend
-st.markdown(\"---\")\nst.markdown(\"For internal use. All training metrics are derived from `milestone.py`. Run it manually if needed:\")\n\nst.code(\"python3 backend/quantum_ml/milestone.py\")
+# st.markdown("---")
+st.markdown("For internal use. All training metrics are derived from `milestone.py`. Run it manually if needed:")
+st.code("python3 backend/quantum_ml/milestone.py")

@@ -12,6 +12,7 @@ dependencies:
   - sqlalchemy
   - psycopg2
   - pip:
+    # - -r requirements.txt
     - fastapi
     - uvicorn[standard]
     - streamlit
