@@ -44,7 +44,6 @@ def setup_logging(log_level: str = "INFO", log_file: str = None):
     
     return root_logger
 
-
 def get_logger(name: str):
     """Get a logger for a specific module"""
     return logging.getLogger(name)
