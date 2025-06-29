@@ -23,13 +23,28 @@ class AccountType(str, enum.Enum):
 class AccountBase(BaseModel):
     username: constr(min_length=3)
     full_name: str
-    email: Optional[EmailStr] = None
     account_type: AccountType
     status: str = "active"
 
 # Schema for creating an account
 class AccountCreate(AccountBase):
     password: constr(min_length=8)
+    email: Optional[EmailStr] = None  # Email for validation but not stored in main account table
+    # Optional contact information
+    street: Optional[str] = None
+    city: Optional[str] = None
+    state: Optional[str] = None
+    country: Optional[str] = None
+    postal_code: Optional[str] = None
+    phone_number: Optional[str] = None
+    phone_type: Optional[str] = "mobile"
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    geo_description: Optional[str] = None
+    ip_address: Optional[str] = None
+    device_name: Optional[str] = None
+    device_fingerprint: Optional[str] = None
+    role_id: Optional[int] = None
 
 # Schema for reading an account
 class AccountRead(AccountBase):
