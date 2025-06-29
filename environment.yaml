@@ -26,6 +26,7 @@ dependencies:
     - scikit-learn
     - imblearn
     - bcrypt
+    - pydantic[email]
     -e backend/liboqs-python
     - email-validator
     - python-jose[cryptography]

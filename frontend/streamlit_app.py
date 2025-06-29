@@ -144,4 +144,4 @@ else:
         # logout
         st.session_state.token = None
         st.session_state.account_type = None
-        st.experimental_rerun()
+        st.rerun()
