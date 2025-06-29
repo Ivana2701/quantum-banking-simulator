@@ -2,9 +2,17 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import Base, engine
 from app.routers import auth, accounts, customer, employee, transactions
+import logging
+
+# Setup basic logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 Base.metadata.create_all(bind=engine)
-app = FastAPI(title="QBank API")
+app = FastAPI(title="QBank API", debug=True)
+
+logger.info("Starting Quantum Banking API server")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],

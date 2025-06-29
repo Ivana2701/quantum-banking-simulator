@@ -50,6 +50,7 @@ def login_page():
         if profile.status_code == 200:
             st.session_state.account_type = profile.json()["account_type"]
             st.success("Logged in successfully!")
+            st.rerun()
         else:
             st.error("Could not fetch account info.")
 
@@ -144,4 +145,4 @@ else:
         # logout
         st.session_state.token = None
         st.session_state.account_type = None
-        st.experimental_rerun()
+        st.rerun()
