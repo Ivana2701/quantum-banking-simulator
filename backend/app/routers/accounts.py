@@ -1,4 +1,5 @@
 from typing import List
+import requests
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from app.services.account_service import AccountService
@@ -38,7 +39,17 @@ def create_account(
     request: Request,
     db: Session = Depends(get_db)
 ):
-    # Extract IP address from request
+    # Function to get public IP
+    def get_public_ip():
+        try:
+            response = requests.get("https://api.ipify.org?format=json", timeout=5)
+            if response.status_code == 200:
+                return response.json().get("ip")
+        except Exception:
+            pass
+        return None
+    
+    # Extract IP address from request headers (fallback)
     client_ip = None
     if hasattr(request, 'client') and request.client:
         client_ip = request.client.host
@@ -53,9 +64,16 @@ def create_account(
     if real_ip:
         client_ip = real_ip
     
-    # Set the IP address in payload if not already provided
-    if not payload.ip_address and client_ip:
-        payload.ip_address = client_ip
+    # Priority order for IP address:
+    # 1. IP provided in payload (from frontend "Check My IP" button)
+    # 2. Public IP fetched by backend
+    # 3. IP from request headers (usually 127.0.0.1 for local development)
+    if not payload.ip_address:
+        public_ip = get_public_ip()
+        if public_ip:
+            payload.ip_address = public_ip
+        elif client_ip:
+            payload.ip_address = client_ip
     
     hashed = get_password_hash(payload.password)
     return svc.create_account(db, payload, hashed)

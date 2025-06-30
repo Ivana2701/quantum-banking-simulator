@@ -88,6 +88,138 @@ def register_page():
     
     with st.expander("Device Information", expanded=False):
         device_name = st.text_input("Device Name", placeholder="My Laptop")
+    
+    # Geolocation section
+    with st.expander("Location Services (Optional)", expanded=False):
+        st.info("📍 Location information helps us provide better security for your account")
+        
+        # Initialize session state for location data
+        if "user_location" not in st.session_state:
+            st.session_state.user_location = None
+        if "location_requested" not in st.session_state:
+            st.session_state.location_requested = False
+        if "location_found" not in st.session_state:
+            st.session_state.location_found = False
+        if "user_ip" not in st.session_state:
+            st.session_state.user_ip = None
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("📍 Get My Location", help="Uses your browser's location services"):
+                st.session_state.location_requested = True
+                st.session_state.location_found = False
+                
+                # JavaScript to get geolocation and display results
+                geolocation_js = f"""
+                <script>
+                let locationAttempted = false;
+                
+                function getLocation() {{
+                    if (locationAttempted) return;
+                    locationAttempted = true;
+                    
+                    if (navigator.geolocation) {{
+                        navigator.geolocation.getCurrentPosition(
+                            function(position) {{
+                                const lat = position.coords.latitude;
+                                const lng = position.coords.longitude;
+                                
+                                // Clear any existing content and show success
+                                document.body.innerHTML = '';
+                                
+                                // Display the coordinates immediately
+                                const coordsDiv = document.createElement('div');
+                                coordsDiv.innerHTML = `
+                                    <div style="
+                                        background: #e8f5e8; 
+                                        border: 1px solid #4caf50; 
+                                        border-radius: 5px; 
+                                        padding: 10px; 
+                                        margin: 10px 0;
+                                        font-family: monospace;
+                                    ">
+                                        <strong>📍 Location Found:</strong><br>
+                                        <strong>Latitude:</strong> ${{lat.toFixed(6)}}<br>
+                                        <strong>Longitude:</strong> ${{lng.toFixed(6)}}
+                                    </div>
+                                `;
+                                document.body.appendChild(coordsDiv);
+                                
+                                // Signal that location was found
+                                window.parent.postMessage({{
+                                    type: 'geolocation_success',
+                                    latitude: lat,
+                                    longitude: lng
+                                }}, '*');
+                            }},
+                            function(error) {{
+                                const errorDiv = document.createElement('div');
+                                errorDiv.innerHTML = `
+                                    <div style="
+                                        background: #ffebee; 
+                                        border: 1px solid #f44336; 
+                                        border-radius: 5px; 
+                                        padding: 10px; 
+                                        margin: 10px 0;
+                                    ">
+                                        <strong>❌ Location Error:</strong><br>
+                                        ${{error.message}}
+                                    </div>
+                                `;
+                                document.body.appendChild(errorDiv);
+                                
+                                window.parent.postMessage({{
+                                    type: 'geolocation_error',
+                                    error: error.message
+                                }}, '*');
+                            }}
+                        );
+                    }} else {{
+                        const errorDiv = document.createElement('div');
+                        errorDiv.innerHTML = `
+                            <div style="
+                                background: #ffebee; 
+                                border: 1px solid #f44336; 
+                                border-radius: 5px; 
+                                padding: 10px; 
+                                margin: 10px 0;
+                            ">
+                                <strong>❌ Error:</strong><br>
+                                Geolocation is not supported by this browser.
+                            </div>
+                        `;
+                        document.body.appendChild(errorDiv);
+                        
+                        window.parent.postMessage({{
+                            type: 'geolocation_error',
+                            error: 'Geolocation is not supported by this browser.'
+                        }}, '*');
+                    }}
+                }}
+                getLocation();
+                </script>
+                """
+                st.components.v1.html(geolocation_js, height=150)
+            
+            # Display current IP (informational)
+            if st.button("🌐 Check My IP", help="Shows your current IP address"):
+                try:
+                    ip_response = requests.get("https://api.ipify.org?format=json", timeout=5)
+                    if ip_response.status_code == 200:
+                        current_ip = ip_response.json().get("ip")
+                        st.session_state.user_ip = current_ip  # Store IP in session state
+                        st.success(f"Your current IP address: {current_ip}")
+                        st.info("✅ This IP will be saved with your account.")
+                    else:
+                        st.warning("Could not retrieve IP address")
+                except Exception as e:
+                    st.warning("Could not retrieve IP address")
+        
+        with col2:
+            # Manual location entry
+            manual_lat = st.number_input("Latitude", value=None, placeholder="42.6977", format="%.6f")
+            manual_lng = st.number_input("Longitude", value=None, placeholder="23.3219", format="%.6f")
+            location_desc = st.text_input("Location Description", placeholder="Sofia, Bulgaria")
         
     if st.button("Sign Up", type="primary"):
         # Client-side validation
@@ -143,6 +275,17 @@ def register_page():
         if device_name and device_name.strip():
             payload["device_name"] = device_name.strip()
             payload["device_fingerprint"] = f"web_{username}_{device_name}".replace(" ", "_")
+        
+        # Add location data if provided
+        if manual_lat is not None and manual_lng is not None:
+            payload["latitude"] = manual_lat
+            payload["longitude"] = manual_lng
+        if location_desc and location_desc.strip():
+            payload["geo_description"] = location_desc.strip()
+        
+        # Add IP address if captured
+        if st.session_state.user_ip:
+            payload["ip_address"] = st.session_state.user_ip
         
         try:
             r = requests.post(f"{API_URL}/accounts/createAccount", json=payload)
