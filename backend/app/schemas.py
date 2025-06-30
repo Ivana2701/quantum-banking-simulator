@@ -2,7 +2,7 @@
 from datetime import datetime
 from typing import List, Optional
 import enum, base64
-from pydantic import BaseModel, EmailStr, constr, Field, validator
+from pydantic import BaseModel, constr, Field, validator
 
 # JWT token schemas
 class Token(BaseModel):
@@ -29,7 +29,6 @@ class AccountBase(BaseModel):
 # Schema for creating an account
 class AccountCreate(AccountBase):
     password: constr(min_length=8)
-    email: Optional[EmailStr] = None  # Email for validation but not stored in main account table
     # Optional contact information
     street: Optional[str] = None
     city: Optional[str] = None

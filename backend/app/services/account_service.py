@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
 from app.db.models import Account, Address, PhoneNumber, GeoLocation, IPAddress, Device
 from app.schemas import AccountCreate
@@ -25,84 +26,118 @@ class AccountService:
     ) -> Account:
         logger.info(f"Creating new account for username: {payload.username}")
         
+        # Check if username already exists
+        existing_user = self.get_by_username(db, payload.username)
+        if existing_user:
+            logger.warning(f"Username already exists: {payload.username}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already exists. Please choose a different username."
+            )
+        
         # Set role_id based on account_type if not provided
         role_id = payload.role_id
         if role_id is None:
             role_id = 1 if payload.account_type == "customer" else 2
             
-        logger.debug(f"Account details - Email: {payload.email}, Type: {payload.account_type}, Role: {role_id}")
+        logger.debug(f"Account details - Username: {payload.username}, Type: {payload.account_type}, Role: {role_id}")
         
-        # Create default encrypted balance (empty bytes)
-        default_balance = b'\x00\x00\x00\x00'
-        
-        new_acct = Account(
-            username=payload.username,
-            full_name=payload.full_name,
-            password_hash=hashed_password,
-            account_type=payload.account_type,
-            role_id=role_id,
-            encrypted_balance=default_balance
-        )
-        db.add(new_acct)
-        db.flush()  # Flush to get the account_id
-        
-        # Add address if provided
-        if any([payload.street, payload.city, payload.state, payload.country, payload.postal_code]):
-            address = Address(
-                street=payload.street,
-                city=payload.city,
-                state=payload.state,
-                country=payload.country,
-                postal_code=payload.postal_code
-            )
-            db.add(address)
-            db.flush()
-            new_acct.addresses.append(address)
+        try:
+            # Create default encrypted balance (empty bytes)
+            default_balance = b'\x00\x00\x00\x00'
             
-        # Add phone if provided
-        if payload.phone_number:
-            phone = PhoneNumber(
-                phone_number=payload.phone_number,
-                phone_type=payload.phone_type or "mobile"
+            new_acct = Account(
+                username=payload.username,
+                full_name=payload.full_name,
+                password_hash=hashed_password,
+                account_type=payload.account_type,
+                role_id=role_id,
+                encrypted_balance=default_balance
             )
-            db.add(phone)
-            db.flush()
-            new_acct.phones.append(phone)
+            db.add(new_acct)
+            db.flush()  # Flush to get the account_id
             
-        # Add geolocation if provided
-        if payload.latitude is not None and payload.longitude is not None:
-            geo = GeoLocation(
-                latitude=payload.latitude,
-                longitude=payload.longitude,
-                description=payload.geo_description
-            )
-            db.add(geo)
-            db.flush()
-            new_acct.geos.append(geo)
+            # Add address if provided
+            if any([payload.street, payload.city, payload.state, payload.country, payload.postal_code]):
+                address = Address(
+                    street=payload.street,
+                    city=payload.city,
+                    state=payload.state,
+                    country=payload.country,
+                    postal_code=payload.postal_code
+                )
+                db.add(address)
+                db.flush()
+                new_acct.addresses.append(address)
+                
+            # Add phone if provided
+            if payload.phone_number:
+                phone = PhoneNumber(
+                    phone_number=payload.phone_number,
+                    phone_type=payload.phone_type or "mobile"
+                )
+                db.add(phone)
+                db.flush()
+                new_acct.phones.append(phone)
+                
+            # Add geolocation if provided
+            if payload.latitude is not None and payload.longitude is not None:
+                geo = GeoLocation(
+                    latitude=payload.latitude,
+                    longitude=payload.longitude,
+                    description=payload.geo_description
+                )
+                db.add(geo)
+                db.flush()
+                new_acct.geos.append(geo)
+                
+            # Add IP address if provided
+            if payload.ip_address:
+                ip = IPAddress(
+                    ip_address=payload.ip_address
+                )
+                db.add(ip)
+                db.flush()
+                new_acct.ips.append(ip)
+                
+            # Add device if provided
+            if payload.device_name and payload.device_fingerprint:
+                device = Device(
+                    device_name=payload.device_name,
+                    fingerprint=payload.device_fingerprint
+                )
+                db.add(device)
+                db.flush()
+                new_acct.devices.append(device)
             
-        # Add IP address if provided
-        if payload.ip_address:
-            ip = IPAddress(
-                ip_address=payload.ip_address
-            )
-            db.add(ip)
-            db.flush()
-            new_acct.ips.append(ip)
+            db.commit()
+            db.refresh(new_acct)
+            logger.info(f"Successfully created account with ID: {new_acct.account_id}")
+            return new_acct
             
-        # Add device if provided
-        if payload.device_name and payload.device_fingerprint:
-            device = Device(
-                device_name=payload.device_name,
-                fingerprint=payload.device_fingerprint
+        except IntegrityError as e:
+            db.rollback()
+            logger.error(f"Database integrity error while creating account: {str(e)}")
+            
+            # Check if it's a username constraint violation
+            if "accounts_username_key" in str(e) or "username" in str(e).lower():
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already exists. Please choose a different username."
+                )
+            else:
+                # Generic integrity error
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Account creation failed due to a data conflict. Please check your information and try again."
+                )
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Unexpected error while creating account: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An unexpected error occurred while creating the account. Please try again later."
             )
-            db.add(device)
-            db.flush()
-            new_acct.devices.append(device)
-        
-        db.commit()
-        db.refresh(new_acct)
-        logger.info(f"Successfully created account with ID: {new_acct.account_id}")
-        return new_acct
 
     def authenticate_user(
         self,

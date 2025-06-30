@@ -14,9 +14,7 @@ def show_register():
     full_name = st.text_input("Full Name *", key="full_name", placeholder="Enter your full name", help="Required field")
     
     username = st.text_input("Username *", key="username", placeholder="Choose a username (minimum 3 characters)", help="Required field")
-    
-    email = st.text_input("Email *", key="email", placeholder="Enter your email address", help="Required field")
-    
+        
     password = st.text_input("Password *", type="password", key="password", placeholder="Enter password (minimum 8 characters)", help="Required field")
     
     password2 = st.text_input("Confirm Password *", type="password", key="password2", placeholder="Confirm your password", help="Required field")
@@ -180,12 +178,7 @@ def show_register():
         
         if not username or len(username.strip()) < 3:
             errors.append("Username is required and must be at least 3 characters long")
-        
-        if not email or len(email.strip()) == 0:
-            errors.append("Email is required")
-        elif "@" not in email or "." not in email:
-            errors.append("Please enter a valid email address")
-        
+
         if not password or len(password) < 8:
             errors.append("Password is required and must be at least 8 characters long")
         
@@ -203,7 +196,6 @@ def show_register():
         payload = {
             "full_name": full_name.strip(),
             "username": username.strip(),
-            "email": email.strip(),
             "password": password,
             "account_type": account_type
         }
