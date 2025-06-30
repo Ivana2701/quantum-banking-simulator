@@ -25,6 +25,8 @@ Ensure you have Conda installed, then create the environment using:
 
 ```bash
 conda env create -f environment.yml
+or
+conda env update -f environment.yml --prune #if you already have an environment
 conda activate qbank
 ``
 save exiisting dependencies into requirements.txt`
