@@ -60,6 +60,7 @@ INSERT INTO roles
 VALUES
   ('customer'),
   ('employee');
+  ('admin');
 
 CREATE TYPE account_type_enum AS ENUM
 ('customer','employee','admin');

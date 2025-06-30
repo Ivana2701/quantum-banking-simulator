@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.db.database import Base, engine
-from app.routers import auth, accounts, customer, employee, transactions
+from app.routers import auth, accounts, customer, employee, transactions, admin
 import logging
 
 # Setup basic logging
@@ -25,3 +25,4 @@ app.include_router(accounts)
 app.include_router(customer)
 app.include_router(employee)
 app.include_router(transactions)
+app.include_router(admin)

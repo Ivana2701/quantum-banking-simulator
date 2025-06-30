@@ -154,3 +154,12 @@ class TransactionBundle(BaseModel):
     all: Optional[List[TransactionRead]] = None
     sent: Optional[List[TransactionRead]] = None
     received: Optional[List[TransactionRead]] = None
+
+# Admin schemas
+class RoleUpdateRequest(BaseModel):
+    new_role: str = Field(..., description="New role for the user (admin, employee, customer)")
+
+class RoleUpdateResponse(BaseModel):
+    message: str
+    user_id: int
+    new_role: str

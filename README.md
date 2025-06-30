@@ -136,3 +136,13 @@ Password: employee
 
 For troubleshooting or assistance, ensure all dependencies match those in `environment.yml`. Enjoy exploring quantum-secure banking!
 
+## Endpoints
+
+1. **New Admin Router** (`backend/app/routers/admin.py`):
+   - `/admin/users` - GET endpoint to list all users
+   - `/admin/users/{user_id}/role` - PATCH endpoint to update user roles
+   - Admin-only access with role verification
+
+2. **New Schemas** (`backend/app/schemas.py`):
+   - `RoleUpdateRequest` - For role update requests
+   - `RoleUpdateResponse` - For role update responses

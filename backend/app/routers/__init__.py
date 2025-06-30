@@ -3,5 +3,6 @@ from .accounts     import router as accounts
 from .customer     import router as customer
 from .employee     import router as employee
 from .transactions import router as transactions
+from .admin        import router as admin
 
-__all__ = [ "auth", "accounts", "customer", "employee", "transactions" ]
+__all__ = [ "auth", "accounts", "customer", "employee", "transactions", "admin" ]
