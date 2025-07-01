@@ -18,9 +18,7 @@ def show_register():
     password = st.text_input("Password *", type="password", key="password", placeholder="Enter password (minimum 8 characters)", help="Required field")
     
     password2 = st.text_input("Confirm Password *", type="password", key="password2", placeholder="Confirm your password", help="Required field")
-    
-    account_type = st.selectbox("Account Type *", ["customer", "employee"], key="account_type", help="Required field")
-    
+        
     # Optional contact information
     st.subheader("Contact Information (Optional)")
     with st.expander("Address Information", expanded=False):
@@ -197,7 +195,7 @@ def show_register():
             "full_name": full_name.strip(),
             "username": username.strip(),
             "password": password,
-            "account_type": account_type
+            "account_type": 'customer',
         }
         
         # Add optional fields if provided

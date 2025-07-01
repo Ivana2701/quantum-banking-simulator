@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from fastapi import HTTPException, status
-from app.db.models import Account, Address, PhoneNumber, GeoLocation, IPAddress, Device
+from app.db.models import Account, Address, PhoneNumber, GeoLocation, IPAddress, Device, AccountTypeEnum
 from app.schemas import AccountCreate
 from app.core.security import get_password_hash, verify_password
 from app.services.crypto_service import crypto_service
@@ -45,13 +45,8 @@ class AccountService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Username already exists. Please choose a different username."
             )
-        
-        # Set role_id based on account_type if not provided
-        role_id = payload.role_id
-        if role_id is None:
-            role_id = 1 if payload.account_type == "customer" else 2
             
-        logger.debug(f"Account details - Username: {payload.username}, Type: {payload.account_type}, Role: {role_id}")
+        logger.debug(f"Account details - Username: {payload.username}, Type: {payload.account_type}, Role: customer")
         
         try:
             # Create default encrypted balance of 0.0 using post-quantum cryptography
@@ -69,8 +64,8 @@ class AccountService:
                 username=payload.username,
                 full_name=payload.full_name,
                 password_hash=hashed_password,
-                account_type=payload.account_type,
-                role_id=role_id,
+                account_type=AccountTypeEnum("customer"),
+                role_id=1,
                 encrypted_balance=balance_data
             )
             db.add(new_acct)
@@ -322,4 +317,74 @@ class AccountService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Error updating account balance"
+            )
+        
+    def create_admin(
+        self,
+        db: Session,
+        payload: AccountCreate,
+        hashed_password: str
+    ) -> Account:
+        logger.info(f"Creating new admin account for username: {payload.username}")
+        
+        # Check if username already exists
+        existing_user = self.get_by_username(db, payload.username)
+        if existing_user:
+            logger.warning(f"Username already exists: {payload.username}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Username already exists. Please choose a different username."
+            )
+            
+        logger.debug(f"Account details - Username: {payload.username}, Type: admin, Role: 3")
+        
+        try:
+            # Create default encrypted balance of 0.0 using post-quantum cryptography
+            # Generate Kyber keypair for this account
+            kyber_public_key, kyber_secret_key = crypto_service.generate_kyber_keypair()
+            
+            # Encrypt initial balance of 0.0 using post-quantum crypto
+            kyber_ciphertext, encrypted_balance = crypto_service.encrypt_balance(0.0, kyber_public_key)
+            
+            # Store the Kyber ciphertext + encrypted balance together
+            # Format: kyber_ciphertext_length(4 bytes) + kyber_ciphertext + encrypted_balance
+            balance_data = len(kyber_ciphertext).to_bytes(4, 'big') + kyber_ciphertext + encrypted_balance
+            
+            new_acct = Account(
+                username=payload.username,
+                full_name=payload.full_name,
+                password_hash=hashed_password,
+                account_type=AccountTypeEnum("admin"),
+                role_id=3,
+                encrypted_balance=balance_data
+            )
+            db.add(new_acct)
+            db.flush()  # Flush to get the account_id
+            
+            # Generate and store post-quantum cryptography keys
+            dilithium_public_key, dilithium_secret_key = crypto_service.generate_dilithium_keypair()
+            
+            # Store encryption keys in separate table
+            from app.db.models import AccountEncryption
+            encryption_data = AccountEncryption(
+                account_id=new_acct.account_id,
+                kyber_public_key=kyber_public_key,
+                kyber_secret_key=kyber_secret_key,
+                dilithium_public_key=dilithium_public_key,
+                dilithium_secret_key=dilithium_secret_key
+            )
+            db.add(encryption_data)
+            db.flush()
+            
+            db.commit()
+            db.refresh(new_acct)
+            logger.info(f"Successfully created account with ID: {new_acct.account_id}")
+            return new_acct
+
+        except Exception as e:
+            db.rollback()
+            logger.error(f"Unexpected error while creating account: {str(e)}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="An unexpected error occurred while creating the account. Please try again later."
             )

@@ -54,8 +54,7 @@ def read_account(
 def create_account(
     payload: AccountCreate,
     request: Request,
-    db: Session = Depends(get_db),
-    current = Depends(require_admin)  # Only admins can create new accounts
+    db: Session = Depends(get_db)
 ):
     """Create a new account - requires admin role"""
     # Function to get public IP
