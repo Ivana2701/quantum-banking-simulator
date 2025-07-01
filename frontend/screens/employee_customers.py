@@ -23,6 +23,9 @@ def show_employee_customers():
             if customers:
                 st.subheader("📋 All Customers")
                 
+                # Username filter
+                username_filter = st.text_input("🔍 Filter by username:", placeholder="Enter username to filter...")
+                
                 # Convert to DataFrame for better display
                 customer_data = []
                 for customer in customers:
@@ -55,8 +58,78 @@ def show_employee_customers():
                 
                 df = pd.DataFrame(customer_data)
                 
-                # Display customers table
-                st.dataframe(df, use_container_width=True)
+                # Apply username filter if provided
+                if username_filter:
+                    df_filtered = df[df["Username"].str.contains(username_filter, case=False, na=False)]
+                else:
+                    df_filtered = df
+                
+                # Pagination logic
+                customers_per_page = 20
+                total_pages = (len(df_filtered) + customers_per_page - 1) // customers_per_page if len(df_filtered) > 0 else 1
+                
+                if total_pages > 1:
+                    # Initialize page number in session state
+                    if "customer_current_page" not in st.session_state:
+                        st.session_state.customer_current_page = 1
+                    
+                    # Reset to page 1 if filter changed
+                    if "last_username_filter" not in st.session_state:
+                        st.session_state.last_username_filter = ""
+                    
+                    if st.session_state.last_username_filter != username_filter:
+                        st.session_state.customer_current_page = 1
+                        st.session_state.last_username_filter = username_filter
+                    
+                    # Ensure current page is within bounds
+                    st.session_state.customer_current_page = min(st.session_state.customer_current_page, total_pages)
+                    
+                    # Page navigation
+                    col1, col2, col3, col4, col5 = st.columns([1, 1, 2, 1, 1])
+                    
+                    with col1:
+                        if st.button("⏮️ First", key="customers_first") and st.session_state.customer_current_page > 1:
+                            st.session_state.customer_current_page = 1
+                            st.rerun()
+                    
+                    with col2:
+                        if st.button("◀️ Previous", key="customers_prev") and st.session_state.customer_current_page > 1:
+                            st.session_state.customer_current_page -= 1
+                            st.rerun()
+                    
+                    with col3:
+                        st.write(f"**Page {st.session_state.customer_current_page} of {total_pages}** ({len(df_filtered)} customers)")
+                    
+                    with col4:
+                        if st.button("Next ▶️", key="customers_next") and st.session_state.customer_current_page < total_pages:
+                            st.session_state.customer_current_page += 1
+                            st.rerun()
+                    
+                    with col5:
+                        if st.button("Last ⏭️", key="customers_last") and st.session_state.customer_current_page < total_pages:
+                            st.session_state.customer_current_page = total_pages
+                            st.rerun()
+                    
+                    # Calculate start and end indices for current page
+                    start_idx = (st.session_state.customer_current_page - 1) * customers_per_page
+                    end_idx = min(start_idx + customers_per_page, len(df_filtered))
+                    
+                    # Display the current page of data
+                    if len(df_filtered) > 0:
+                        st.dataframe(df_filtered.iloc[start_idx:end_idx], use_container_width=True)
+                        st.caption(f"Showing customers {start_idx + 1}-{end_idx} of {len(df_filtered)}")
+                    else:
+                        st.info("No customers match the current filter.")
+                else:
+                    # If only one page or no results, show all filtered data
+                    if len(df_filtered) > 0:
+                        st.dataframe(df_filtered, use_container_width=True)
+                        if username_filter:
+                            st.caption(f"Showing {len(df_filtered)} customers matching '{username_filter}'")
+                        else:
+                            st.caption(f"Showing all {len(df_filtered)} customers")
+                    else:
+                        st.info("No customers match the current filter.")
                 
                 st.divider()
                 

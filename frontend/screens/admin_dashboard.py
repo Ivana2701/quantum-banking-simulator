@@ -74,6 +74,9 @@ def show_admin_dashboard():
                 # All Users section with pagination
                 st.subheader("📋 All Users")
                 
+                # Username filter
+                username_filter = st.text_input("🔍 Filter by username:", placeholder="Enter username to filter...", key="admin_username_filter")
+                
                 # Convert to DataFrame for better display
                 user_data = []
                 for user in users:
@@ -90,53 +93,78 @@ def show_admin_dashboard():
                 
                 df = pd.DataFrame(user_data)
                 
+                # Apply username filter if provided
+                if username_filter:
+                    df_filtered = df[df["Username"].str.contains(username_filter, case=False, na=False)]
+                else:
+                    df_filtered = df
+                
                 # Pagination logic
                 users_per_page = 20
-                total_pages = (len(df) + users_per_page - 1) // users_per_page  # Ceiling division
+                total_pages = (len(df_filtered) + users_per_page - 1) // users_per_page if len(df_filtered) > 0 else 1
                 
                 if total_pages > 1:
                     # Initialize page number in session state
-                    if "current_page" not in st.session_state:
-                        st.session_state.current_page = 1
+                    if "admin_current_page" not in st.session_state:
+                        st.session_state.admin_current_page = 1
+                    
+                    # Reset to page 1 if filter changed
+                    if "admin_last_username_filter" not in st.session_state:
+                        st.session_state.admin_last_username_filter = ""
+                    
+                    if st.session_state.admin_last_username_filter != username_filter:
+                        st.session_state.admin_current_page = 1
+                        st.session_state.admin_last_username_filter = username_filter
+                    
+                    # Ensure current page is within bounds
+                    st.session_state.admin_current_page = min(st.session_state.admin_current_page, total_pages)
                     
                     # Page navigation
                     col1, col2, col3, col4, col5 = st.columns([1, 1, 2, 1, 1])
                     
                     with col1:
-                        if st.button("⏮️ First") and st.session_state.current_page > 1:
-                            st.session_state.current_page = 1
+                        if st.button("⏮️ First", key="admin_first") and st.session_state.admin_current_page > 1:
+                            st.session_state.admin_current_page = 1
                             st.rerun()
                     
                     with col2:
-                        if st.button("◀️ Previous") and st.session_state.current_page > 1:
-                            st.session_state.current_page -= 1
+                        if st.button("◀️ Previous", key="admin_prev") and st.session_state.admin_current_page > 1:
+                            st.session_state.admin_current_page -= 1
                             st.rerun()
                     
                     with col3:
-                        st.write(f"**Page {st.session_state.current_page} of {total_pages}** ({len(df)} total users)")
+                        st.write(f"**Page {st.session_state.admin_current_page} of {total_pages}** ({len(df_filtered)} users)")
                     
                     with col4:
-                        if st.button("Next ▶️") and st.session_state.current_page < total_pages:
-                            st.session_state.current_page += 1
+                        if st.button("Next ▶️", key="admin_next") and st.session_state.admin_current_page < total_pages:
+                            st.session_state.admin_current_page += 1
                             st.rerun()
                     
                     with col5:
-                        if st.button("Last ⏭️") and st.session_state.current_page < total_pages:
-                            st.session_state.current_page = total_pages
+                        if st.button("Last ⏭️", key="admin_last") and st.session_state.admin_current_page < total_pages:
+                            st.session_state.admin_current_page = total_pages
                             st.rerun()
                     
                     # Calculate start and end indices for current page
-                    start_idx = (st.session_state.current_page - 1) * users_per_page
-                    end_idx = min(start_idx + users_per_page, len(df))
+                    start_idx = (st.session_state.admin_current_page - 1) * users_per_page
+                    end_idx = min(start_idx + users_per_page, len(df_filtered))
                     
                     # Display the current page of data
-                    st.dataframe(df.iloc[start_idx:end_idx], use_container_width=True)
-                    
-                    # Show page info at bottom
-                    st.caption(f"Showing users {start_idx + 1}-{end_idx} of {len(df)}")
+                    if len(df_filtered) > 0:
+                        st.dataframe(df_filtered.iloc[start_idx:end_idx], use_container_width=True)
+                        st.caption(f"Showing users {start_idx + 1}-{end_idx} of {len(df_filtered)}")
+                    else:
+                        st.info("No users match the current filter.")
                 else:
-                    # If only one page, show all data
-                    st.dataframe(df, use_container_width=True)
+                    # If only one page or no results, show all filtered data
+                    if len(df_filtered) > 0:
+                        st.dataframe(df_filtered, use_container_width=True)
+                        if username_filter:
+                            st.caption(f"Showing {len(df_filtered)} users matching '{username_filter}'")
+                        else:
+                            st.caption(f"Showing all {len(df_filtered)} users")
+                    else:
+                        st.info("No users match the current filter.")
                 
                 # Statistics section
                 st.subheader("📊 System Statistics")
