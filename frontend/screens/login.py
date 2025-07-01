@@ -23,7 +23,7 @@ def show_login():
     with st.form("login_form"):
         username = st.text_input("Username", placeholder="Enter your username")
         password = st.text_input("Password", type="password", placeholder="Enter your password")
-        
+
         submitted = st.form_submit_button("Login", use_container_width=True)
         
         if submitted:
@@ -32,7 +32,7 @@ def show_login():
                 return
             
             with st.spinner("Authenticating..."):
-                if auth_manager.login(username, password, remember_me):
+                if auth_manager.login(username, password):
                     st.rerun()  # Refresh page after successful login
     
     # Additional info
