@@ -4,21 +4,12 @@ from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.db.models import Account, Role, AccountTypeEnum
 from app.schemas import AccountRead, RoleUpdateRequest, RoleUpdateResponse
-from app.core.security import get_current_user
+from app.core.security import require_admin
 import logging
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-
-def require_admin(current_user: Account = Depends(get_current_user)):
-    """Dependency to ensure the current user is an admin"""
-    if current_user.account_type.value != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
-        )
-    return current_user
 
 @router.get("/users", response_model=List[AccountRead])
 def get_all_users(

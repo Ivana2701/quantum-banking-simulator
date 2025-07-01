@@ -144,6 +144,7 @@ class TransactionBase(BaseModel):
     is_fraud: bool = False
 
 class TransactionCreate(BaseModel):
+    from_account_id: int
     to_account_id: int
     amount: float = Field(..., gt=0, description="Amount to transfer")
 

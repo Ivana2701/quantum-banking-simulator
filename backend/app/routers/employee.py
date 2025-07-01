@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 
 from app.services.transaction_service import TransactionService
 from app.services.account_service import AccountService
-from app.schemas import TransactionRead, AccountRead, BalanceUpdateRequest
-from app.core.security import get_current_user, require_employee_or_admin
+from app.schemas import TransactionRead, AccountRead, BalanceUpdateRequest, TransactionCreate
+from app.core.security import require_employee, require_employee_or_admin
 from app.db.database import get_db
 from app.db.models import Account, AccountTypeEnum
 from datetime import date
@@ -151,4 +151,40 @@ def add_money_to_customer(
         raise HTTPException(
             status_code=500,
             detail="Error updating customer balance"
+        )
+
+@router.post("/create-transaction", response_model=TransactionRead)
+def create_employee_transaction(
+    transaction: TransactionCreate,
+    db: Session = Depends(get_db),
+    employee_user: Account = Depends(require_employee)
+):
+    """Create a transaction between customer accounts (employee-initiated) - requires employee or admin role"""
+    logger.info(f"Employee {employee_user.username} creating transaction from {transaction.from_account_id} to {transaction.to_account_id}")
+    
+    try:
+        # Create transaction with employee as initiator
+        new_transaction = tx_svc.create_transaction(
+            db=db,
+            account_id=employee_user.account_id,  # Employee as initiator
+            from_account_id=transaction.from_account_id,
+            to_account_id=transaction.to_account_id,
+            amount=transaction.amount
+        )
+        
+        logger.info(f"Employee transaction created successfully. Transaction ID: {new_transaction.transaction_id}")
+        
+        # Return the transaction with decrypted amount for employee view
+        new_transaction.amount = tx_svc.decrypt_transaction_amount(db, new_transaction, employee_user.account_id)
+        
+        return new_transaction
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions (like validation errors)
+        raise
+    except Exception as e:
+        logger.error(f"Error creating employee transaction: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail="Error creating transaction"
         )
