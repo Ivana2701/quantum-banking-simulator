@@ -1,16 +1,76 @@
 import streamlit as st
+import time
 from screens.login import show_login
 from screens.register import show_register
 from screens.dashboard import show_customer_dashboard, show_employee_dashboard
 from screens.admin_dashboard import show_admin_dashboard
+from utils.auth_manager import auth_manager
 
 st.set_page_config(page_title="QBank", layout="centered")
 
-# initialize session state
-if "token" not in st.session_state:
-    st.session_state.token = None
-if "account_type" not in st.session_state:
-    st.session_state.account_type = None
+# Enhanced session initialization with persistent authentication
+def initialize_session():
+    """Initialize session state with persistent authentication check"""
+    if "token" not in st.session_state:
+        st.session_state.token = None
+    if "account_type" not in st.session_state:
+        st.session_state.account_type = None
+    if "username" not in st.session_state:
+        st.session_state.username = None
+    if "full_name" not in st.session_state:
+        st.session_state.full_name = None
+    if "account_id" not in st.session_state:
+        st.session_state.account_id = None
+    
+    # Debug: Show current session state (only for admin users)
+    if auth_manager.is_debug_enabled():
+        st.write("🔍 DEBUG - Authentication Settings:")
+        st.write(f"Token expiration: {auth_manager.token_expire_minutes} minutes")
+        st.write(f"Session file: {auth_manager.session_file}")
+        st.write("🔍 DEBUG - Current session state:")
+        st.write(f"Token: {st.session_state.token[:20] + '...' if st.session_state.token else 'None'}")
+        st.write(f"Account type: {st.session_state.account_type}")
+        st.write(f"Auth manager session: {auth_manager._get_stored_session() is not None}")
+        
+        # Show session age if available
+        session_data = auth_manager._get_stored_session()
+        if session_data:
+            session_age_minutes = (time.time() - session_data.get("timestamp", 0)) / 60
+            st.write(f"Session age: {session_age_minutes:.1f} minutes")
+            st.write(f"Session expires in: {auth_manager.token_expire_minutes - session_age_minutes:.1f} minutes")
+    
+    # Check for persistent session on every page load
+    if st.session_state.token is None:
+        # Try to restore session from persistent storage
+        try:
+            if auth_manager.validate_session():
+                user_data = auth_manager.get_current_user()
+                if user_data:
+                    st.session_state.token = auth_manager.get_token()
+                    st.session_state.account_type = user_data.get("account_type")
+                    st.session_state.username = user_data.get("username")
+                    st.session_state.full_name = user_data.get("full_name")
+                    st.session_state.account_id = user_data.get("account_id")
+                    
+                    # Debug: Show successful restoration (only for admin users)
+                    if auth_manager.is_debug_enabled():
+                        st.success(f"✅ Session restored for {user_data.get('username')}")
+            else:
+                # Debug: Show why validation failed (only for admin users)
+                if auth_manager.is_debug_enabled():
+                    st.warning("❌ Session validation failed")
+        except Exception as e:
+            # Debug: Show any errors (only for admin users)
+            if auth_manager.is_debug_enabled():
+                st.error(f"🚨 Session restoration error: {e}")
+
+# Initialize session state
+initialize_session()
+
+# Add debug toggle in sidebar (only for admin users)
+if st.session_state.token and st.session_state.account_type == "admin":
+    if st.sidebar.checkbox("Enable Auth Debug", key="debug_auth"):
+        st.sidebar.write("🔍 Debug mode enabled")
 
 # sidebar navigation
 if st.session_state.token is None:
@@ -25,18 +85,14 @@ else:
         dashboard_pages = ["Home"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
-            st.session_state.token = None
-            st.session_state.account_type = None
-            st.rerun()
+            auth_manager.logout()  # Use auth_manager for proper logout
         if page == "Home":
             show_customer_dashboard()
     elif st.session_state.account_type == "employee":
         dashboard_pages = ["Home", "Customers"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
-            st.session_state.token = None
-            st.session_state.account_type = None
-            st.rerun()
+            auth_manager.logout()  # Use auth_manager for proper logout
         if page == "Home":
             show_employee_dashboard()
         elif page == "Customers":
@@ -46,13 +102,9 @@ else:
         dashboard_pages = ["Home"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
-            st.session_state.token = None
-            st.session_state.account_type = None
-            st.rerun()
+            auth_manager.logout()  # Use auth_manager for proper logout
         if page == "Home":
             show_admin_dashboard()
     else:
         # logout if account type is unknown
-        st.session_state.token = None
-        st.session_state.account_type = None
-        st.rerun()
+        auth_manager.logout()  # Use auth_manager for proper logout

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.services.transaction_service import TransactionService
 from app.services.account_service import AccountService
 from app.schemas import TransactionRead, AccountRead, BalanceUpdateRequest
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_employee_or_admin
 from app.db.database import get_db
 from app.db.models import Account, AccountTypeEnum
 from datetime import date
@@ -20,38 +20,31 @@ router = APIRouter(prefix="/employee", tags=["employee"])
 acct_svc = AccountService()
 tx_svc = TransactionService()
 
-def require_employee(current_user: Account = Depends(get_current_user)):
-    """Dependency to ensure the current user is an employee"""
-    if current_user.account_type.value not in ["employee", "admin"]:
-        raise HTTPException(
-            status_code=403,
-            detail="Employee access required"
-        )
-    return current_user
-
 @router.get("/transactions/all", response_model=List[TransactionRead])
 def all_transactions(
     from_date: Optional[date] = None,
     to_date: Optional[date] = None,
-    user = Depends(require_employee),
+    user = Depends(require_employee_or_admin),  # Use centralized role check
     db: Session = Depends(get_db)
 ):
+    """Get all transactions - requires employee or admin role"""
     return tx_svc.get_all_transactions(db, from_date, to_date)
 
 @router.get("/transactions/search", response_model=List[TransactionRead])
 def search_transactions(
     account_id: int,
-    user = Depends(require_employee),
+    user = Depends(require_employee_or_admin),  # Use centralized role check
     db: Session = Depends(get_db)
 ):
+    """Search transactions by account - requires employee or admin role"""
     return tx_svc.get_transactions_by_account(db, account_id)
 
 @router.get("/customers", response_model=List[AccountRead])
 def get_all_customers(
     db: Session = Depends(get_db),
-    employee_user: Account = Depends(require_employee)
+    employee_user: Account = Depends(require_employee_or_admin)
 ):
-    """Get a list of all customers in the system"""
+    """Get a list of all customers in the system - requires employee or admin role"""
     logger.info(f"Employee {employee_user.username} requested all customers list")
     
     # Only return customers (not employees or admins)
@@ -65,9 +58,9 @@ def get_all_customers(
 def get_customer_balance(
     customer_id: int,
     db: Session = Depends(get_db),
-    employee_user: Account = Depends(require_employee)
+    employee_user: Account = Depends(require_employee_or_admin)
 ):
-    """Get a customer's balance (for employee view)"""
+    """Get a customer's balance (for employee view) - requires employee or admin role"""
     # Verify customer exists
     customer = db.query(Account).filter(
         Account.account_id == customer_id,
@@ -104,9 +97,9 @@ def add_money_to_customer(
     customer_id: int,
     balance_request: BalanceUpdateRequest,
     db: Session = Depends(get_db),
-    employee_user: Account = Depends(require_employee)
+    employee_user: Account = Depends(require_employee_or_admin)
 ):
-    """Add money to a customer's balance using post-quantum encryption"""
+    """Add money to a customer's balance using post-quantum encryption - requires employee or admin role"""
     if balance_request.amount <= 0:
         raise HTTPException(
             status_code=400,

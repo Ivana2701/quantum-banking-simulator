@@ -22,16 +22,25 @@ def get_transactions(
     db: Session = Depends(get_db),
     user = Depends(get_current_user)
 ):
+    """
+    Get transactions based on user role:
+    - Employees/Admins: See all transactions
+    - Customers: See only their sent and received transactions
+    """
     # reload to get full account_type
     acct = acct_svc.get_account_by_id(db, user.account_id)
     if not acct:
         raise HTTPException(404, "Account not found")
 
-    if acct.account_type == "employee":
+    # Role-based access to transactions
+    if acct.account_type.value in ["employee", "admin"]:
+        # Employees and admins can see all transactions
         all_tx = tx_svc.get_all_transactions(db, from_date, to_date)
         return TransactionBundle(all=all_tx)
-
-    # customer: split sent vs received
-    sent     = tx_svc.get_sent_transactions(db, acct.account_id, from_date, to_date)
-    received = tx_svc.get_received_transactions(db, acct.account_id, from_date, to_date)
-    return TransactionBundle(sent=sent, received=received)
+    elif acct.account_type.value == "customer":
+        # Customers can only see their own transactions
+        sent     = tx_svc.get_sent_transactions(db, acct.account_id, from_date, to_date)
+        received = tx_svc.get_received_transactions(db, acct.account_id, from_date, to_date)
+        return TransactionBundle(sent=sent, received=received)
+    else:
+        raise HTTPException(403, "Access denied")

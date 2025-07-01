@@ -1,7 +1,8 @@
 # backend/app/core/security.py
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Optional, List
 import os
+from functools import wraps
 
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -38,6 +39,7 @@ def create_access_token(
     to_encode = data.copy()
     expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
+    # Include role in token for faster access
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 # -------------------------------------------------------------------
@@ -76,3 +78,60 @@ def get_current_user(
         raise credentials_exception
 
     return user
+
+# -------------------------------------------------------------------
+# Role-based authorization decorators
+# -------------------------------------------------------------------
+def require_role(allowed_roles: List[str]):
+    """
+    Decorator factory for role-based access control.
+    Usage: @require_role(["admin", "employee"])
+    """
+    def decorator(current_user = Depends(get_current_user)):
+        if current_user.account_type.value not in allowed_roles:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied. Required roles: {', '.join(allowed_roles)}"
+            )
+        return current_user
+    return decorator
+
+def require_admin(current_user = Depends(get_current_user)):
+    """Dependency to ensure the current user is an admin"""
+    if current_user.account_type.value != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required"
+        )
+    return current_user
+
+def require_employee_or_admin(current_user = Depends(get_current_user)):
+    """Dependency to ensure the current user is an employee or admin"""
+    if current_user.account_type.value not in ["employee", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Employee or admin access required"
+        )
+    return current_user
+
+def require_customer(current_user = Depends(get_current_user)):
+    """Dependency to ensure the current user is a customer"""
+    if current_user.account_type.value != "customer":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Customer access required"
+        )
+    return current_user
+
+def require_same_user_or_admin(user_id: int):
+    """
+    Dependency factory to ensure the current user is either accessing their own data or is an admin
+    """
+    def check_permission(current_user = Depends(get_current_user)):
+        if current_user.account_type.value == "admin" or current_user.account_id == user_id:
+            return current_user
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You can only access your own data or admin privileges required"
+        )
+    return check_permission

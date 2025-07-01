@@ -1,8 +1,11 @@
-# frontend/screens/login.py
+# frontend/screens/login_new.py
 import streamlit as st
 from utils.auth_manager import auth_manager
 
 def show_login():
+    """
+    Enhanced login screen with persistent authentication
+    """
     st.title("🔐 Quantum Banking Login")
     
     # Check if already authenticated
@@ -21,8 +24,13 @@ def show_login():
     
     # Login form
     with st.form("login_form"):
+        st.subheader("Please enter your credentials")
+        
         username = st.text_input("Username", placeholder="Enter your username")
         password = st.text_input("Password", type="password", placeholder="Enter your password")
+        
+        # Optional: Remember me checkbox (for future enhancement)
+        remember_me = st.checkbox("Keep me logged in")
         
         submitted = st.form_submit_button("Login", use_container_width=True)
         
@@ -32,15 +40,18 @@ def show_login():
                 return
             
             with st.spinner("Authenticating..."):
-                if auth_manager.login(username, password, remember_me):
+                if auth_manager.login(username, password):
                     st.rerun()  # Refresh page after successful login
     
     # Additional info
     st.markdown("---")
     st.markdown("""
     **🛡️ Security Features:**
-    - JWT-based authentication with role information
-    - Persistent sessions across page refreshes
+    - JWT-based authentication
     - Role-based access control
-    - Post-quantum cryptography for data protection
+    - Session persistence
+    - Post-quantum cryptography
     """)
+
+if __name__ == "__main__":
+    show_login()

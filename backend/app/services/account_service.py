@@ -19,6 +19,16 @@ class AccountService:
             logger.debug(f"No user found with username: {username}")
         return user
 
+    def get_by_id(self, db: Session, account_id: int) -> Account:
+        """Get account by account ID"""
+        logger.debug(f"Searching for user with account_id: {account_id}")
+        user = db.query(Account).filter(Account.account_id == account_id).first()
+        if user:
+            logger.debug(f"Found user: {user.username} with ID: {user.account_id}")
+        else:
+            logger.debug(f"No user found with account_id: {account_id}")
+        return user
+
     def create_account(
         self,
         db: Session,

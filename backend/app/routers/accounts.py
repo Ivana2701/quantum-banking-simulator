@@ -5,7 +5,13 @@ from sqlalchemy.orm import Session
 from app.services.account_service import AccountService
 from app.schemas import AccountCreate, AccountRead
 from app.db.database import get_db
-from app.core.security import get_current_user, get_password_hash
+from app.core.security import (
+    get_current_user, 
+    get_password_hash, 
+    require_admin, 
+    require_employee_or_admin,
+    require_same_user_or_admin
+)
 
 router = APIRouter(prefix="/accounts", tags=["accounts"])
 svc    = AccountService()
@@ -13,22 +19,33 @@ svc    = AccountService()
 @router.get("", response_model=List[AccountRead])
 def list_accounts(
     db: Session = Depends(get_db),
-    current = Depends(get_current_user)
+    current = Depends(require_employee_or_admin)  # Only employees and admins can list all accounts
 ):
+    """List all accounts - requires employee or admin role"""
     return svc.get_all_users(db)
 
 @router.get("/me", response_model=AccountRead)
 def read_current(
     current = Depends(get_current_user)
 ):
+    """Get current user's account information"""
     return current
 
 @router.get("/{account_id}", response_model=AccountRead)
 def read_account(
     account_id: int,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current = Depends(get_current_user)
 ):
-    acct = svc.get_by_username(db, account_id)
+    """Get specific account information - users can only access their own account unless admin"""
+    # Check if user can access this account
+    if current.account_type.value != "admin" and current.account_id != account_id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Access denied. You can only access your own account data."
+        )
+    
+    acct = svc.get_by_id(db, account_id)  # Changed to get_by_id instead of get_by_username
     if not acct:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Account not found")
     return acct
@@ -37,8 +54,10 @@ def read_account(
 def create_account(
     payload: AccountCreate,
     request: Request,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current = Depends(require_admin)  # Only admins can create new accounts
 ):
+    """Create a new account - requires admin role"""
     # Function to get public IP
     def get_public_ip():
         try:
