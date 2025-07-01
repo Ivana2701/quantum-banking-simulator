@@ -164,3 +164,16 @@ class Transaction(Base):
     encrypted_amount = Column(LargeBinary, nullable=False)
     is_fraud         = Column(Boolean, default=False)
     created_at       = Column(DateTime, server_default="now()")
+
+# Post-quantum cryptography keys storage
+class AccountEncryption(Base):
+    __tablename__ = "account_encryption"
+    account_id           = Column(Integer, ForeignKey("accounts.account_id"), primary_key=True)
+    kyber_public_key     = Column(LargeBinary, nullable=False)
+    kyber_secret_key     = Column(LargeBinary, nullable=False)
+    dilithium_public_key = Column(LargeBinary, nullable=False)
+    dilithium_secret_key = Column(LargeBinary, nullable=False)
+    created_at           = Column(DateTime, server_default="now()")
+    
+    # Relationship back to account
+    account = relationship("Account", backref="encryption_keys")

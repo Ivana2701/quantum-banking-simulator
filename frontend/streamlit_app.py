@@ -31,7 +31,7 @@ else:
         if page == "Home":
             show_customer_dashboard()
     elif st.session_state.account_type == "employee":
-        dashboard_pages = ["Home"]
+        dashboard_pages = ["Home", "Customers"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
             st.session_state.token = None
@@ -39,6 +39,9 @@ else:
             st.rerun()
         if page == "Home":
             show_employee_dashboard()
+        elif page == "Customers":
+            from screens.employee_customers import show_employee_customers
+            show_employee_customers()
     elif st.session_state.account_type == "admin":
         dashboard_pages = ["Home"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)

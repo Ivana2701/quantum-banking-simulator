@@ -163,3 +163,7 @@ class RoleUpdateResponse(BaseModel):
     message: str
     user_id: int
     new_role: str
+
+# Balance schemas
+class BalanceUpdateRequest(BaseModel):
+    amount: float = Field(..., gt=0, description="Amount to add to the customer's balance")
