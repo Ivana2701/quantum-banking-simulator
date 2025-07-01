@@ -59,7 +59,7 @@ INSERT INTO roles
   (role_name)
 VALUES
   ('customer'),
-  ('employee');
+  ('employee'),
   ('admin');
 
 CREATE TYPE account_type_enum AS ENUM
@@ -273,63 +273,6 @@ CREATE TABLE key_management
   wrapped BYTEA NOT NULL,
   created_at TIMESTAMP NOT NULL DEFAULT now()
 );
-
--- 7) Demo data (addresses, phones, etc.)
-INSERT INTO addresses
-  (street,city,state,country,postal_code)
-VALUES
-  ('123 Main St', 'Sofia', '', 'Bulgaria', '1000'),
-  ('456 Elm St', 'Plovdiv', '', 'Bulgaria', '4000');
-INSERT INTO phone_numbers
-  (phone_number,phone_type)
-VALUES
-  ('+359888123456', 'mobile'),
-  ('+359298765432', 'work');
-INSERT INTO geolocations
-  (latitude,longitude,description)
-VALUES
-  (42.6977, 23.3219, 'Sofia HQ'),
-  (42.1354, 24.7453, 'Plovdiv Branch');
-INSERT INTO ip_addresses
-  (ip_address)
-VALUES
-  ('193.144.10.1'),
-  ('193.144.10.2');
-INSERT INTO devices
-  (device_name,fingerprint)
-VALUES
-  ('Alice Laptop', 'fp_alice_001'),
-  ('Bob Phone', 'fp_bob_002');
-
--- 8) Demo accounts & mappings
-INSERT INTO accounts
-  (encrypted_balance,username,full_name,password_hash,account_type,role_id)
-VALUES
-  (decode('00AABBCC','hex'), 'alice', 'Alice Ivanova', ' $2b$12$X/sMiAFlWQGkYqxGyklOyOKcualofLn/tBMsPrhD9xT4GYZMzY.O.', 'customer', 1),
-  (decode('00112233','hex'), 'bob', 'Bob Petrov', '$2b$12$Z4O///EpqcD.kkA1XruqhOQvhAh4/R7Q0BGgdRfByMQfjzg6MRope', 'employee', 2),
-  (decode('FFEE0011','hex'), 'carol', 'Carol Dimitrova', '$2b$12$eOvl1YMw2Q4XvzmMwN3PCe7RTY3FCOGPNRAmS46I6LNbpf938Z4p6', 'admin', 2);
-
-INSERT INTO account_addresses
-VALUES
-  (1, 1),
-  (2, 2);
-INSERT INTO account_phones
-VALUES
-  (1, 1),
-  (2, 2);
-INSERT INTO account_geos
-VALUES
-  (1, 1),
-  (2, 2);
-INSERT INTO account_ips
-VALUES
-  (1, 1),
-  (2, 2);
-INSERT INTO account_devices
-VALUES
-  (1, 1),
-  (2, 2);
-
 
 INSERT INTO classification_metrics
   (algorithm_type_id,accuracy,"precision",recall,f1_score,confusion_matrix,roc_curve)

@@ -35,7 +35,8 @@ def create_admin_user():
         admin_payload = AccountCreate(
             username="admin",
             full_name="System Administrator",
-            password="admin123"
+            password="admin123",
+            account_type=AccountTypeEnum.admin
         )
         
         # Hash the password

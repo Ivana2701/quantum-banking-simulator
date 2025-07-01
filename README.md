@@ -75,10 +75,41 @@ find . -name "*.pyc" -delete
 
 ### Database
 
-Start PostgreSQL and access your banking database:
+1. Start PostgreSQL and access your banking database:
 
 ```bash
-psql -U bankuser -d banking
+psql -U root -d banking
+```
+or
+```bash
+docker run --name banking -p 5432:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=root -d postgres:latest
+```
+2. Run the quantum-banking-simulator/backend/databse/database_0_increment.sql script in your database
+
+3. Run the quantum-banking-simulator/backend/databse/setup_scripts/create_admin.py sctipt using 
+```bash
+python quantum-banking-simulator/backend/databse/setup_scripts/create_admin.py
+```
+
+### Env setup
+Make sure you have .env file in your backend folder:
+```bash
+# Database Configuration - Set to false to use PostgreSQL (your existing database)
+USE_SQLITE=false
+
+# PostgreSQL Configuration (used when USE_SQLITE=false)
+DB_NAME=<DB name, usually postgres>
+DB_USER=root
+DB_PASSWORD=root
+DB_HOST=localhost
+DB_PORT=5432
+
+# JWT signing key (must match what your FastAPI security.py reads)
+JWT_SECRET_KEY=<Secret-key>
+
+# (optional) if you ever want to tweak the algorithm or expiration
+#ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=5
 ```
 
 ## File Structure
@@ -120,19 +151,6 @@ quantum-banking-simulator/
 
 - **Demo Mode**: Educational only. Temporarily stores quantum-generated BB84 keys for visual understanding. **Not secure**.
 - **Real Mode**: Production-level security. BB84 keys **never stored or reused**, adhering strictly to quantum encryption security practices.
-
-## Security Notice
-
-Replace default credentials with secure authentication methods for production deployments.
-
-🔑 Credentials:
-Customer Login:
-Username: customer
-Password: customer
-
-Employee Login:
-Username: employee
-Password: employee
 
 ---
 
