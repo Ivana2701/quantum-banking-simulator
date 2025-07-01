@@ -159,8 +159,9 @@ class Device(Base):
 class Transaction(Base):
     __tablename__ = "transactions"
     transaction_id   = Column(Integer, primary_key=True, index=True)
-    from_account_id  = Column(Integer, ForeignKey("accounts.account_id"))
-    to_account_id    = Column(Integer, ForeignKey("accounts.account_id"))
+    account_id       = Column(Integer, ForeignKey("accounts.account_id"), nullable=False)
+    from_account_id  = Column(Integer, ForeignKey("accounts.account_id"), nullable=False)
+    to_account_id    = Column(Integer, ForeignKey("accounts.account_id"), nullable=False)
     encrypted_amount = Column(LargeBinary, nullable=False)
     is_fraud         = Column(Boolean, default=False)
     created_at       = Column(DateTime, server_default="now()")

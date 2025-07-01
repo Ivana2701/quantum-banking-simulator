@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.services.transaction_service import TransactionService
 from app.services.account_service import AccountService
-from app.schemas import TransactionBundle, TransactionRead
+from app.schemas import TransactionBundle, TransactionRead, TransactionCreate
 from app.core.security import get_current_user, require_customer
 from app.db.database import get_db
 from datetime import date
@@ -22,21 +22,46 @@ def get_balance(
     db: Session = Depends(get_db)
 ):
     """Get customer balance - requires customer role"""
-    acct = acct_svc.get_account_by_id(db, user.account_id)
-    if not acct:
-        raise HTTPException(status_code=404, detail="Account not found")
-    return {"encrypted_balance": acct.encrypted_balance}
+    try:
+        acct = acct_svc.get_account_by_id(db, user.account_id)
+        if not acct:
+            raise HTTPException(status_code=404, detail="Account not found")
+        
+        # Return decrypted balance for customer
+        balance = acct_svc.get_balance(db, user.account_id)
+        
+        # Convert encrypted_balance bytes to base64 string for JSON serialization
+        import base64
+        encrypted_balance_b64 = base64.b64encode(acct.encrypted_balance).decode('utf-8')
+        
+        return {
+            "balance": float(balance), 
+            "encrypted_balance": encrypted_balance_b64,
+            "account_id": user.account_id
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Error getting balance for user {user.account_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving balance: {str(e)}")
 
 @router.post("/transfer", response_model=TransactionRead)
 def send_money(
-    to_account_id: int,
-    amount: float,
+    transaction_data: TransactionCreate,
     user = Depends(require_customer),  # Only customers can transfer money
     db: Session = Depends(get_db)
 ):
     """Transfer money to another account - requires customer role"""
-    # Add logic in service to create transaction record
-    tx = tx_svc.create_transaction(db, from_account_id=user.account_id, to_account_id=to_account_id, amount=amount)
+    # Create transaction using the transaction service
+    tx = tx_svc.create_transaction(
+        db, 
+        account_id=user.account_id,  # The account that generated the transaction
+        from_account_id=user.account_id, 
+        to_account_id=transaction_data.to_account_id, 
+        amount=transaction_data.amount
+    )
     return tx
 
 @router.get("/transactions", response_model=TransactionBundle)
@@ -47,7 +72,7 @@ def view_transactions(
     db: Session = Depends(get_db)
 ):
     """View customer transactions - requires customer role"""
-    # Customers see their sent and received
+    # Customers see their sent and received transactions (without decrypted amounts)
     acct = acct_svc.get_account_by_id(db, user.account_id)
     sent = tx_svc.get_sent_transactions(db, acct.account_id, from_date, to_date)
     received = tx_svc.get_received_transactions(db, acct.account_id, from_date, to_date)

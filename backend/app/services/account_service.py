@@ -280,6 +280,13 @@ class AccountService:
             # Calculate new balance
             new_balance = current_balance + amount
             
+            # Prevent negative balances (except for specific admin operations)
+            if new_balance < 0:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Transaction would result in negative balance"
+                )
+            
             # Encrypt the new balance using post-quantum cryptography
             # Get the Kyber public key from the secret key (for re-encryption)
             kyber_ciphertext, encrypted_balance = crypto_service.encrypt_balance(

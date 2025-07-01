@@ -27,8 +27,14 @@ def all_transactions(
     user = Depends(require_employee_or_admin),  # Use centralized role check
     db: Session = Depends(get_db)
 ):
-    """Get all transactions - requires employee or admin role"""
-    return tx_svc.get_all_transactions(db, from_date, to_date)
+    """Get all transactions with decrypted amounts - requires employee or admin role"""
+    transactions = tx_svc.get_all_transactions(db, from_date, to_date)
+    
+    # Add decrypted amounts for employee/admin view
+    for tx in transactions:
+        tx.amount = tx_svc.decrypt_transaction_amount(db, tx, user.account_id)
+    
+    return transactions
 
 @router.get("/transactions/search", response_model=List[TransactionRead])
 def search_transactions(
@@ -36,8 +42,14 @@ def search_transactions(
     user = Depends(require_employee_or_admin),  # Use centralized role check
     db: Session = Depends(get_db)
 ):
-    """Search transactions by account - requires employee or admin role"""
-    return tx_svc.get_transactions_by_account(db, account_id)
+    """Search transactions by account with decrypted amounts - requires employee or admin role"""
+    transactions = tx_svc.get_transactions_by_account(db, account_id)
+    
+    # Add decrypted amounts for employee/admin view
+    for tx in transactions:
+        tx.amount = tx_svc.decrypt_transaction_amount(db, tx, user.account_id)
+    
+    return transactions
 
 @router.get("/customers", response_model=List[AccountRead])
 def get_all_customers(

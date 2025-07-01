@@ -141,11 +141,16 @@ class DeviceRead(DeviceBase):
 class TransactionBase(BaseModel):
     from_account_id: int
     to_account_id: int
-    is_fraud: bool
+    is_fraud: bool = False
+
+class TransactionCreate(BaseModel):
+    to_account_id: int
+    amount: float = Field(..., gt=0, description="Amount to transfer")
 
 class TransactionRead(TransactionBase):
     transaction_id: int
     created_at: datetime
+    amount: Optional[float] = Field(None, description="Decrypted amount (for employees/admins only)")
 
     class Config:
         from_attributes = True

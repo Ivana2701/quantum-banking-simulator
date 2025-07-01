@@ -2,7 +2,8 @@ import streamlit as st
 import time
 from screens.login import show_login
 from screens.register import show_register
-from screens.dashboard import show_customer_dashboard, show_employee_dashboard
+from screens.transactions import show_customer_transactions, show_employee_transactions
+from screens.dashboard import show_employee_dashboard
 from screens.admin_dashboard import show_admin_dashboard
 from utils.auth_manager import auth_manager
 
@@ -82,14 +83,16 @@ if st.session_state.token is None:
 else:
     # Show only relevant dashboard based on account type
     if st.session_state.account_type == "customer":
-        dashboard_pages = ["Home"]
+        dashboard_pages = ["Home", "Transactions"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
             auth_manager.logout()  # Use auth_manager for proper logout
         if page == "Home":
-            show_customer_dashboard()
+            show_customer_transactions()
+        elif page == "Transactions":
+            show_customer_transactions()
     elif st.session_state.account_type == "employee":
-        dashboard_pages = ["Home", "Customers"]
+        dashboard_pages = ["Home", "Customers", "Transactions"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
             auth_manager.logout()  # Use auth_manager for proper logout
@@ -98,6 +101,8 @@ else:
         elif page == "Customers":
             from screens.employee_customers import show_employee_customers
             show_employee_customers()
+        elif page == "Transactions":
+            show_employee_transactions()
     elif st.session_state.account_type == "admin":
         dashboard_pages = ["Home"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
