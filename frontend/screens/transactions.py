@@ -25,15 +25,13 @@ def show_customer_transactions():
     session_status = quantum_session_manager.get_session_status()
     
     if session_status["active"]:
-        col1, col2, col3, col4 = st.columns(4)
+        col1, col2, col3,  = st.columns(3)
         with col1:
             st.success(f"🟢 **{session_status['security_level']}**")
         with col2:
             minutes_remaining = int(session_status["time_remaining"] // 60)
             st.info(f"⏱️ {minutes_remaining}m left")
         with col3:
-            st.info(f"🆔 ID: {session_status['session_id']}")
-        with col4:
             if st.button("🗑️ End Session", help="Manually end the current quantum session"):
                 quantum_session_manager.clear_session()
                 st.success("Session ended successfully")

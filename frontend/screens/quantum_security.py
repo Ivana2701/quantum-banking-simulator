@@ -25,40 +25,31 @@ def show_quantum_security_dashboard():
     session_status = quantum_session_manager.get_session_status()
     
     if session_status["active"]:
-        col1, col2, col3, col4 = st.columns(4)
-        
+        col1, col2, col3,  = st.columns(3)
         with col1:
-            st.metric(
-                "🟢 Security Level",
-                session_status["security_level"],
-                help="Current quantum security protection level"
-            )
-        
+            st.success(f"🟢 **{session_status['security_level']}**")
         with col2:
             minutes_remaining = int(session_status["time_remaining"] // 60)
-            seconds_remaining = int(session_status["time_remaining"] % 60)
-            st.metric(
-                "⏱️ Session Time",
-                f"{minutes_remaining}m {seconds_remaining}s",
-                help="Time remaining for current secure session"
-            )
-        
+            st.info(f"⏱️ {minutes_remaining}m left")
         with col3:
-            st.metric(
-                "🆔 Session ID",
-                session_status["session_id"],
-                help="Unique identifier for current session"
-            )
-        
-        with col4:
-            if st.button("🗑️ End Session"):
+            if st.button("🗑️ End Session", help="Manually end the current quantum session"):
                 success = quantum_session_manager.cleanup_session(st.session_state.token)
                 if success:
                     st.success("Session ended successfully")
-                    st.rerun()
                 else:
                     st.warning("Session cleanup completed locally")
-                    st.rerun()
+                st.rerun()
+        # Show detailed session info in an expander
+        with st.expander("📋 Detailed Session Information"):
+            session_info = quantum_session_manager.get_session_info()
+            if session_info:
+                col_info1, col_info2 = st.columns(2)
+                with col_info1:
+                    st.write(f"**Established:** {session_info['established_at']}")
+                    st.write(f"**Expires:** {session_info['expires_at']}")
+                with col_info2:
+                    st.write(f"**Session ID:** {session_info['session_id']}")
+                    st.write(f"**Security Level:** {session_info['security_level']}")
         
         # Protocol Details
         st.markdown("### 🛡️ Active Security Protocols")
