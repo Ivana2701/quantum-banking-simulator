@@ -2,6 +2,8 @@
 import streamlit as st
 import requests
 import pandas as pd
+from utils.notifications import show_notification
+import time
 
 API_URL = "http://localhost:8000"
 
@@ -178,9 +180,7 @@ def show_employee_customers():
                                 
                                 if add_response.status_code == 200:
                                     result = add_response.json()
-                                    st.success(f"✅ {result['message']}")
-                                    st.info(f"New balance: ${result['new_balance']:,.2f}")
-                                    st.rerun()  # Refresh the page to show updated data
+                                    show_notification(f"✅ {result['message']}", "success", True)
                                 else:
                                     error_msg = add_response.json().get("detail", "Unknown error")
                                     st.error(f"Failed to add money: {error_msg}")

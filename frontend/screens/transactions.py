@@ -4,11 +4,13 @@ import requests
 import pandas as pd
 from datetime import datetime, date, timedelta
 from typing import Optional
+from utils.notifications import show_notification
 
 API_URL = "http://localhost:8000"
 
 def show_customer_transactions():
     """Display customer transaction dashboard with send money functionality"""
+    
     st.title("💰 Transaction Center")
     
     if "token" not in st.session_state or not st.session_state.token:
@@ -85,17 +87,7 @@ def show_customer_transactions():
                             json={"to_account_id": int(recipient_id), "amount": float(amount)}
                         )
                         if response.status_code == 200:
-                            st.success(f"✅ Successfully sent ${amount:.2f} to account {recipient_id}")
-                            
-                            # Show transaction details
-                            transaction_data = response.json()
-                            with st.expander("📄 Transaction Details"):
-                                st.write(f"**Transaction ID:** {transaction_data.get('transaction_id')}")
-                                st.write(f"**From Account:** {st.session_state.account_id}")
-                                st.write(f"**To Account:** {recipient_id}")
-                                st.write(f"**Amount:** ${amount:.2f}")
-                                st.write(f"**Time:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-                                st.write("🔐 **Security:** Amount encrypted with post-quantum cryptography")
+                            show_notification(f"✅ Successfully sent ${amount:.2f} to account {recipient_id}", "success", True)
                         elif response.status_code == 400:
                             st.error("❌ Insufficient funds or invalid transaction")
                         elif response.status_code == 404:
@@ -212,6 +204,7 @@ def show_customer_transactions():
 
 def show_employee_transactions():
     """Display employee transaction dashboard with enhanced capabilities"""
+    
     st.title("👩‍💼 Employee Transaction Dashboard")
     
     if "token" not in st.session_state or not st.session_state.token:
@@ -259,7 +252,11 @@ def show_employee_transactions():
                 if transactions:
                     # Create DataFrame with better column names
                     df = pd.DataFrame(transactions)
-                    df["created_at"] = pd.to_datetime(df["created_at"]).dt.strftime('%Y-%m-%d %H:%M:%S')
+                    # Convert to datetime for proper sorting, then sort by latest first
+                    df["created_at"] = pd.to_datetime(df["created_at"])
+                    df = df.sort_values("created_at", ascending=False)
+                    # Convert back to string for display
+                    df["created_at"] = df["created_at"].dt.strftime('%Y-%m-%d %H:%M:%S')
                     
                     # Rename columns for better display
                     display_df = df.rename(columns={
@@ -476,8 +473,8 @@ def show_employee_transactions():
                                 }
                             )
                             if response.status_code == 200:
-                                st.success(f"✅ Transaction created successfully!")
-                                st.rerun()
+                                show_notification("✅ Transaction created successfully!")
+                                st.rerun()  # Refresh to show new transaction
                             elif response.status_code == 400:
                                 error_detail = response.json().get("detail", "Invalid transaction")
                                 if "Insufficient funds" in error_detail:

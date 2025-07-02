@@ -2,6 +2,7 @@
 import streamlit as st
 import requests
 import pandas as pd
+from utils.notifications import show_notification
 
 API_URL = "http://localhost:8000"
 
@@ -59,8 +60,7 @@ def show_admin_dashboard():
                                 )
                                 
                                 if update_response.status_code == 200:
-                                    st.success(f"Successfully updated {current_user['username']}'s role to {new_role}")
-                                    st.rerun()  # Refresh the page to show updated data
+                                    show_notification(f"Successfully updated {current_user['username']}'s role to {new_role}", "success", True)
                                 else:
                                     error_msg = update_response.json().get("detail", "Unknown error")
                                     st.error(f"Failed to update role: {error_msg}")
