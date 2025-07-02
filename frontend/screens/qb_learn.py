@@ -43,7 +43,7 @@ def show_qb_learn():
         This diagram compares the performance of quantum and classical models for fraud detection.\
         Observe how quantum models (QSVM, VQC) perform relative to classical approaches.
         """)
-        img_path = os.path.join("backend", "fraud_detection", "visualizations", "performance_comparison.png")
+        img_path = os.path.join("backend", "fraud_detection", "visualizations", "qsvm_vqc_performance_comparison.png")
         if os.path.exists(img_path):
             st.image(Image.open(img_path), caption="Performance Comparison: Quantum vs Classical Models", use_column_width=True)
         else:

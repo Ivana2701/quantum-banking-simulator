@@ -12,6 +12,9 @@ from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_sc
 import pandas as pd
 import numpy as np
 
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+csv_path = os.path.join(project_root, 'creditcard.csv')
+
 # Load IBMQ account and select backend
 provider = IBMProvider()
 backend = provider.get_backend('ibmq_qasm_simulator')  # Change to a real backend if desired
@@ -19,7 +22,10 @@ sampler = BackendSampler(backend)
 
 np.random.seed(42)
 
-def load_creditcard_data(filepath='../../creditcard.csv', sample_size=None):
+def load_creditcard_data(filepath='creditcard.csv', sample_size=None):
+    if not os.path.isabs(filepath):
+        project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+        filepath = os.path.join(project_root, filepath)
     print(f"Loading credit card data from {filepath}...")
     df = pd.read_csv(filepath)
     if sample_size:

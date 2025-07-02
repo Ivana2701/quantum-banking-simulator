@@ -1,3 +1,6 @@
+import sys
+import os
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 import streamlit as st
 import time
 from screens.login import show_login
@@ -9,6 +12,7 @@ from screens.qb_learn import show_qb_learn
 from screens.quantum_security import show_quantum_security_dashboard, show_quantum_demo
 from utils.auth_manager import auth_manager
 from utils.quantum_session_manager import quantum_session_manager
+
 
 st.set_page_config(page_title="QBank", layout="centered")
 

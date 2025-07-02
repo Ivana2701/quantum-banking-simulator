@@ -34,14 +34,18 @@ class CreditCardClassical:
         self.pca = None
         self.model = None
         
-    def load_creditcard_data(self, filepath='../../creditcard.csv', sample_size=None):
+    def load_creditcard_data(self, filepath='creditcard.csv', sample_size=None):
         """
         Load and preprocess credit card fraud dataset
         
         Args:
-            filepath: Path to creditcard.csv
+            filepath: Path to creditcard.csv (relative to project root or absolute)
             sample_size: If provided, sample this many transactions for faster training
         """
+        # Always resolve the path relative to the project root
+        if not os.path.isabs(filepath):
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+            filepath = os.path.join(project_root, filepath)
         print(f"Loading credit card data from {filepath}...")
         df = pd.read_csv(filepath)
         

@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 from utils.config import get_cached_quantum_safe_setting
 from utils.quantum_session_manager import quantum_session_manager
+from screens import employee_experiments
 
 API_URL = "http://localhost:8000"
 
@@ -78,7 +79,7 @@ def show_employee_dashboard():
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     
     # Create tabs for different functionalities
-    tab1, tab2 = st.tabs(["📊 Transactions", "🔐 Quantum Security Demo"])
+    tab1, tab2, tab3 = st.tabs(["📊 Transactions", "🔐 Quantum Security Demo", "🧪 ML Experiments"])
     
     with tab1:
         st.subheader("All Transactions")
@@ -113,7 +114,7 @@ def show_employee_dashboard():
         
         # Post-quantum cryptography information
         st.markdown("""
-        ### �️ Post-Quantum Cryptographic Algorithms
+        ### 🔐 Post-Quantum Cryptographic Algorithms
         
         Our banking system uses NIST-selected post-quantum cryptographic algorithms to ensure security against both classical and quantum computer attacks:
         
@@ -174,3 +175,6 @@ def show_employee_dashboard():
             st.metric("🔑 Key Exchange", "Quantum-Safe", help="CRYSTAL-Kyber in use")
         with col3:
             st.metric("📝 Signatures", "Post-Quantum", help="CRYSTAL-DILITHIUM active")
+    
+    with tab3:
+        employee_experiments.main()

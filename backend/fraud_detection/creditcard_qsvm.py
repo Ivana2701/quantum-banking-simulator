@@ -21,6 +21,8 @@ from qiskit_machine_learning.kernels import FidelityQuantumKernel as QuantumKern
 from qiskit.algorithms.optimizers import COBYLA, SPSA
 import warnings
 warnings.filterwarnings('ignore')
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+csv_path = os.path.join(project_root, 'creditcard.csv')
 
 # Set random seeds for reproducibility
 np.random.seed(42)
@@ -46,7 +48,7 @@ class CreditCardQSVM:
         self.feature_map = None
         self.quantum_kernel = None
         
-    def load_creditcard_data(self, filepath='../../creditcard.csv', sample_size=None):
+    def load_creditcard_data(self, filepath='creditcard.csv', sample_size=None):
         """
         Load and preprocess credit card fraud dataset
         
@@ -54,6 +56,9 @@ class CreditCardQSVM:
             filepath: Path to creditcard.csv
             sample_size: If provided, sample this many transactions for faster training
         """
+        if not os.path.isabs(filepath):
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+            filepath = os.path.join(project_root, filepath)
         print(f"Loading credit card data from {filepath}...")
         df = pd.read_csv(filepath)
         

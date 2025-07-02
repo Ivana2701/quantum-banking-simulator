@@ -46,7 +46,7 @@ class ModelComparisonVisualizer:
             else:
                 print(f"⚠️  {model_name} metrics not found")
     
-    def create_performance_comparison(self, save_path="./model_comparison.png"):
+    def create_performance_comparison(self, save_path="./qsvm_vqc_performance_comparison.png"):
         """Create comprehensive performance comparison visualization"""
         if not self.models_data:
             print("No model data available!")
@@ -318,7 +318,7 @@ class ModelComparisonVisualizer:
         output_dir.mkdir(exist_ok=True)
         
         # Create all visualizations
-        self.create_performance_comparison(str(output_dir / "performance_comparison.png"))
+        self.create_performance_comparison(str(output_dir / "qsvm_vqc_performance_comparison.png"))
         self.create_roc_curves_comparison(str(output_dir / "roc_curves_comparison.png"))
         self.create_confusion_matrices(str(output_dir / "confusion_matrices.png"))
         self.create_summary_table(str(output_dir / "summary_table.png"))
