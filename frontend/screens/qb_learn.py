@@ -240,38 +240,40 @@ def show_qb_learn():
                 else:
                     st.success("🟢 No eavesdropping detected. Secure key established.")
 
-                st.markdown("---")
-                st.header("2️⃣ Post-Quantum Cryptography (Kyber)")
-                st.markdown("**Sender → encapsulates → ciphertext → receiver decapsulates → shared secret**")
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    st.write("📨 **Sender**")
-                    st.code("public_key = generate_kyber_keypair()")
-                with col2:
-                    st.write("🔐 **Encapsulation**")
-                    st.code("ciphertext, secret = encapsulate(public_key)")
-                with col3:
-                    st.write("📩 **Receiver**")
-                    st.code("shared_secret = decapsulate(ciphertext)")
-                st.success("Kyber shared secret: `a4f7c1e2d3b8f901`")
-                st.markdown("**Kyber Math:** c = A·s + e (mod q). Based on the hardness of Module-LWE.**")
+                # Only show Post-Quantum Cryptography and AES sections if Eve is NOT intercepting
+                if not eve_interception:
+                    st.markdown("---")
+                    st.header("2️⃣ Post-Quantum Cryptography (Kyber)")
+                    st.markdown("**Sender → encapsulates → ciphertext → receiver decapsulates → shared secret**")
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.write("📨 **Sender**")
+                        st.code("public_key = generate_kyber_keypair()")
+                    with col2:
+                        st.write("🔐 **Encapsulation**")
+                        st.code("ciphertext, secret = encapsulate(public_key)")
+                    with col3:
+                        st.write("📩 **Receiver**")
+                        st.code("shared_secret = decapsulate(ciphertext)")
+                    st.success("Kyber shared secret: `a4f7c1e2d3b8f901`")
+                    st.markdown("**Kyber Math:** c = A·s + e (mod q). Based on the hardness of Module-LWE.**")
 
-                st.markdown("---")
-                st.header("3️⃣ AES Encryption of Transaction")
-                original_transaction = "Send $1000 to Account XYZ"
-                aes_encrypted = "e4a9f8d1c9f..."
-                st.write("📤 Encrypting a financial transaction...")
-                st.code(f"Transaction: {original_transaction}")
-                st.code(f"Encrypted (AES): {aes_encrypted}")
-                st.success("✅ Encrypted transaction secured with quantum-safe keys!")
-                st.markdown(r"""
-                **AES Math:**
-                - SubBytes → ShiftRows → MixColumns → AddRoundKey
-                \[
-                C = E_K(P), \quad P = D_K(C)
-                \]
-                where `E` is AES encryption with key K.
-                """)
+                    st.markdown("---")
+                    st.header("3️⃣ AES Encryption of Transaction")
+                    original_transaction = "Send $1000 to Account XYZ"
+                    aes_encrypted = "e4a9f8d1c9f..."
+                    st.write("📤 Encrypting a financial transaction...")
+                    st.code(f"Transaction: {original_transaction}")
+                    st.code(f"Encrypted (AES): {aes_encrypted}")
+                    st.success("✅ Encrypted transaction secured with quantum-safe keys!")
+                    st.markdown(r"""
+                    **AES Math:**
+                    - SubBytes → ShiftRows → MixColumns → AddRoundKey
+                    \[
+                    C = E_K(P), \quad P = D_K(C)
+                    \]
+                    where `E` is AES encryption with key K.
+                    """)
 
     # --- Tab 2: Performance Comparison ---
     with tabs[1]:
