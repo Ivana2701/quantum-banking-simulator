@@ -3,6 +3,7 @@ import streamlit as st
 import requests
 import pandas as pd
 from utils.notifications import show_notification
+from components.quantum_improvements import show_quantum_improvements
 
 API_URL = "http://localhost:8000"
 
