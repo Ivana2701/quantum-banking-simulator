@@ -4,7 +4,7 @@ Simple database connection test
 """
 import os
 import sys
-sys.path.append('/Users/itodorov/code/python/quantum-banking-simulator/backend')
+sys.path.append('/Users/ibazhdarova/ProjectsIvana/quantum/quantum-banking-simulator/backend')
 
 from dotenv import load_dotenv
 

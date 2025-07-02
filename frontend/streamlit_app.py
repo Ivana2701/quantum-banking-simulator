@@ -5,6 +5,7 @@ from screens.register import show_register
 from screens.transactions import show_customer_transactions, show_employee_transactions
 from screens.dashboard import show_employee_dashboard
 from screens.admin_dashboard import show_admin_dashboard
+from screens.qb_learn import show_qb_learn
 from utils.auth_manager import auth_manager
 
 st.set_page_config(page_title="QBank", layout="centered")
@@ -75,11 +76,13 @@ if st.session_state.token and st.session_state.account_type == "admin":
 
 # sidebar navigation
 if st.session_state.token is None:
-    page = st.sidebar.radio("Go to", ["Login", "Register"])
+    page = st.sidebar.radio("Go to", ["Login", "Register", "QB-Learn"])
     if page == "Login":
         show_login()
-    else:
+    elif page == "Register":
         show_register()
+    elif page == "QB-Learn":
+        show_qb_learn()
 else:
     # Show only relevant dashboard based on account type
     if st.session_state.account_type == "customer":

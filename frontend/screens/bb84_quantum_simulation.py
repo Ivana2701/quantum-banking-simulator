@@ -8,7 +8,6 @@ from PIL import Image
 import tempfile
 import io
 
-st.set_page_config(page_title="Quantum Demo", layout="wide")
 st.title("🔐 Quantum-Safe Banking Security Demonstration")
 
 # ----- Sidebar controls -----

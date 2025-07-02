@@ -3,7 +3,7 @@
 Add test users to your existing PostgreSQL database
 """
 import sys
-sys.path.append('/Users/itodorov/code/python/quantum-banking-simulator/backend')
+sys.path.append('/Users/ibazhdarova/ProjectsIvana/quantum/quantum-banking-simulator/backend')
 
 from app.db.database import SessionLocal
 from app.db.models import Account, Role, AccountTypeEnum
