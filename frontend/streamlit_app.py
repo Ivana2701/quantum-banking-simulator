@@ -92,7 +92,7 @@ if st.session_state.token is None:
 else:
     # Show only relevant dashboard based on account type
     if st.session_state.account_type == "customer":
-        dashboard_pages = ["Home", "Transactions", "Quantum Security"]
+        dashboard_pages = ["Transactions", "Quantum Security"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
             # Clean up quantum session before logout
