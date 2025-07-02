@@ -173,3 +173,39 @@ class RoleUpdateResponse(BaseModel):
 # Balance schemas
 class BalanceUpdateRequest(BaseModel):
     amount: float = Field(..., gt=0, description="Amount to add to the customer's balance")
+
+# Secure Transaction Protocol Schemas
+class SessionEstablishmentRequest(BaseModel):
+    client_id: str = Field(..., description="Unique client identifier")
+    protocol_version: str = Field(default="1.0", description="Protocol version")
+
+class SessionEstablishmentResponse(BaseModel):
+    session_id: str
+    client_id: str
+    timestamp: str
+    kyber_public_key: str
+    kyber_encapsulated_secret: str
+    bank_public_key: str
+    bb84_parameters: dict
+    expires_at: Optional[str] = None
+
+class SecureTransactionRequest(BaseModel):
+    session_id: str = Field(..., description="Session identifier")
+    encrypted_transaction: dict = Field(..., description="Encrypted transaction data")
+    signature: str = Field(..., description="Digital signature")
+    bank_public_key: str = Field(..., description="Bank's public key for verification")
+    protocol_version: str = Field(default="1.0", description="Protocol version")
+    security_level: str = Field(default="hybrid-pqc", description="Security level indicator")
+
+class SecureTransactionResponse(BaseModel):
+    success: bool
+    transaction_id: Optional[str] = None
+    message: str
+    signature: Optional[str] = None
+    timestamp: str
+
+class EncryptedTransactionData(BaseModel):
+    session_id: str
+    nonce: str
+    ciphertext: str
+    timestamp: str

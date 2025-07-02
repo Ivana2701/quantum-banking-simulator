@@ -20,6 +20,25 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Health check endpoint
+@app.get("/health")
+def health_check():
+    """Basic health check endpoint"""
+    try:
+        # Try to get protocol instance to check quantum readiness
+        from quantum_encryption.hybrid_pqc_protocol import get_protocol_instance
+        protocol = get_protocol_instance()
+        quantum_ready = True
+    except Exception:
+        quantum_ready = False
+    
+    return {
+        "status": "healthy",
+        "quantum_ready": quantum_ready,
+        "service": "QBank API"
+    }
+
 app.include_router(auth)
 app.include_router(accounts)
 app.include_router(customer)

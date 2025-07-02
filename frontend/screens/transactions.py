@@ -5,6 +5,7 @@ import pandas as pd
 from datetime import datetime, date, timedelta
 from typing import Optional
 from utils.notifications import show_notification
+from utils.quantum_session_manager import quantum_session_manager
 
 API_URL = "http://localhost:8000"
 
@@ -19,12 +20,65 @@ def show_customer_transactions():
     
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     
+    # Quantum Security Status
+    st.markdown("### 🔐 Quantum Security Status")
+    session_status = quantum_session_manager.get_session_status()
+    
+    if session_status["active"]:
+        col1, col2, col3, col4 = st.columns(4)
+        with col1:
+            st.success(f"🟢 **{session_status['security_level']}**")
+        with col2:
+            minutes_remaining = int(session_status["time_remaining"] // 60)
+            st.info(f"⏱️ {minutes_remaining}m left")
+        with col3:
+            st.info(f"🆔 ID: {session_status['session_id']}")
+        with col4:
+            if st.button("🗑️ End Session", help="Manually end the current quantum session"):
+                quantum_session_manager.clear_session()
+                st.success("Session ended successfully")
+                st.rerun()
+        
+        # Show protocols in use
+        protocols_str = " • ".join(session_status["protocols"])
+        st.markdown(f"**Active Protocols:** {protocols_str}")
+        
+        # Show detailed session info in an expander
+        with st.expander("📋 Detailed Session Information"):
+            session_info = quantum_session_manager.get_session_info()
+            if session_info:
+                col_info1, col_info2 = st.columns(2)
+                with col_info1:
+                    st.write(f"**Established:** {session_info['established_at']}")
+                    st.write(f"**Expires:** {session_info['expires_at']}")
+                with col_info2:
+                    st.write(f"**Session ID:** {session_info['session_id']}")
+                    st.write(f"**Security Level:** {session_info['security_level']}")
+    else:
+        col_status, col_button = st.columns([3, 1])
+        with col_status:
+            st.warning("🟡 **No Quantum Session** - Enhanced security available")
+            st.markdown("**Protocols Ready:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
+        with col_button:
+            if st.button("🚀 Establish Session", help="Manually establish a quantum-safe session now"):
+                with st.spinner("🔐 Establishing quantum-safe session..."):
+                    success, error = quantum_session_manager.establish_session_manual(st.session_state.token)
+                    if success:
+                        st.success("✅ Quantum session established!")
+                        st.rerun()
+                    else:
+                        st.error(f"❌ Failed to establish session: {error}")
+        
+        st.info("💡 **Note:** A quantum session will be automatically established on your first secure transaction.")
+    
+    st.divider()
+    
     # Create tabs for different functionalities
     tab1, tab2 = st.tabs(["💳 Send Money", "📋 Transaction History"])
     
     with tab1:
         st.subheader("💸 Send Money")
-        st.info("🔐 **Quantum Security**: All transaction amounts are encrypted using post-quantum cryptography (CRYSTAL-Kyber)")
+        st.info("🔐 **Quantum Security**: Transactions use post-quantum cryptography with BB84 QKD, CRYSTALS-Kyber KEM, CRYSTALS-Dilithium signatures, and AES-256-GCM encryption")
         
         # Balance section with refresh button
         col_balance, col_refresh = st.columns([3, 1])
@@ -77,31 +131,90 @@ def show_customer_transactions():
                 help="Enter the amount you want to send"
             )
         
+        # Optional description
+        description = st.text_input(
+            "Description (Optional)",
+            help="Add a note about this transaction"
+        )
+        
+        # Transaction mode selection
+        col_mode1, col_mode2 = st.columns(2)
+        with col_mode1:
+            use_quantum = st.checkbox(
+                "🚀 Use Quantum-Safe Protocol", 
+                value=True,
+                help="Enable post-quantum cryptographic protection (Recommended)"
+            )
+        with col_mode2:
+            if use_quantum:
+                st.info("🔐 Maximum Security")
+            else:
+                st.warning("⚠️ Standard Security")
+        
         if st.button("💸 Send Money", type="primary"):
             if recipient_id and amount > 0:
-                with st.spinner("Processing quantum-encrypted transaction..."):
-                    try:
-                        response = requests.post(
-                            f"{API_URL}/customer/transfer",
-                            headers=headers,
-                            json={"to_account_id": int(recipient_id), "amount": float(amount)}
+                if use_quantum:
+                    # Use quantum-safe protocol
+                    with st.spinner("🔐 Establishing quantum-safe session and processing transaction..."):
+                        success, error, result = quantum_session_manager.send_secure_transaction(
+                            st.session_state.token,
+                            int(recipient_id),
+                            float(amount),
+                            description
                         )
-                        if response.status_code == 200:
-                            show_notification(f"✅ Successfully sent ${amount:.2f} to account {recipient_id}", "success", True)
-                        elif response.status_code == 400:
-                            st.error("❌ Insufficient funds or invalid transaction")
-                        elif response.status_code == 404:
-                            if response.json().get("detail") == "Recipient account must be a customer account":
-                                st.error(f"❌ {response.json().get('detail')}")
-                            else:
-                                st.error("❌ Recipient account not found")
+                        
+                        if success:
+                            show_notification(
+                                f"✅ Quantum-safe transaction successful! Sent ${amount:.2f} to account {recipient_id}", 
+                                "success", 
+                                True
+                            )
+                            st.success("🔐 Transaction secured with post-quantum cryptography")
+                            
+                            # Show transaction details
+                            if result and "transaction_id" in result:
+                                st.info(f"🆔 Transaction ID: {result['transaction_id']}")
+                                
+                                # Offer verification
+                                if st.button("🔍 Verify Transaction Signature"):
+                                    verify_success, verify_error, verify_result = quantum_session_manager.verify_transaction(
+                                        st.session_state.token,
+                                        result['transaction_id']
+                                    )
+                                    
+                                    if verify_success:
+                                        st.success("✅ Transaction signature verified!")
+                                        if verify_result:
+                                            st.json(verify_result)
+                                    else:
+                                        st.error(f"❌ Verification failed: {verify_error}")
                         else:
-                            st.error(f"❌ Transaction failed: {response.text}")
-                    except requests.exceptions.RequestException as e:
-                        st.error(f"❌ Connection error: {str(e)}")
-                        st.info("Make sure the backend server is running on http://localhost:8000")
-                    except Exception as e:
-                        st.error(f"❌ An error occurred: {str(e)}")
+                            st.error(f"❌ Quantum transaction failed: {error}")
+                else:
+                    # Use standard protocol
+                    with st.spinner("Processing standard transaction..."):
+                        try:
+                            response = requests.post(
+                                f"{API_URL}/customer/transfer",
+                                headers=headers,
+                                json={"to_account_id": int(recipient_id), "amount": float(amount)}
+                            )
+                            if response.status_code == 200:
+                                show_notification(f"✅ Successfully sent ${amount:.2f} to account {recipient_id}", "success", True)
+                            elif response.status_code == 400:
+                                st.error("❌ Insufficient funds or invalid transaction")
+                            elif response.status_code == 404:
+                                if response.json().get("detail") == "Recipient account must be a customer account":
+                                    st.error(f"❌ {response.json().get('detail')}")
+                                else:
+                                    st.error("❌ Recipient account not found")
+                            else:
+                                st.error(f"❌ Transaction failed: {response.text}")
+                        except requests.exceptions.RequestException as e:
+                            st.error(f"❌ Connection error: {str(e)}")
+                            st.info("Make sure the backend server is running on http://localhost:8000")
+                        except Exception as e:
+                            st.error(f"❌ An error occurred: {str(e)}")
             else:
                 st.warning("Please enter a valid recipient ID and amount")
     
