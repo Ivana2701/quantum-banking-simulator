@@ -123,6 +123,15 @@ def require_employee_or_admin(current_user = Depends(get_current_user)):
         )
     return current_user
 
+def require_employee_or_customer(current_user = Depends(get_current_user)):
+    """Dependency to ensure the current user is an employee or admin"""
+    if current_user.account_type.value not in ["employee", "customer"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Employee or admin access required"
+        )
+    return current_user
+
 def require_customer(current_user = Depends(get_current_user)):
     """Dependency to ensure the current user is a customer"""
     if current_user.account_type.value != "customer":

@@ -177,7 +177,7 @@ class QuantumSessionManager:
                 "amount": amount
             }
             
-            # Add description if provided (note: backend may not handle this field yet)
+            # Add description if provided (note: backend does not handle this field yet)
             if description:
                 transaction_create_data["description"] = description
             
@@ -406,6 +406,67 @@ class QuantumSessionManager:
             "security_level": "Post-Quantum Secure",
             "protocols": ["BB84 QKD", "CRYSTALS-Kyber", "CRYSTALS-Dilithium", "AES-256-GCM"]
         }
+
+    def send_secure_employee_transaction(
+        self, 
+        auth_token: str,
+        from_account_id: int,
+        to_account_id: int, 
+        amount: float
+    ) -> Tuple[bool, Optional[str], Optional[Dict]]:
+        """Send a secure employee transaction using the quantum-safe protocol"""
+        
+        # Get current session
+        session = self.get_current_session()
+        if not session:
+            # Try to establish a new session
+            success, error = self.establish_session(auth_token)
+            if not success:
+                return False, f"Could not establish secure session: {error}", None
+            session = self.get_current_session()
+        
+        try:
+            headers = {"Authorization": f"Bearer {auth_token}"}
+            
+            # Step 1: Create encrypted and signed employee transaction package
+            transaction_create_data = {
+                "from_account_id": from_account_id,
+                "to_account_id": to_account_id,
+                "amount": amount
+            }
+            
+            # Call /create-secure-employee-transaction to encrypt and sign the transaction
+            create_response = requests.post(
+                f"{API_URL}/transactions/create-secure-employee-transaction",
+                headers=headers,
+                params={"session_id": session.session_id},
+                json=transaction_create_data,
+                timeout=30
+            )
+            
+            if create_response.status_code != 200:
+                return False, f"Failed to create secure employee transaction package: {create_response.text}", None
+            
+            encrypted_transaction_package = create_response.json()
+            
+            # Step 2: Submit the encrypted transaction package for execution
+            execute_response = requests.post(
+                f"{API_URL}/transactions/secure-employee-transaction",
+                headers=headers,
+                json=encrypted_transaction_package,
+                timeout=30
+            )
+            
+            if execute_response.status_code == 200:
+                result = execute_response.json()
+                return True, None, result
+            else:
+                return False, f"Employee transaction execution failed: {execute_response.text}", None
+                
+        except requests.exceptions.RequestException as e:
+            return False, f"Connection error: {str(e)}", None
+        except Exception as e:
+            return False, f"Employee transaction error: {str(e)}", None
 
 # Global instance
 quantum_session_manager = QuantumSessionManager()

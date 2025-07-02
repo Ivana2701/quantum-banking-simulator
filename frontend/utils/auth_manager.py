@@ -8,6 +8,7 @@ import tempfile
 import hashlib
 from typing import Optional, Dict, Any
 from dotenv import load_dotenv
+from utils.config import refresh_quantum_safe_setting
 
 # Load environment variables from backend .env file
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", "backend", ".env"))
@@ -144,6 +145,9 @@ class AuthManager:
             
             # Store session
             self._store_session(access_token, user_data)
+
+            # Refresh quantum-safe setting, so we get the latest config
+            refresh_quantum_safe_setting()
             
             st.success(f"Welcome, {user_data.get('full_name', username)}!")
             return True

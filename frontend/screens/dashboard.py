@@ -1,6 +1,8 @@
 # frontend/screens/dashboard.py
 import streamlit as st
 import requests
+from utils.config import get_cached_quantum_safe_setting
+from utils.quantum_session_manager import quantum_session_manager
 
 API_URL = "http://localhost:8000"
 
@@ -17,18 +19,46 @@ def show_customer_dashboard():
 
     # send money
     st.subheader("Send Money")
+    
+    # Check if quantum-safe protocol is enabled
+    use_quantum = get_cached_quantum_safe_setting()
+    
+    # Display current security mode
+    if use_quantum:
+        st.info("🔐 **Quantum-Safe Mode**: Transactions use post-quantum cryptography")
+    else:
+        st.warning("⚠️ **Standard Mode**: Using traditional cryptography")
+    
     to_id = st.text_input("Recipient Account ID")
     amt = st.number_input("Amount", min_value=0.01, step=0.01)
     if st.button("Send"):
-        r = requests.post(
-            f"{API_URL}/customer/transfer",
-            headers=hdr,
-            json={"to_account_id": int(to_id), "amount": amt}
-        )
-        if r.status_code == 200:
-            st.success("Sent!")
+        if use_quantum:
+            # Use quantum-safe protocol
+            with st.spinner("🔐 Processing quantum-safe transaction..."):
+                success, error, result = quantum_session_manager.send_secure_transaction(
+                    st.session_state.token,
+                    int(to_id),
+                    float(amt),
+                    "Dashboard transaction"
+                )
+                
+                if success:
+                    st.success("✅ Quantum-safe transaction successful!")
+                    if result and "transaction_id" in result:
+                        st.info(f"🆔 Transaction ID: {result['transaction_id']}")
+                else:
+                    st.error(f"❌ Quantum transaction failed: {error}")
         else:
-            st.error(f"Failed: {r.text}")
+            # Use standard protocol
+            r = requests.post(
+                f"{API_URL}/customer/transfer",
+                headers=hdr,
+                json={"to_account_id": int(to_id), "amount": amt}
+            )
+            if r.status_code == 200:
+                st.success("Sent!")
+            else:
+                st.error(f"Failed: {r.text}")
 
     # transactions
     st.subheader("Transactions")

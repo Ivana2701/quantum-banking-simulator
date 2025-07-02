@@ -16,7 +16,9 @@ from app.schemas import (
     SecureTransactionRequest, SecureTransactionResponse
 )
 from app.db.database import get_db
-from app.core.security import get_current_user
+from app.core.security import get_current_user, require_employee, require_customer, require_employee_or_customer
+from app.db.models import Account, AccountTypeEnum
+from app.config import QUANTUM_SAFE_ENABLED
 from quantum_encryption.hybrid_pqc_protocol import get_protocol_instance
 
 # Configure logging
@@ -62,7 +64,7 @@ def get_transactions(
 @router.post("/establish-session", response_model=SessionEstablishmentResponse)
 def establish_secure_session(
     request: SessionEstablishmentRequest,
-    user = Depends(get_current_user)
+    user = Depends(require_employee_or_customer)
 ):
     """
     Establish a secure session using hybrid BB84 + Kyber protocol.
@@ -94,7 +96,7 @@ def establish_secure_session(
 def process_secure_transaction(
     request: SecureTransactionRequest,
     db: Session = Depends(get_db),
-    user = Depends(get_current_user)
+    user: Account = Depends(require_customer)
 ):
     """
     Process a secure transaction using the hybrid PQC protocol.
@@ -107,33 +109,30 @@ def process_secure_transaction(
         protocol = get_protocol_instance()
         
         # Process and validate the secure transaction request
-        transaction_data = protocol.process_secure_transaction_request(request.dict())
-        
-        # Validate user permissions for the transaction
-        acct = acct_svc.get_account_by_id(db, user.account_id)
-        if not acct:
-            raise HTTPException(404, "Account not found")
-        
+        decrypted_data = protocol.process_secure_transaction_request(request.dict())
+
         # Check if user is authorized to perform this transaction
-        if 'from_account_id' in transaction_data:
-            if (acct.account_type.value == "customer" and 
-                transaction_data['from_account_id'] != user.account_id):
+        if 'from_account_id' in decrypted_data:
+            if (user.account_type.value == "customer" and 
+                decrypted_data['from_account_id'] != user.account_id):
                 raise HTTPException(403, "Not authorized to transfer from this account")
-        
-        # Create transaction in the database
-        transaction_create = TransactionCreate(
-            from_account_id=transaction_data.get('from_account_id', user.account_id),
-            to_account_id=transaction_data['to_account_id'],
-            amount=transaction_data['amount']
-        )
+            
+        to_account_id = decrypted_data.get('to_account_id')
+        amount = decrypted_data.get('amount')
+        # Validate transaction data
+        if not all([to_account_id, amount]):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Missing required transaction data"
+            )
         
         # Process the transaction
         new_transaction = tx_svc.create_transaction(
             db=db,
             account_id=user.account_id,
-            from_account_id=transaction_data.get('from_account_id', user.account_id),
-            to_account_id=transaction_data['to_account_id'],
-            amount=transaction_data['amount']
+            from_account_id=decrypted_data.get('from_account_id', user.account_id),
+            to_account_id=decrypted_data['to_account_id'],
+            amount=decrypted_data['amount']
         )
         
         # Create secure response
@@ -141,7 +140,11 @@ def process_secure_transaction(
             'success': True,
             'transaction_id': str(new_transaction.transaction_id),
             'message': 'Transaction processed successfully',
-            'timestamp': datetime.utcnow().isoformat()
+            'amount': amount,
+            'from_account_id': user.account_id,
+            'to_account_id': to_account_id,
+            'timestamp': new_transaction.created_at.isoformat(),
+            'session_id': request.session_id
         }
         
         # Sign the response
@@ -176,7 +179,8 @@ def process_secure_transaction(
 def create_secure_transaction(
     session_id: str,
     transaction_data: TransactionCreate,
-    user = Depends(get_current_user)
+    user = Depends(require_customer),
+    db: Session = Depends(get_db)
 ):
     """
     Create a secure transaction request that can be submitted to /secure-transaction.
@@ -185,15 +189,22 @@ def create_secure_transaction(
     try:
         logger.info(f"Creating secure transaction for session {session_id}")
         
-        # Get the protocol instance
-        protocol = get_protocol_instance()
-        
         # Convert transaction data to dictionary
         tx_dict = transaction_data.dict()
         
         # Add user context if not specified
         if not tx_dict.get('from_account_id'):
             tx_dict['from_account_id'] = user.account_id
+
+        toAcct = acct_svc.get_account_by_id(db, transaction_data.to_account_id)
+        if toAcct.account_type != AccountTypeEnum.customer or transaction_data.to_account_id == user.account_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Both from and to accounts must be customers and cannot be the same account."
+            )
+        
+        # Get the protocol instance
+        protocol = get_protocol_instance()
         
         # Create secure transaction request
         secure_request = protocol.create_secure_transaction_request(session_id, tx_dict)
@@ -373,3 +384,144 @@ def quantum_health_check():
             "error": str(e),
             "status": "Quantum protocols not available"
         }
+
+@router.get("/config/quantum-safe")
+def get_quantum_safe_config():
+    """
+    Get the current quantum-safe protocol configuration
+    """
+    return {
+        "quantum_safe_enabled": QUANTUM_SAFE_ENABLED,
+        "message": "Quantum-safe protocol enabled" if QUANTUM_SAFE_ENABLED else "Standard protocol enabled"
+    }
+
+@router.post("/create-secure-employee-transaction", response_model=SecureTransactionRequest)
+def create_secure_employee_transaction(
+    session_id: str,
+    transaction_data: TransactionCreate,
+    user: Account = Depends(require_employee),
+    db: Session = Depends(get_db)
+):
+    """
+    Create a secure employee transaction request that can be submitted to /secure-employee-transaction.
+    This endpoint encrypts and signs employee transaction data for secure transmission.
+    """
+    try:
+        logger.info(f"Creating secure employee transaction for session {session_id}")
+        
+        if transaction_data.from_account_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="From account ID is required for employee transactions."
+            )
+        
+        fromAcct = acct_svc.get_account_by_id(db, transaction_data.from_account_id)
+        toAcct = acct_svc.get_account_by_id(db, transaction_data.to_account_id)
+        if fromAcct.account_type != AccountTypeEnum.customer or toAcct.account_type != AccountTypeEnum.customer or transaction_data.from_account_id == transaction_data.to_account_id:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Both from and to accounts must be customers and cannot be the same account."
+            )
+        
+        # Get the protocol instance
+        protocol = get_protocol_instance()
+        
+        tx_dict = transaction_data.dict()
+
+        # Add employee context
+        tx_dict['account_id'] = user.account_id
+        
+        # Create secure transaction request
+        secure_request = protocol.create_secure_transaction_request(session_id, tx_dict)
+        
+        logger.info(f"Secure employee transaction request created: {secure_request['session_id']}")
+        return SecureTransactionRequest(**secure_request)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Secure employee transaction creation failed: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to create secure employee transaction: {str(e)}"
+        )
+
+@router.post("/secure-employee-transaction", response_model=SecureTransactionResponse)
+def process_secure_employee_transaction(
+    request: SecureTransactionRequest,
+    db: Session = Depends(get_db),
+    user: Account = Depends(require_employee)
+):
+    """
+    Process a secure employee transaction using the hybrid PQC protocol.
+    This endpoint handles encrypted and signed employee transaction packages.
+    """
+    try:
+        logger.info(f"Processing secure employee transaction for session {request.session_id}")
+        
+        # Get the protocol instance
+        protocol = get_protocol_instance()
+        
+        # Process and validate the secure transaction request
+        decrypted_data = protocol.process_secure_transaction_request(request.dict())
+        
+        # Extract transaction details
+        from_account_id = decrypted_data.get('from_account_id')
+        to_account_id = decrypted_data.get('to_account_id')
+        amount = decrypted_data.get('amount')
+        
+        # Validate transaction data
+        if not all([from_account_id, to_account_id, amount]):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Missing required transaction data"
+            )
+        
+        # Create the transaction using employee service
+        new_transaction = tx_svc.create_transaction(
+            db=db,
+            account_id=user.account_id,  # Employee as initiator
+            from_account_id=from_account_id,
+            to_account_id=to_account_id,
+            amount=amount,
+        )
+        
+        # Prepare response data
+        response_data = {
+            'success': True,
+            'transaction_id': new_transaction.transaction_id,
+            'message': 'Employee transaction completed successfully',
+            'amount': amount,
+            'from_account_id': from_account_id,
+            'to_account_id': to_account_id,
+            'timestamp': new_transaction.created_at.isoformat(),
+            'session_id': request.session_id
+        }
+        
+        # Sign the response
+        signature = protocol.sign_transaction(response_data)
+        response_data['signature'] = signature
+        
+        logger.info(f"Secure employee transaction completed: {new_transaction.transaction_id}")
+        return SecureTransactionResponse(**response_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Secure employee transaction processing failed: {e}")
+        
+        # Create signed error response
+        error_response = {
+            'success': False,
+            'message': f'Employee transaction failed: {str(e)}',
+            'timestamp': datetime.utcnow().isoformat()
+        }
+        
+        try:
+            protocol = get_protocol_instance()
+            error_signature = protocol.sign_transaction(error_response)
+            error_response['signature'] = error_signature
+        except:
+            pass  # If signing fails, return without signature
+        
+        return SecureTransactionResponse(**error_response)
