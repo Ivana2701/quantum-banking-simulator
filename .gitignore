@@ -10,3 +10,4 @@ __pycache__/
 transaction_results/
 
 backend/fraud_detection/transactions/creditcard.csv
+creditcard.csv
