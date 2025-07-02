@@ -187,7 +187,7 @@ def show_quantum_security_dashboard():
     with col1:
         st.markdown("### 🌐 Backend Health")
         try:
-            response = requests.post(f"{API_URL}/transactions/quantum/health", timeout=5)
+            response = requests.get(f"{API_URL}/transactions/quantum/health", timeout=5)
             if response.status_code == 200:
                 st.success("🟢 Backend Online")
                 health_data = response.json()

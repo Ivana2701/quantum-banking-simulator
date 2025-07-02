@@ -99,9 +99,7 @@ else:
             if st.session_state.token:
                 quantum_session_manager.cleanup_session(st.session_state.token)
             auth_manager.logout()  # Use auth_manager for proper logout
-        if page == "Home":
-            show_customer_transactions()
-        elif page == "Transactions":
+        if page == "Transactions":
             show_customer_transactions()
         elif page == "Quantum Security":
             show_quantum_security_dashboard()

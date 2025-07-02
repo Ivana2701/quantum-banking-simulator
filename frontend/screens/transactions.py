@@ -60,7 +60,7 @@ def show_customer_transactions():
             col_status, col_button = st.columns([3, 1])
             with col_status:
                 st.warning("🟡 **No Quantum Session** - will be automatically established")
-                st.markdown("**Protocols Ready:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
+                st.markdown("**Protocols:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
             with col_button:
                 if st.button("🚀 Establish Session", help="Manually establish a quantum-safe session now"):
                     with st.spinner("🔐 Establishing quantum-safe session..."):
@@ -503,7 +503,7 @@ def show_employee_transactions():
                 col_status, col_button = st.columns([3, 1])
                 with col_status:
                     st.warning("🟡 **No Quantum Session** - will be automatically established")
-                    st.markdown("**Protocols Ready:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
+                    st.markdown("**Protocols:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
                 with col_button:
                     if st.button("🚀 Establish Session", help="Manually establish a quantum-safe session now", use_container_width=True):
                         with st.spinner("🔐 Establishing quantum-safe session..."):
@@ -527,56 +527,116 @@ def show_employee_transactions():
                 help="Enter the account ID that will send money"
             )
             
-            # Check and display from account balance
+            # Check if from_account_id has changed or refresh button clicked
             if from_account_id > 0:
-                try:
-                    response = requests.get(
-                        f"{API_URL}/employee/customers/{from_account_id}/balance",
-                        headers=headers
-                    )
-                    if response.status_code == 200:
-                        balance_data = response.json()
-                        balance = balance_data.get("balance", 0)
-                        st.success(f"💰 Balance: ${balance:.2f}")
-                        # Clear refresh flag if it was set
-                        if hasattr(st.session_state, 'refresh_balances') and st.session_state.refresh_balances:
-                            st.session_state.refresh_balances = False
-                    elif response.status_code == 404:
-                        st.error("❌ Account not found")
+                # Initialize session state for tracking previous values
+                if "prev_from_account_id" not in st.session_state:
+                    st.session_state.prev_from_account_id = 0
+                if "from_account_balance" not in st.session_state:
+                    st.session_state.from_account_balance = None
+                
+                # Only fetch balance if account ID has changed or refresh button clicked
+                if from_account_id != st.session_state.prev_from_account_id:
+                    st.session_state.prev_from_account_id = from_account_id
+                    try:
+                        response = requests.get(
+                            f"{API_URL}/employee/customers/{from_account_id}/balance",
+                            headers=headers
+                        )
+                        if response.status_code == 200:
+                            balance_data = response.json()
+                            balance = balance_data.get("balance", 0)
+                            st.session_state.from_account_balance = {
+                                "status": "success",
+                                "balance": balance,
+                                "message": f"💰 Balance: ${balance:.2f}"
+                            }
+                        elif response.status_code == 404:
+                            st.session_state.from_account_balance = {
+                                "status": "error",
+                                "message": "❌ Account not found"
+                            }
+                        else:
+                            st.session_state.from_account_balance = {
+                                "status": "error",
+                                "message": "❌ Could not fetch balance"
+                            }
+                    except Exception as e:
+                        st.session_state.from_account_balance = {
+                            "status": "error",
+                            "message": f"❌ Error: {str(e)}"
+                        }
+                
+                # Display cached balance information
+                if st.session_state.from_account_balance:
+                    if st.session_state.from_account_balance["status"] == "success":
+                        st.success(st.session_state.from_account_balance["message"])
                     else:
-                        st.error("❌ Could not fetch balance")
-                except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                        st.error(st.session_state.from_account_balance["message"])
         
         with col2:
-            to_account_id = st.number_input(
-                "To Account ID (Receiver)", 
-                min_value=1, 
-                step=1,
-                key="emp_to_account",
-                help="Enter the account ID that will receive money"
-            )
+            # Create sub-columns for input and refresh button
+            input_col, refresh_col = st.columns([4, 1])
             
-            # Check and display to account status
+            with input_col:
+                to_account_id = st.number_input(
+                    "To Account ID (Receiver)", 
+                    min_value=1, 
+                    step=1,
+                    key="emp_to_account",
+                    help="Enter the account ID that will receive money"
+                )
+            
+            with refresh_col:
+                st.write("")  # Add spacing to align with input
+                refresh_to = st.button("🔄", key="refresh_to", help="Refresh receiver account balance")
+            
+            # Check if to_account_id has changed or refresh button clicked
             if to_account_id > 0:
-                try:
-                    response = requests.get(
-                        f"{API_URL}/employee/customers/{to_account_id}/balance",
-                        headers=headers
-                    )
-                    if response.status_code == 200:
-                        balance_data = response.json()
-                        balance = balance_data.get("balance", 0)
-                        st.success(f"💰 Balance: ${balance:.2f}")
-                        # Clear refresh flag after both balances are shown
-                        if hasattr(st.session_state, 'refresh_balances') and st.session_state.refresh_balances:
-                            st.session_state.refresh_balances = False
-                    elif response.status_code == 404:
-                        st.error("❌ Account not found")
+                # Initialize session state for tracking previous values
+                if "prev_to_account_id" not in st.session_state:
+                    st.session_state.prev_to_account_id = 0
+                if "to_account_balance" not in st.session_state:
+                    st.session_state.to_account_balance = None
+                
+                # Only fetch balance if account ID has changed or refresh button clicked
+                if to_account_id != st.session_state.prev_to_account_id or refresh_to:
+                    st.session_state.prev_to_account_id = to_account_id
+                    try:
+                        response = requests.get(
+                            f"{API_URL}/employee/customers/{to_account_id}/balance",
+                            headers=headers
+                        )
+                        if response.status_code == 200:
+                            balance_data = response.json()
+                            balance = balance_data.get("balance", 0)
+                            st.session_state.to_account_balance = {
+                                "status": "success",
+                                "balance": balance,
+                                "message": f"💰 Balance: ${balance:.2f}"
+                            }
+                        elif response.status_code == 404:
+                            st.session_state.to_account_balance = {
+                                "status": "error",
+                                "message": "❌ Account not found"
+                            }
+                        else:
+                            st.session_state.to_account_balance = {
+                                "status": "error",
+                                "message": "❌ Could not fetch balance"
+                            }
+                    except Exception as e:
+                        st.session_state.to_account_balance = {
+                            "status": "error",
+                            "message": f"❌ Error: {str(e)}"
+                        }
+                
+                # Display cached balance information
+                if st.session_state.to_account_balance:
+                    if st.session_state.to_account_balance["status"] == "success":
+                        st.success(st.session_state.to_account_balance["message"])
                     else:
-                        st.error("❌ Could not fetch balance")
-                except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                        st.error(st.session_state.to_account_balance["message"])
         
         # Amount input
         amount = st.number_input(
