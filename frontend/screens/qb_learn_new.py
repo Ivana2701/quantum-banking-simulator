@@ -24,15 +24,36 @@ def show_qb_learn():
 
     # --- Tabs for different visualizations ---
     tabs = st.tabs([
-        " Interactive BB84",
-        "🔒 Transaction Security",
-        "🧬 Quantum 100 Performance",
+        "🔑 BB84 Simulation",
+        "🚀 Interactive BB84",
         "📊 Performance Comparison",
+        "🧬 Quantum 100 Performance",
+        "🔒 Transaction Security",
         "📚 Learn More"
     ])
 
-    # --- Tab 1: Interactive BB84 Simulation ---
+    # --- Tab 1: BB84 Simulation ---
     with tabs[0]:
+        st.header("BB84 Quantum Key Distribution Simulation")
+        st.markdown("""
+        The BB84 protocol is a quantum key distribution scheme that allows two parties to securely share a cryptographic key.
+        Explore how quantum mechanics enables secure communication, and see how eavesdropping can be detected!
+        """)
+        st.markdown("---")
+        st.info("For a full interactive simulation, see the 'Interactive BB84' tab.")
+        st.markdown("#### BB84 Key Generation Example (Python)")
+        st.code('''
+    from backend.quantum_encryption.bb84 import generate_bb84_key
+    alice_bits, alice_bases, bob_results = generate_bb84_key(length=10)
+    print("Alice's bits:", alice_bits)
+    print("Alice's bases:", alice_bases)
+    print("Bob's results:", bob_results)
+    ''', language="python")
+        st.markdown("---")
+        st.markdown("**Key Takeaways:** Quantum states cannot be measured without disturbance. Any eavesdropping attempt will be detected by mismatches in the key.")
+
+    # --- Tab 2: Interactive BB84 Simulation ---
+    with tabs[1]:
         st.header("🚀 Interactive BB84 Quantum Key Distribution")
         st.markdown("""
         Experience the full BB84 protocol with interactive controls, visual animations, and quantum circuit generation.
@@ -273,8 +294,34 @@ def show_qb_learn():
                 where `E` is AES encryption with key K.
                 """)
 
-    # --- Tab 2: Performance Comparison ---
-    with tabs[1]:
+    # --- Tab 3: Performance Comparison ---
+    with tabs[2]:
+        st.header("Model Performance Comparison (QSVM, VQC, Classical)")
+        st.markdown("""
+        This diagram compares the performance of quantum and classical models for fraud detection.
+        Observe how quantum models (QSVM, VQC) perform relative to classical approaches.
+        """)
+        img_path = os.path.join("backend", "fraud_detection", "visualizations", "qsvm_vqc_performance_comparison.png")
+        if os.path.exists(img_path):
+            st.image(Image.open(img_path), caption="Performance Comparison: Quantum vs Classical Models", use_column_width=True)
+        else:
+            st.warning("Performance comparison image not found.")
+
+    # --- Tab 4: Quantum 100 Performance Comparison ---
+    with tabs[3]:
+        st.header("Quantum 100 Qubit Performance Comparison")
+        st.markdown("""
+        This visualization shows the performance of quantum-inspired and quantum models on a 100-qubit dataset.
+        It highlights the scalability and potential of quantum machine learning for large-scale fraud detection.
+        """)
+        img_path = os.path.join("backend", "fraud_detection", "visualizations", "quantum_100_performance_comparison.png")
+        if os.path.exists(img_path):
+            st.image(Image.open(img_path), caption="Quantum 100 Performance Comparison", use_column_width=True)
+        else:
+            st.warning("Quantum 100 performance comparison image not found.")
+
+    # --- Tab 5: Transaction Security ---
+    with tabs[4]:
         st.header("Transaction Security: Encryption, Hashing, and Signing")
         st.markdown("""
         In secure banking systems, protecting transaction data is critical. Here's how different cryptographic techniques are used:
@@ -387,34 +434,8 @@ def show_qb_learn():
             decrypted = unpadder.update(decrypted_padded) + unpadder.finalize()
             st.code(f"Decrypted message: {decrypted.decode()}", language="text")
 
-    # --- Tab 3: Quantum 100 Performance Comparison ---
-    with tabs[2]:
-        st.header("Quantum 100 Qubit Performance Comparison")
-        st.markdown("""
-        This visualization shows the performance of quantum-inspired and quantum models on a 100-qubit dataset.
-        It highlights the scalability and potential of quantum machine learning for large-scale fraud detection.
-        """)
-        img_path = os.path.join("backend", "fraud_detection", "visualizations", "quantum_100_performance_comparison.png")
-        if os.path.exists(img_path):
-            st.image(Image.open(img_path), caption="Quantum 100 Performance Comparison", use_column_width=True)
-        else:
-            st.warning("Quantum 100 performance comparison image not found.")
-
-    # --- Tab 4: Transaction Security ---
-    with tabs[3]:
-        st.header("Model Performance Comparison (QSVM, VQC, Classical)")
-        st.markdown("""
-        This diagram compares the performance of quantum and classical models for fraud detection.
-        Observe how quantum models (QSVM, VQC) perform relative to classical approaches.
-        """)
-        img_path = os.path.join("backend", "fraud_detection", "visualizations", "qsvm_vqc_performance_comparison.png")
-        if os.path.exists(img_path):
-            st.image(Image.open(img_path), caption="Performance Comparison: Quantum vs Classical Models", use_column_width=True)
-        else:
-            st.warning("Performance comparison image not found.")
-
-    # --- Tab 5: Learn More ---
-    with tabs[4]:
+    # --- Tab 6: Learn More ---
+    with tabs[5]:
         st.subheader("📚 Understanding Quantum AI Protection")
         
         st.markdown("""
