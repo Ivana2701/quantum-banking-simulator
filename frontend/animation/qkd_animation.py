@@ -5,7 +5,7 @@ import time
 
 # BB84 QKD animation in Streamlit
 def bb84_qkd_simulation():
-    st.title("🔐 Quantum Security Demonstration (BB84)")
+    st.title("Quantum Security Demonstration (BB84)")
 
     st.markdown("""
     ### 🛡️ Quantum Security Overview
@@ -23,7 +23,7 @@ def bb84_qkd_simulation():
     IT security specialists, compliance officers, auditors, and employees overseeing security infrastructure.
     """)
 
-    eve_interception = st.checkbox("🔴 Eve intercepts photons")
+    eve_interception = st.checkbox("Eve intercepts photons")
 
     if st.button("Start QKD Simulation"):
         alice_bits = np.random.randint(0, 2, size=10)
@@ -86,9 +86,9 @@ def bb84_qkd_simulation():
             if np.array_equal(alice_key, bob_key):
                 st.error("Unexpected: Eve intercepted, but no errors detected (highly unlikely)!")
             else:
-                st.error("🚨 **Interception detected!** Errors found in keys.")
+                st.error("**Interception detected!** Errors found in keys.")
         else:
-            st.success("✅ **No interception detected!** Secure key established.")
+            st.success("**No interception detected!** Secure key established.")
 
 # Run the simulation
 bb84_qkd_simulation()

@@ -15,7 +15,7 @@ def show_customer_transactions():
     # Check if quantum-safe protocol is enabled
     use_quantum = get_cached_quantum_safe_setting()
     
-    st.title("💰 Transaction Center")
+    st.title("Transaction Center")
     
     if "token" not in st.session_state or not st.session_state.token:
         st.error("Please login first")
@@ -25,18 +25,18 @@ def show_customer_transactions():
     
     # Quantum Security Status
     if use_quantum:
-        st.markdown("### 🔐 Quantum Security Status")
+        st.markdown("### Quantum Security Status")
         session_status = quantum_session_manager.get_session_status()
         
         if session_status["active"]:
             col1, col2, col3,  = st.columns(3)
             with col1:
-                st.success(f"🟢 **{session_status['security_level']}**")
+                st.success(f"**{session_status['security_level']}**")
             with col2:
                 minutes_remaining = int(session_status["time_remaining"] // 60)
-                st.info(f"⏱️ {minutes_remaining}m left")
+                st.info(f"{minutes_remaining}m left")
             with col3:
-                if st.button("🗑️ End Session", help="Manually end the current quantum session"):
+                if st.button("End Session", help="Manually end the current quantum session"):
                     quantum_session_manager.clear_session()
                     st.success("Session ended successfully")
                     st.rerun()
@@ -46,7 +46,7 @@ def show_customer_transactions():
             st.markdown(f"**Active Protocols:** {protocols_str}")
             
             # Show detailed session info in an expander
-            with st.expander("📋 Detailed Session Information"):
+            with st.expander("Detailed Session Information"):
                 session_info = quantum_session_manager.get_session_info()
                 if session_info:
                     col_info1, col_info2 = st.columns(2)
@@ -59,31 +59,31 @@ def show_customer_transactions():
         else:
             col_status, col_button = st.columns([3, 1])
             with col_status:
-                st.warning("🟡 **No Quantum Session** - will be automatically established")
+                st.warning("**No Quantum Session** - will be automatically established")
                 st.markdown("**Protocols:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
             with col_button:
-                if st.button("🚀 Establish Session", help="Manually establish a quantum-safe session now"):
-                    with st.spinner("🔐 Establishing quantum-safe session..."):
+                if st.button("Establish Session", help="Manually establish a quantum-safe session now"):
+                    with st.spinner("Establishing quantum-safe session..."):
                         success, error = quantum_session_manager.establish_session_manual(st.session_state.token)
                         if success:
-                            st.success("✅ Quantum session established!")
+                            st.success("Quantum session established!")
                             st.rerun()
                         else:
-                            st.error(f"❌ Failed to establish session: {error}")
+                            st.error(f"Failed to establish session: {error}")
         
         st.divider()
     
     # Create tabs for different functionalities
-    tab1, tab2 = st.tabs(["💳 Send Money", "📋 Transaction History"])
+    tab1, tab2 = st.tabs(["Send Money", "Transaction History"])
     
     with tab1:
-        st.subheader("💸 Send Money")
+        st.subheader("Send Money")
         
         # Balance section with refresh button
         col_balance, col_refresh = st.columns([3, 1])
         
         with col_refresh:
-            refresh_balance = st.button("🔄 Refresh Balance", help="Click to update your current balance")
+            refresh_balance = st.button("Refresh Balance", help="Click to update your current balance")
         
         # Display current balance at the top
         try:
@@ -95,18 +95,18 @@ def show_customer_transactions():
                 # Display balance with nice formatting
                 with col_balance:
                     st.metric(
-                        "💵 Current Balance", 
+                        "Current Balance", 
                         f"${balance:.2f}",
                         help="Your current account balance"
                     )
                     
                 st.divider()  # Add a visual separator
             else:
-                st.warning("⚠️ Could not fetch current balance")
+                st.warning("Could not fetch current balance")
                 if refresh_balance:
                     st.rerun()
         except Exception as e:
-            st.warning(f"⚠️ Balance unavailable: {str(e)}")
+            st.warning(f"Balance unavailable: {str(e)}")
             if refresh_balance:
                 st.rerun()
         
@@ -139,15 +139,15 @@ def show_customer_transactions():
         
         # Display current security mode
         if use_quantum:
-            st.info("� **Quantum-Safe Mode**: All transactions use post-quantum cryptography with BB84 QKD, CRYSTALS-Kyber KEM, CRYSTALS-Dilithium signatures, and AES-256-GCM encryption")
+            st.info("**Quantum-Safe Mode**: All transactions use post-quantum cryptography with BB84 QKD, CRYSTALS-Kyber KEM, CRYSTALS-Dilithium signatures, and AES-256-GCM encryption")
         else:
-            st.warning("⚠️ **Standard Mode**: Using traditional cryptography (quantum-safe protocol disabled)")
+            st.warning("**Standard Mode**: Using traditional cryptography (quantum-safe protocol disabled)")
         
-        if st.button("💸 Send Money", type="primary"):
+        if st.button("Send Money", type="primary"):
             if recipient_id and amount > 0:
                 if use_quantum:
                     # Use quantum-safe protocol
-                    with st.spinner("🔐 Establishing quantum-safe session and processing transaction..."):
+                    with st.spinner("Establishing quantum-safe session and processing transaction..."):
                         success, error, result = quantum_session_manager.send_secure_transaction(
                             st.session_state.token,
                             int(recipient_id),
@@ -157,31 +157,31 @@ def show_customer_transactions():
                         
                         if success:
                             show_notification(
-                                f"✅ Quantum-safe transaction successful! Sent ${amount:.2f} to account {recipient_id}", 
+                                f"Quantum-safe transaction successful! Sent ${amount:.2f} to account {recipient_id}", 
                                 "success", 
                                 True
                             )
-                            st.success("🔐 Transaction secured with post-quantum cryptography")
+                            st.success("Transaction secured with post-quantum cryptography")
                             
                             # Show transaction details
                             if result and "transaction_id" in result:
-                                st.info(f"🆔 Transaction ID: {result['transaction_id']}")
+                                st.info(f"Transaction ID: {result['transaction_id']}")
                                 
                                 # Offer verification
-                                if st.button("🔍 Verify Transaction Signature"):
+                                if st.button("Verify Transaction Signature"):
                                     verify_success, verify_error, verify_result = quantum_session_manager.verify_transaction(
                                         st.session_state.token,
                                         result['transaction_id']
                                     )
                                     
                                     if verify_success:
-                                        st.success("✅ Transaction signature verified!")
+                                        st.success("Transaction signature verified!")
                                         if verify_result:
                                             st.json(verify_result)
                                     else:
-                                        st.error(f"❌ Verification failed: {verify_error}")
+                                        st.error(f"Verification failed: {verify_error}")
                         else:
-                            st.error(f"❌ Quantum transaction failed: {error}")
+                            st.error(f"Quantum transaction failed: {error}")
                 else:
                     # Use standard protocol
                     with st.spinner("Processing standard transaction..."):
@@ -192,27 +192,27 @@ def show_customer_transactions():
                                 json={"to_account_id": int(recipient_id), "amount": float(amount)}
                             )
                             if response.status_code == 200:
-                                show_notification(f"✅ Successfully sent ${amount:.2f} to account {recipient_id}", "success", True)
+                                show_notification(f"Successfully sent ${amount:.2f} to account {recipient_id}", "success", True)
                             elif response.status_code == 400:
-                                st.error("❌ Insufficient funds or invalid transaction")
+                                st.error("Insufficient funds or invalid transaction")
                             elif response.status_code == 404:
                                 if response.json().get("detail") == "Recipient account must be a customer account":
-                                    st.error(f"❌ {response.json().get('detail')}")
+                                    st.error(f"{response.json().get('detail')}")
                                 else:
-                                    st.error("❌ Recipient account not found")
+                                    st.error("Recipient account not found")
                             else:
-                                st.error(f"❌ Transaction failed: {response.text}")
+                                st.error(f"Transaction failed: {response.text}")
                         except requests.exceptions.RequestException as e:
-                            st.error(f"❌ Connection error: {str(e)}")
+                            st.error(f"Connection error: {str(e)}")
                             st.info("Make sure the backend server is running on http://localhost:8000")
                         except Exception as e:
-                            st.error(f"❌ An error occurred: {str(e)}")
+                            st.error(f"An error occurred: {str(e)}")
             else:
                 st.warning("Please enter a valid recipient ID and amount")
     
     with tab2:
-        st.subheader("📋 Your Transaction History")
-        st.info("💰 **Customer View**: Your transaction amounts are decrypted for your viewing")
+        st.subheader("Your Transaction History")
+        st.info("**Customer View**: Your transaction amounts are decrypted for your viewing")
         
         # Date filter
         col1, col2, col3 = st.columns(3)
@@ -229,7 +229,7 @@ def show_customer_transactions():
                 help="End date for transaction history"
             )
         with col3:
-            if st.button("🔄 Refresh Transactions"):
+            if st.button("Refresh Transactions"):
                 st.rerun()
         
         # Load transactions
@@ -246,7 +246,7 @@ def show_customer_transactions():
                 
                 # Display sent transactions
                 if transactions_data.get("sent"):
-                    st.markdown("### 📤 Sent Transactions")
+                    st.markdown("### Sent Transactions")
                     sent_df = pd.DataFrame(transactions_data["sent"])
                     sent_df["type"] = "Sent"
                     
@@ -275,11 +275,11 @@ def show_customer_transactions():
                     
                     st.dataframe(display_sent[columns_to_show], use_container_width=True)
                 else:
-                    st.info("📤 No sent transactions found")
+                    st.info("No sent transactions found")
                 
                 # Display received transactions
                 if transactions_data.get("received"):
-                    st.markdown("### 📥 Received Transactions")
+                    st.markdown("### Received Transactions")
                     received_df = pd.DataFrame(transactions_data["received"])
                     received_df["type"] = "Received"
                     
@@ -308,38 +308,38 @@ def show_customer_transactions():
                     
                     st.dataframe(display_received[columns_to_show], use_container_width=True)
                 else:
-                    st.info("📥 No received transactions found")
+                    st.info("No received transactions found")
                 
                 # Summary statistics
                 total_sent = len(transactions_data.get("sent", []))
                 total_received = len(transactions_data.get("received", []))
                 
                 if total_sent > 0 or total_received > 0:
-                    st.markdown("### 📊 Transaction Summary")
+                    st.markdown("### Transaction Summary")
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.metric("📤 Sent", total_sent)
+                        st.metric("Sent", total_sent)
                     with col2:
-                        st.metric("📥 Received", total_received)
+                        st.metric("Received", total_received)
                     with col3:
-                        st.metric("📊 Total", total_sent + total_received)
+                        st.metric("Total", total_sent + total_received)
                 
             elif response.status_code == 403:
-                st.error("❌ Access denied. Customer privileges required.")
+                st.error("Access denied. Customer privileges required.")
             else:
-                st.error(f"❌ Failed to load transactions. Status code: {response.status_code}")
+                st.error(f"Failed to load transactions. Status code: {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
-            st.error(f"❌ Connection error: {str(e)}")
+            st.error(f"Connection error: {str(e)}")
             st.info("Make sure the backend server is running on http://localhost:8000")
         except Exception as e:
-            st.error(f"❌ An error occurred: {str(e)}")
+            st.error(f"An error occurred: {str(e)}")
 
 
 def show_employee_transactions():
     """Display employee transaction dashboard with enhanced capabilities"""
     
-    st.title("👩‍💼 Employee Transaction Dashboard")
+    st.title("Employee Transaction Dashboard")
     
     if "token" not in st.session_state or not st.session_state.token:
         st.error("Please login first")
@@ -348,11 +348,11 @@ def show_employee_transactions():
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     
     # Create tabs for different functionalities
-    tab1, tab2, tab3, tab4 = st.tabs(["📊 All Transactions", "🔍 Search Transactions", "💸 Create Transaction", "🔐 Security Overview"])
+    tab1, tab2, tab3 = st.tabs(["All Transactions", "Search Transactions", "Create Transaction"])
     
     with tab1:
-        st.subheader("📊 All System Transactions")
-        st.info("🔓 **Employee Access**: Transaction amounts are decrypted for monitoring purposes")
+        st.subheader("All System Transactions")
+        st.info("**Employee Access**: Transaction amounts are decrypted for monitoring purposes")
         
         # Date filter
         col1, col2 = st.columns(2)
@@ -369,7 +369,7 @@ def show_employee_transactions():
                 key="dash_to_date"
             )
         
-        if st.button("🔄 Load Transactions", use_container_width=True):
+        if st.button("Load Transactions", use_container_width=True):
             st.rerun()
         
         # Load all transactions with decrypted amounts
@@ -418,47 +418,47 @@ def show_employee_transactions():
                     )
                     
                     # Summary statistics
-                    st.markdown("### 📈 Transaction Statistics")
+                    st.markdown("### Transaction Statistics")
                     col1, col2, col3, col4 = st.columns(4)
                     
                     with col1:
-                        st.metric("📊 Total Transactions", len(transactions))
+                        st.metric("Total Transactions", len(transactions))
                     
                     with col2:
                         fraud_count = len([tx for tx in transactions if tx.get("is_fraud", False)])
-                        st.metric("🚨 Fraud Alerts", fraud_count)
+                        st.metric("Fraud Alerts", fraud_count)
                     
                     with col3:
                         amounts = [tx.get("amount", 0) for tx in transactions if tx.get("amount") is not None]
                         if amounts:
                             total_volume = sum(amounts)
-                            st.metric("💰 Total Volume", f"${total_volume:.2f}")
+                            st.metric("Total Volume", f"${total_volume:.2f}")
                         else:
-                            st.metric("💰 Total Volume", "N/A")
+                            st.metric("Total Volume", "N/A")
                     
                     with col4:
                         if amounts:
                             avg_amount = sum(amounts) / len(amounts)
-                            st.metric("📊 Average Amount", f"${avg_amount:.2f}")
+                            st.metric("Average Amount", f"${avg_amount:.2f}")
                         else:
-                            st.metric("📊 Average Amount", "N/A")
+                            st.metric("Average Amount", "N/A")
                     
                 else:
-                    st.info("📊 No transactions found for the selected date range")
+                    st.info("No transactions found for the selected date range")
                     
             elif response.status_code == 403:
-                st.error("❌ Access denied. Employee privileges required.")
+                st.error("Access denied. Employee privileges required.")
             else:
-                st.error(f"❌ Failed to load transactions. Status code: {response.status_code}")
+                st.error(f"Failed to load transactions. Status code: {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
-            st.error(f"❌ Connection error: {str(e)}")
+            st.error(f"Connection error: {str(e)}")
             st.info("Make sure the backend server is running on http://localhost:8000")
         except Exception as e:
-            st.error(f"❌ An error occurred: {str(e)}")
+            st.error(f"An error occurred: {str(e)}")
     
     with tab2:
-        st.subheader("🔍 Search Transactions by Account")
+        st.subheader("Search Transactions by Account")
         
         account_id = st.number_input(
             "Account ID to Search", 
@@ -467,7 +467,7 @@ def show_employee_transactions():
             help="Enter the account ID to search for all related transactions"
         )
         
-        if st.button("🔍 Search Transactions"):
+        if st.button("Search Transactions"):
             if account_id:
                 try:
                     response = requests.get(
@@ -488,7 +488,7 @@ def show_employee_transactions():
                             st.success(f"Found {len(transactions)} transactions for account {account_id}")
                             
                             if not sent_transactions.empty:
-                                st.markdown("#### 📤 Sent Transactions")
+                                st.markdown("#### Sent Transactions")
                                 sent_display = sent_transactions.rename(columns={
                                     "transaction_id": "ID",
                                     "to_account_id": "To Account",
@@ -505,7 +505,7 @@ def show_employee_transactions():
                                 st.dataframe(sent_display[["ID", "To Account", "Amount ($)", "Created By", "Date & Time"]], use_container_width=True)
                             
                             if not received_transactions.empty:
-                                st.markdown("#### 📥 Received Transactions")
+                                st.markdown("#### Received Transactions")
                                 received_display = received_transactions.rename(columns={
                                     "transaction_id": "ID",
                                     "from_account_id": "From Account",
@@ -530,36 +530,36 @@ def show_employee_transactions():
                 st.warning("Please enter a valid account ID")
     
     with tab3:
-        st.subheader("💸 Create Transaction (Employee)")
+        st.subheader("Create Transaction (Employee)")
         use_quantum = get_cached_quantum_safe_setting()
         session_status = quantum_session_manager.get_session_status()
         if use_quantum:
             if session_status["active"]:
                 col1, col2, col3,  = st.columns(3)
                 with col1:
-                    st.success(f"🟢 **{session_status['security_level']}**")
+                    st.success(f"**{session_status['security_level']}**")
                 with col2:
                     minutes_remaining = int(session_status["time_remaining"] // 60)
-                    st.info(f"⏱️ {minutes_remaining}m left")
+                    st.info(f"{minutes_remaining}m left")
                 with col3:
-                    if st.button("🗑️ End Session", help="Manually end the current quantum session", use_container_width=True):
+                    if st.button("End Session", help="Manually end the current quantum session", use_container_width=True):
                         quantum_session_manager.clear_session()
                         st.success("Session ended successfully")
                         st.rerun()
             else:
                 col_status, col_button = st.columns([3, 1])
                 with col_status:
-                    st.warning("🟡 **No Quantum Session** - will be automatically established")
+                    st.warning("**No Quantum Session** - will be automatically established")
                     st.markdown("**Protocols:** BB84 QKD • CRYSTALS-Kyber • CRYSTALS-Dilithium • AES-256-GCM")
                 with col_button:
-                    if st.button("🚀 Establish Session", help="Manually establish a quantum-safe session now", use_container_width=True):
-                        with st.spinner("🔐 Establishing quantum-safe session..."):
+                    if st.button("Establish Session", help="Manually establish a quantum-safe session now", use_container_width=True):
+                        with st.spinner("Establishing quantum-safe session..."):
                             success, error = quantum_session_manager.establish_session_manual(st.session_state.token)
                             if success:
-                                st.success("✅ Quantum session established!")
+                                st.success("Quantum session established!")
                                 st.rerun()
                             else:
-                                st.error(f"❌ Failed to establish session: {error}")
+                                st.error(f"Failed to establish session: {error}")
             st.divider()
         
         # Transaction creation form
@@ -596,22 +596,22 @@ def show_employee_transactions():
                             st.session_state.from_account_balance = {
                                 "status": "success",
                                 "balance": balance,
-                                "message": f"💰 Balance: ${balance:.2f}"
+                                "message": f"Balance: ${balance:.2f}"
                             }
                         elif response.status_code == 404:
                             st.session_state.from_account_balance = {
                                 "status": "error",
-                                "message": "❌ Account not found"
+                                "message": "Account not found"
                             }
                         else:
                             st.session_state.from_account_balance = {
                                 "status": "error",
-                                "message": "❌ Could not fetch balance"
+                                "message": "Could not fetch balance"
                             }
                     except Exception as e:
                         st.session_state.from_account_balance = {
                             "status": "error",
-                            "message": f"❌ Error: {str(e)}"
+                            "message": f"Error: {str(e)}"
                         }
                 
                 # Display cached balance information
@@ -635,8 +635,8 @@ def show_employee_transactions():
                 )
             
             with refresh_col:
-                st.write("")  # Add spacing to align with input
-                refresh_to = st.button("🔄", key="refresh_to", help="Refresh receiver account balance")
+                st.write(" ")  # Add spacing to align with input
+                refresh_to = st.button("⟳", key="refresh_to", help="Refresh receiver account balance")
             
             # Check if to_account_id has changed or refresh button clicked
             if to_account_id > 0:
@@ -660,22 +660,22 @@ def show_employee_transactions():
                             st.session_state.to_account_balance = {
                                 "status": "success",
                                 "balance": balance,
-                                "message": f"💰 Balance: ${balance:.2f}"
+                                "message": f"Balance: ${balance:.2f}"
                             }
                         elif response.status_code == 404:
                             st.session_state.to_account_balance = {
                                 "status": "error",
-                                "message": "❌ Account not found"
+                                "message": "Account not found"
                             }
                         else:
                             st.session_state.to_account_balance = {
                                 "status": "error",
-                                "message": "❌ Could not fetch balance"
+                                "message": "Could not fetch balance"
                             }
                     except Exception as e:
                         st.session_state.to_account_balance = {
                             "status": "error",
-                            "message": f"❌ Error: {str(e)}"
+                            "message": f"Error: {str(e)}"
                         }
                 
                 # Display cached balance information
@@ -696,19 +696,19 @@ def show_employee_transactions():
         )
         
         if use_quantum:
-            st.info("🔐 **Quantum-Safe Mode**: Employee transactions use post-quantum cryptography")
+            st.info("**Quantum-Safe Mode**: Employee transactions use post-quantum cryptography")
         else:
-            st.warning("⚠️ **Standard Mode**: Using traditional cryptography (quantum-safe protocol disabled)")
+            st.warning("**Standard Mode**: Using traditional cryptography (quantum-safe protocol disabled)")
         
         # Create transaction button (full width like amount input)
-        if st.button("💸 Create Transaction", type="primary", key="emp_create_tx", use_container_width=True):
+        if st.button("Create Transaction", type="primary", key="emp_create_tx", use_container_width=True):
             if from_account_id > 0 and to_account_id > 0 and amount > 0:
                 if from_account_id == to_account_id:
-                    st.error("❌ From and To accounts cannot be the same")
+                    st.error("From and To accounts cannot be the same")
                 else:
                     if use_quantum:
                         # Use quantum-safe protocol for employee transactions
-                        with st.spinner("🔐 Processing quantum-safe employee transaction..."):
+                        with st.spinner("Processing quantum-safe employee transaction..."):
                             success, error, result = quantum_session_manager.send_secure_employee_transaction(
                                 st.session_state.token,
                                 int(from_account_id),
@@ -717,13 +717,13 @@ def show_employee_transactions():
                             )
                             
                             if success:
-                                show_notification("✅ Quantum-safe employee transaction created successfully!")
-                                st.success("🔐 Transaction secured with post-quantum cryptography")
+                                show_notification("Quantum-safe employee transaction created successfully!")
+                                st.success("Transaction secured with post-quantum cryptography")
                                 if result and "transaction_id" in result:
-                                    st.info(f"🆔 Transaction ID: {result['transaction_id']}")
+                                    st.info(f"Transaction ID: {result['transaction_id']}")
                                 st.rerun()
                             else:
-                                st.error(f"❌ Quantum-safe transaction failed: {error}")
+                                st.error(f"Quantum-safe transaction failed: {error}")
                     else:
                         # Use standard protocol for employee transactions
                         with st.spinner("Processing standard employee-initiated transaction..."):
@@ -739,35 +739,35 @@ def show_employee_transactions():
                                     }
                                 )
                                 if response.status_code == 200:
-                                    show_notification("✅ Transaction created successfully!")
+                                    show_notification("Transaction created successfully!")
                                     st.rerun()  # Refresh to show new transaction
                                 elif response.status_code == 400:
                                     error_detail = response.json().get("detail", "Invalid transaction")
                                     if "Insufficient funds" in error_detail:
-                                        st.error("❌ Insufficient funds in sender account")
+                                        st.error("Insufficient funds in sender account")
                                     else:
-                                        st.error(f"❌ {error_detail}")
+                                        st.error(f"{error_detail}")
                                 elif response.status_code == 404:
                                     error_detail = response.json().get("detail", "Account not found")
                                     if "customer account" in error_detail:
-                                        st.error(f"❌ {error_detail}")
+                                        st.error(f"{error_detail}")
                                     else:
-                                        st.error("❌ One or both accounts not found")
+                                        st.error("One or both accounts not found")
                                 elif response.status_code == 403:
-                                    st.error("❌ Access denied. Employee privileges required.")
+                                    st.error("Access denied. Employee privileges required.")
                                 else:
-                                    st.error(f"❌ Transaction failed: {response.text}")
+                                    st.error(f"Transaction failed: {response.text}")
                             except requests.exceptions.RequestException as e:
-                                st.error(f"❌ Connection error: {str(e)}")
+                                st.error(f"Connection error: {str(e)}")
                                 st.info("Make sure the backend server is running on http://localhost:8000")
                             except Exception as e:
-                                st.error(f"❌ An error occurred: {str(e)}")
+                                st.error(f"An error occurred: {str(e)}")
             else:
                 st.warning("Please enter valid account IDs and amount")
         
         # Helper information
         st.markdown("---")
-        st.markdown("### ℹ️ Employee Transaction Guidelines")
+        st.markdown("### Employee Transaction Guidelines")
         st.info("""
         - Only customer accounts can send and receive money
         - Employee account will be recorded as the transaction initiator
@@ -775,61 +775,3 @@ def show_employee_transactions():
         - Sender must have sufficient balance for the transaction
         - All transaction amounts are encrypted using post-quantum cryptography
         """)
-    
-    with tab4:
-        st.subheader("🔐 Post-Quantum Security Overview")
-        st.info("Transaction security features employed in the system")
-        
-        # Security features overview
-        st.markdown("""
-        ### 🛡️ Transaction Security Features
-        
-        #### **Encryption**
-        - **CRYSTAL-Kyber512**: Used for encrypting transaction amounts
-        - Each transaction generates a new shared secret
-        - Quantum-resistant key encapsulation mechanism
-        
-        #### **Digital Signatures**
-        - **CRYSTAL-DILITHIUM2**: Used for transaction authentication
-        - All transactions are digitally signed
-        - Provides non-repudiation and integrity verification
-        
-        #### **Data Protection**
-        - Transaction amounts are encrypted at rest
-        - Decryption only available to authorized employees
-        - Audit trail for all access attempts
-        
-        ### 📊 Security Status
-        """)
-        
-        col1, col2, col3 = st.columns(3)
-        
-        with col1:
-            st.metric("🔐 Encryption", "Active", help="CRYSTAL-Kyber encryption active")
-        with col2:
-            st.metric("📝 Signatures", "Verified", help="CRYSTAL-DILITHIUM signatures enabled")
-        with col3:
-            st.metric("🛡️ Quantum-Safe", "Yes", help="Post-quantum cryptography in use")
-        
-        # Demo buttons
-        st.markdown("### 🔬 Security Demonstrations")
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            if st.button("🔑 Demo: Key Generation"):
-                with st.spinner("Generating post-quantum keys..."):
-                    import time
-                    time.sleep(1)
-                    st.success("✅ CRYSTAL-Kyber keypair generated!")
-                    st.success("✅ CRYSTAL-DILITHIUM keypair generated!")
-                    st.info("🔑 Keys would be stored securely for transaction encryption")
-        
-        with col2:
-            if st.button("📝 Demo: Transaction Signing"):
-                with st.spinner("Creating transaction signature..."):
-                    import time
-                    time.sleep(1)
-                    st.success("✅ Transaction signed with DILITHIUM!")
-                    st.success("✅ Signature verified successfully!")
-                    st.info("🛡️ Transaction integrity and authenticity guaranteed")

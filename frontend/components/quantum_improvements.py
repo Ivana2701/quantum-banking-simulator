@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 def show_quantum_improvements():
-    st.subheader("⚛️ Quantum Fraud Detection Improvements")
+    st.subheader("Quantum Fraud Detection Improvements")
     st.markdown("""
     **Quantum fraud detection has been dramatically improved!**
     - **Qubits:** 2 → 8-10

@@ -25,46 +25,46 @@ except ImportError as e:
 API_URL = "http://localhost:8000"
 
 def show_qb_learn():
-    st.title("🎓 QB-Learn: THE Quantum Banking Learning Platform")
+    st.title("QB-Learn: THE Quantum Banking Learning Platform")
 
     # --- Tabs for different visualizations ---
     tabs = st.tabs([
         " Interactive BB84",
-        "� BB84 Key Distribution",
-        "�🔒 Transaction Security",
-        "🧬 Quantum 100 Performance",
-        "📊 Performance Comparison",
-        "📚 Learn More"
+        "BB84 Key Distribution",
+        "Transaction Security",
+        "Quantum 100 Performance",
+        "Performance Comparison",
+        "Learn More"
     ])
 
     # --- Tab 1: Interactive BB84 Simulation ---
     with tabs[0]:
-        st.header("🚀 Interactive BB84 Quantum Key Distribution")
+        st.header("Interactive BB84 Quantum Key Distribution")
         st.markdown("""
         Experience the full BB84 protocol with interactive controls, visual animations, and quantum circuit generation.
         This simulation shows exactly how quantum mechanics protects your banking transactions.
         """)
         
         if not QUANTUM_AVAILABLE:
-            st.error("❌ Interactive BB84 simulation requires additional packages.")
+            st.error("Interactive BB84 simulation requires additional packages.")
             st.markdown("""
             To enable this feature, install the required packages:
             ```bash
             pip install numpy pandas qiskit matplotlib
             ```
             """)
-            st.info("📚 For now, check out the other tabs for quantum banking education!")
+            st.info("For now, check out the other tabs for quantum banking education!")
         else:
             # Sidebar-style controls in the main area
-            st.subheader("🎛️ Simulation Settings")
+            st.subheader("Simulation Settings")
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
                 num_photons = st.slider("Number of photons (qubits)", 1, 20, 10, key="bb84_photons")
             with col2:
-                manual_mode = st.checkbox("🔧 Manual mode (toggle Alice/Bob bases)", value=False, key="bb84_manual")
+                manual_mode = st.checkbox("Manual mode (toggle Alice/Bob bases)", value=False, key="bb84_manual")
             with col3:
-                eve_interception = st.checkbox("🕵️ Eve intercepts photons", key="bb84_eve")
+                eve_interception = st.checkbox("Eve intercepts photons", key="bb84_eve")
             with col4:
                 view_mode = st.radio("Photon view mode", ["wave", "particle"], horizontal=True, key="bb84_view")
 
@@ -98,7 +98,7 @@ def show_qb_learn():
 
             # Manual toggle UI
             if manual_mode:
-                st.subheader("🎛️ Manual Basis Selection")
+                st.subheader("Manual Basis Selection")
                 cols = st.columns(2)
                 with cols[0]:
                     st.markdown("#### Alice's Bases")
@@ -118,20 +118,20 @@ def show_qb_learn():
                         )
 
             # ----- Run Simulation -----
-            if st.button("🚀 Run Full Quantum Simulation", key="bb84_run"):
+            if st.button("Run Full Quantum Simulation", key="bb84_run"):
                 df_results = pd.DataFrame(columns=[
                     "Photon", "Alice Bit", "Alice Basis", "Eve Basis", "Eve Bit",
                     "Bob Basis", "Bob Bit", "Bases Match", "Bits Match"
                 ])
                 result_container = st.empty()
 
-                st.markdown("### 🧮 BB84 Protocol Math")
+                st.markdown("### BB84 Protocol Math")
                 st.markdown(r"""
                 - If β = + and b = 0 → \(|0⟩\), if b = 1 → \(|1⟩\)
                 - If β = × and b = 0 → \(|+⟩ = \frac{1}{\sqrt{2}}(|0⟩ + |1⟩)\), if b = 1 → \(|−⟩ = \frac{1}{\sqrt{2}}(|0⟩ - |1⟩)\)
                 """)
 
-                with st.expander("🔬 Interact with a Sample BB84 Circuit"):
+                with st.expander("Interact with a Sample BB84 Circuit"):
                     bit = st.selectbox("Alice's Bit", [0, 1], index=0, key="bb84_bit")
                     basis = st.selectbox("Alice's Basis", ['+', 'x'], index=0, key="bb84_basis")
                     qc_exp = QuantumCircuit(1, 1)
@@ -149,7 +149,7 @@ def show_qb_learn():
                         st.warning(f"Circuit visualization not available: {e}")
                         st.code(str(qc_exp))
 
-                with st.expander("🧭 Visual: Bloch Sphere Basis Overlay"):
+                with st.expander("Visual: Bloch Sphere Basis Overlay"):
                     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Bloch_sphere.svg/500px-Bloch_sphere.svg.png", caption="Bloch Sphere showing + and × bases", use_container_width=True)
 
                 for i in range(num_photons):
@@ -219,7 +219,7 @@ def show_qb_learn():
                         st.write(f"**Photon {i+1} Circuit:**")
                         st.code(str(qc))
 
-                    with st.expander(f"🧠 Explain Photon {i+1} Circuit Step-by-Step"):
+                    with st.expander(f"Explain Photon {i+1} Circuit Step-by-Step"):
                         for step in explanation:
                             st.markdown(f"- {step}")
 
@@ -237,41 +237,41 @@ def show_qb_learn():
                     result_container.dataframe(df_results)
                     time.sleep(0.5)
 
-                st.success("✅ BB84 Simulation Complete!")
+                st.success("BB84 Simulation Complete!")
                 sifted = df_results[df_results["Bases Match"] == "✅"]
-                st.markdown(f"🔑 Sifted key: {len(sifted)} bits")
+                st.markdown(f"Sifted key: {len(sifted)} bits")
 
                 if eve_interception and any(sifted["Bits Match"] == "❌"):
-                    st.error("⚠️ Eve was detected! Inconsistencies found.")
+                    st.error("Eve was detected! Inconsistencies found.")
                 else:
-                    st.success("🟢 No eavesdropping detected. Secure key established.")
+                    st.success("No eavesdropping detected. Secure key established.")
 
                 # Only show Post-Quantum Cryptography and AES sections if Eve is NOT intercepting
                 if not eve_interception:
                     st.markdown("---")
-                    st.header("2️⃣ Post-Quantum Cryptography (Kyber)")
+                    st.header("2. Post-Quantum Cryptography (Kyber)")
                     st.markdown("**Sender → encapsulates → ciphertext → receiver decapsulates → shared secret**")
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.write("📨 **Sender**")
+                        st.write("**Sender**")
                         st.code("public_key = generate_kyber_keypair()")
                     with col2:
-                        st.write("🔐 **Encapsulation**")
+                        st.write("**Encapsulation**")
                         st.code("ciphertext, secret = encapsulate(public_key)")
                     with col3:
-                        st.write("📩 **Receiver**")
+                        st.write("**Receiver**")
                         st.code("shared_secret = decapsulate(ciphertext)")
                     st.success("Kyber shared secret: `a4f7c1e2d3b8f901`")
                     st.markdown("**Kyber Math:** c = A·s + e (mod q). Based on the hardness of Module-LWE.**")
 
                     st.markdown("---")
-                    st.header("3️⃣ AES Encryption of Transaction")
+                    st.header("3. AES Encryption of Transaction")
                     original_transaction = "Send $1000 to Account XYZ"
                     aes_encrypted = "e4a9f8d1c9f..."
-                    st.write("📤 Encrypting a financial transaction...")
+                    st.write("Encrypting a financial transaction...")
                     st.code(f"Transaction: {original_transaction}")
                     st.code(f"Encrypted (AES): {aes_encrypted}")
-                    st.success("✅ Encrypted transaction secured with quantum-safe keys!")
+                    st.success("Encrypted transaction secured with quantum-safe keys!")
                     st.markdown(r"""
                     **AES Math:**
                     - SubBytes → ShiftRows → MixColumns → AddRoundKey
@@ -283,7 +283,7 @@ def show_qb_learn():
 
     # --- Tab 2: BB84 Key Distribution Demo ---
     with tabs[1]:
-        st.header("🔬 BB84 Quantum Key Distribution Demo")
+        st.header("BB84 Quantum Key Distribution Demo")
         st.markdown("""
         Experience the BB84 protocol with customizable parameters and detailed analysis.
         This demo connects to our quantum backend to simulate real quantum key distribution.
@@ -296,7 +296,7 @@ def show_qb_learn():
         with col2:
             error_rate = st.slider("Simulated Channel Error Rate", min_value=0.0, max_value=0.2, value=0.05, step=0.01)
         
-        if st.button("🚀 Run BB84 Demo", type="primary"):
+        if st.button("Run BB84 Demo", type="primary"):
             with st.spinner("Simulating quantum key distribution..."):
                 try:
                     response = requests.post(
@@ -307,7 +307,7 @@ def show_qb_learn():
                     
                     if response.status_code == 200:
                         result = response.json()
-                        st.success("✅ BB84 simulation completed!")
+                        st.success("BB84 simulation completed!")
                         
                         # Display results
                         col1, col2, col3 = st.columns(3)
@@ -319,11 +319,11 @@ def show_qb_learn():
                             st.metric("Security Status", result.get('security_status', 'Unknown'))
                         
                         # Enhanced detailed explanation dropdown
-                        with st.expander("🔍 **Detailed Protocol Analysis & Behind-the-Scenes**"):
-                            st.markdown("### 🔬 Complete BB84 Quantum Key Distribution Analysis")
+                        with st.expander("**Detailed Protocol Analysis & Behind-the-Scenes**"):
+                            st.markdown("### Complete BB84 Quantum Key Distribution Analysis")
                             
                             # Input parameters
-                            st.markdown("**📥 Input Parameters:**")
+                            st.markdown("**Input Parameters:**")
                             col_input1, col_input2 = st.columns(2)
                             with col_input1:
                                 st.markdown(f"- **Requested Key Length**: {key_length} bits")
@@ -333,14 +333,14 @@ def show_qb_learn():
                                 st.markdown(f"- **Processing Method**: Batched (30 qubits/batch)")
                             
                             # Protocol execution breakdown
-                            st.markdown("**🔄 Protocol Execution Breakdown:**")
+                            st.markdown("**Protocol Execution Breakdown:**")
                             
                             # Create tabs for different aspects
                             detail_tab1, detail_tab2, detail_tab3, detail_tab4 = st.tabs([
-                                "🔬 Quantum Process", 
-                                "📊 Performance Analysis", 
-                                "🔐 Security Validation", 
-                                "💡 Technical Deep Dive"
+                                "Quantum Process", 
+                                "Performance Analysis", 
+                                "Security Validation", 
+                                "Technical Deep Dive"
                             ])
                             
                             with detail_tab1:
@@ -354,22 +354,22 @@ def show_qb_learn():
                                             
                                             # Add detailed explanations for each step
                                             if "Initialize quantum channel" in step:
-                                                st.caption("🔧 Set up quantum simulator and prepare for photon transmission")
+                                                st.caption("Set up quantum simulator and prepare for photon transmission")
                                             elif "Alice generates random bits" in step:
-                                                st.caption("🎲 Alice creates random sequence of 0s and 1s, and random basis choices")
+                                                st.caption("Alice creates random sequence of 0s and 1s, and random basis choices")
                                             elif "Alice sends encoded qubits" in step:
-                                                st.caption("📡 Qubits encoded using either computational (Z) or Hadamard (X) basis")
+                                                st.caption("Qubits encoded using either computational (Z) or Hadamard (X) basis")
                                             elif "Bob measures" in step:
-                                                st.caption("📋 Bob randomly chooses measurement bases and measures incoming qubits")
+                                                st.caption("Bob randomly chooses measurement bases and measures incoming qubits")
                                             elif "Public basis comparison" in step:
-                                                st.caption("📢 Alice and Bob publicly compare their basis choices (not the measurements)")
+                                                st.caption("Alice and Bob publicly compare their basis choices (not the measurements)")
                                             elif "Key sifting" in step:
-                                                st.caption("🔍 Only keep measurements where Alice and Bob used the same basis")
+                                                st.caption("Only keep measurements where Alice and Bob used the same basis")
                                             elif "Final key established" in step:
-                                                st.caption("🔑 After error correction and privacy amplification")
+                                                st.caption("After error correction and privacy amplification")
                                 
                                 # Visual representation
-                                st.markdown("**📈 Process Flow:**")
+                                st.markdown("**Process Flow:**")
                                 st.markdown("""
                                 ```
                                 Alice's Random Bits → Quantum Encoding → Quantum Channel 
@@ -402,7 +402,7 @@ def show_qb_learn():
                                     st.metric("Processing Rate", f"{detailed_metrics.get('processing_rate', 0):.0f} qubits/s")
                                 
                                 # Efficiency breakdown
-                                st.markdown("**🔄 Efficiency Breakdown:**")
+                                st.markdown("**Efficiency Breakdown:**")
                                 detailed_metrics = result.get('detailed_metrics', {})
                                 basis_match_rate = detailed_metrics.get('basis_match_rate', 0.5)
                                 error_rate_measured = result.get('measured_error_rate', 0)
@@ -414,7 +414,7 @@ def show_qb_learn():
                                 """)
                                 
                                 # Performance chart using actual data
-                                st.markdown("**📊 Bit Processing Pipeline:**")
+                                st.markdown("**Bit Processing Pipeline:**")
                                 initial_qubits = detailed_metrics.get('initial_qubits', key_length * 4)
                                 matching_bases = detailed_metrics.get('matching_bases', int(initial_qubits * 0.5))
                                 progress_data = {
@@ -438,12 +438,12 @@ def show_qb_learn():
                                 
                                 # Security status
                                 if error_rate_measured < error_threshold:
-                                    st.success(f"🔒 **SECURE**: Error rate {error_rate_measured:.3f} is below threshold {error_threshold}")
+                                    st.success(f"**SECURE**: Error rate {error_rate_measured:.3f} is below threshold {error_threshold}")
                                 else:
-                                    st.warning(f"⚠️ **CAUTION**: Error rate {error_rate_measured:.3f} exceeds secure threshold {error_threshold}")
+                                    st.warning(f"**CAUTION**: Error rate {error_rate_measured:.3f} exceeds secure threshold {error_threshold}")
                                 
                                 # Security analysis
-                                st.markdown("**🛡️ Security Analysis:**")
+                                st.markdown("**Security Analysis:**")
                                 
                                 security_col1, security_col2 = st.columns(2)
                                 with security_col1:
@@ -468,12 +468,12 @@ def show_qb_learn():
                                 # Protocol success indicator
                                 protocol_success = detailed_metrics.get('protocol_success', error_rate_measured < error_threshold)
                                 if protocol_success:
-                                    st.success("✅ **Protocol executed successfully with acceptable security parameters**")
+                                    st.success("**Protocol executed successfully with acceptable security parameters**")
                                 else:
-                                    st.warning("⚠️ **Protocol completed but security parameters need attention**")
+                                    st.warning("**Protocol completed but security parameters need attention**")
                                 
                                 # Threat model
-                                st.markdown("**🎯 Threat Model Protection:**")
+                                st.markdown("**Threat Model Protection:**")
                                 st.info("""
                                 **This protocol protects against:**
                                 - Classical computational attacks (factoring, discrete log)
@@ -489,7 +489,7 @@ def show_qb_learn():
                                 protocol_info = result.get('protocol_info', {})
                                 detailed_metrics = result.get('detailed_metrics', {})
                                 
-                                st.markdown("**⚙️ Implementation Architecture:**")
+                                st.markdown("**Implementation Architecture:**")
                                 
                                 impl_col1, impl_col2 = st.columns(2)
                                 with impl_col1:
@@ -512,12 +512,12 @@ def show_qb_learn():
                                 
                                 # Encoding schemes
                                 if 'encoding_schemes' in protocol_info:
-                                    st.markdown("**🔤 Encoding Schemes:**")
+                                    st.markdown("**Encoding Schemes:**")
                                     for i, scheme in enumerate(protocol_info['encoding_schemes'], 1):
                                         st.markdown(f"- **Basis {i-1}**: {scheme}")
                                 
                                 # Protocol parameters with actual values
-                                st.markdown("**📋 Protocol Parameters Used:**")
+                                st.markdown("**Protocol Parameters Used:**")
                                 param_data = {
                                     "Parameter": [
                                         "Target Key Length",
@@ -547,7 +547,7 @@ def show_qb_learn():
                                 st.dataframe(param_data, hide_index=True)
                                 
                                 # Mathematical foundations
-                                st.markdown("**🧮 Mathematical Foundations:**")
+                                st.markdown("**Mathematical Foundations:**")
                                 st.markdown("""
                                 **Key Rate Formula (simplified):**
                                 ```
@@ -560,7 +560,7 @@ def show_qb_learn():
                                 """)
                                 
                                 # Real implementation notes
-                                st.markdown("**🏗️ Production Implementation Notes:**")
+                                st.markdown("**Production Implementation Notes:**")
                                 st.warning("""
                                 **For real-world deployment:**
                                 - Replace simulator with actual quantum hardware
@@ -591,7 +591,7 @@ def show_qb_learn():
         - **Digital Signatures**: Prove the authenticity and integrity of a transaction. Only the sender can create a valid signature, and anyone can verify it.
         """)
         st.markdown("---")
-        with st.expander("🔐 AES Encryption Example (Python)"):
+        with st.expander("AES Encryption Example (Python)"):
             st.markdown("""
             Encrypt transaction data using AES-256:
             """)
@@ -612,7 +612,7 @@ def show_qb_learn():
             ''', language="python")
             st.markdown("**Note:** Store the key securely! Only those with the key can decrypt the data.")
         
-        with st.expander("#️⃣ SHA-256 Hashing Example (Python)"):
+        with st.expander("SHA-256 Hashing Example (Python)"):
             st.markdown("""
             Hash transaction data for integrity:
             """)
@@ -624,7 +624,7 @@ def show_qb_learn():
             ''', language="python")
             st.markdown("**Note:** Hashing is one-way. You cannot recover the original data from the hash.")
         
-        with st.expander("✍️ Ed25519 Digital Signature Example (Python)"):
+        with st.expander("Ed25519 Digital Signature Example (Python)"):
             st.markdown("""
             Sign and verify transaction data:
             """)
@@ -645,7 +645,7 @@ def show_qb_learn():
 
         # Interactive widgets
         st.markdown("---")
-        st.subheader("🧪 Try it yourself: Interactive Widgets")
+        st.subheader("Try it yourself: Interactive Widgets")
 
         # 1. Hashing widget
         st.markdown("#### Hash a Message (SHA-256)")
@@ -722,10 +722,10 @@ def show_qb_learn():
 
     # --- Tab 5: Learn More ---
     with tabs[5]:
-        st.subheader("📚 Understanding Quantum AI Protection")
+        st.subheader("Understanding Quantum AI Protection")
         
         st.markdown("""
-        ### 🤔 How Does Quantum AI Protect Your Money?
+        ### How Does Quantum AI Protect Your Money?
         
         Our bank uses two revolutionary types of AI to keep your transactions safe:
         """)
@@ -734,7 +734,7 @@ def show_qb_learn():
         
         with col1:
             st.markdown("""
-            #### 🧠 **Classical AI**
+            #### **Classical AI**
             - Uses traditional computer algorithms
             - Analyzes patterns in transaction data
             - Fast and reliable for known fraud types
@@ -748,7 +748,7 @@ def show_qb_learn():
         
         with col2:
             st.markdown("""
-            #### ⚛️ **Quantum AI** 
+            #### **Quantum AI** 
             - Uses quantum computing principles
             - Can detect complex, hidden patterns
             - Better at finding new types of fraud
@@ -763,7 +763,7 @@ def show_qb_learn():
         st.markdown("---")
         
         st.markdown("""
-        ### 🔬 **The Science Behind Our Protection**
+        ### **The Science Behind Our Protection**
         
         #### QSVM (Quantum Support Vector Machine)
         """)
@@ -785,7 +785,7 @@ def show_qb_learn():
         st.markdown("---")
         
         st.markdown("""
-        ### 🛡️ **What This Means For You**
+        ### **What This Means For You**
         
         - **Better Protection**: Quantum AI catches fraud that classical systems miss
         - **Faster Detection**: Real-time analysis of every transaction
@@ -793,7 +793,7 @@ def show_qb_learn():
         - **Future-Proof**: Ready for tomorrow's sophisticated fraud attempts
         - **Always Learning**: Our AI gets smarter with every transaction
         
-        ### 🔒 **Your Privacy & Security**
+        ### **Your Privacy & Security**
         
         - Your transaction data is encrypted using quantum-safe methods
         - AI models learn patterns, not personal information
@@ -801,4 +801,4 @@ def show_qb_learn():
         - You maintain complete control over your account
         """)
         
-        st.success("💡 **Bottom Line**: Our quantum-powered AI works 24/7 to protect your money while you focus on what matters most to you!")
+        st.success("**Bottom Line**: Our quantum-powered AI works 24/7 to protect your money while you focus on what matters most to you!")

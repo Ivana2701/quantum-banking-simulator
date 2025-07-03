@@ -627,7 +627,7 @@ def demo_digital_signature():
                 "signature_size": len(signature),
                 "public_key_size": len(public_key),
                 "private_key_size": len(private_key),
-                "verification_result": "✅ VALID" if is_valid else "❌ INVALID",
+                "verification_result": "VALID" if is_valid else "INVALID",
                 "security_level": "NIST Level 5 (≈AES-256)"
             },
             "performance": {

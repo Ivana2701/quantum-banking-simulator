@@ -39,4 +39,4 @@ conn.commit()
 cur.close()
 conn.close()
 
-print(f"✅ {len(transactions)} synthetic transactions inserted clearly.")
+print(f"{len(transactions)} synthetic transactions inserted clearly.")

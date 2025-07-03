@@ -6,10 +6,10 @@ import seaborn as sns
 import os
 
 st.set_page_config(page_title="Train & Compare QML", layout="wide")
-st.title("🧪 Train & Compare QSVM / VQC Models")
+st.title("Train & Compare QSVM / VQC Models")
 
 # --- Training Buttons ---
-st.subheader("🎓 Train Quantum Models")
+st.subheader("Train Quantum Models")
 
 col1, col2 = st.columns(2)
 with col1:
@@ -18,7 +18,7 @@ with col1:
             ["python3", "backend/fraud_detection/train_and_save_models.py"],
             capture_output=True, text=True
         )
-        st.success("✅ QSVM model trained!")
+        st.success("QSVM model trained!")
         st.code(result.stdout)
 
 with col2:
@@ -27,18 +27,18 @@ with col2:
             ["python3", "backend/fraud_detection/vqc_fraud_detection.py"],
             capture_output=True, text=True
         )
-        st.success("✅ VQC model trained and metrics saved!")
+        st.success("VQC model trained and metrics saved!")
         st.code(result.stdout)
 
 # --- Milestone CSV Metrics View ---
 st.markdown("---")
-st.subheader("📊 Training Metrics from Milestones")
+st.subheader("Training Metrics from Milestones")
 
 # Load milestone training output
 milestone_path = "backend/quantum_ml/milestone_metrics.csv"
 if os.path.exists(milestone_path):
     df = pd.read_csv(milestone_path)
-    tabs = st.tabs(["📈 F1 Comparison", "📉 AUC Comparison", "📋 Raw Metrics"])
+    tabs = st.tabs(["F1 Comparison", "AUC Comparison", "Raw Metrics"])
     
     with tabs[0]:
         fig1, ax1 = plt.subplots()
@@ -61,7 +61,7 @@ else:
 
 # --- Educational Block ---
 st.markdown("---")
-st.subheader("📘 Quantum Classifier Math & Theory")
+st.subheader("Quantum Classifier Math & Theory")
 
 st.markdown("### QSVM: Quantum Support Vector Machine")
 # st.latex(r\"\"\"K(x_i, x_j) = |\langle \phi(x_i) | \phi(x_j) \rangle|^2\"\"\")

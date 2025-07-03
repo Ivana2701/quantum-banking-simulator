@@ -6,7 +6,7 @@ This document describes the implementation of a hybrid post-quantum secure proto
 
 ## Security Architecture
 
-### 🔐 Core Components
+### Core Components
 
 1. **BB84 Quantum Key Distribution (QKD)**
    - Provides quantum-secure key material

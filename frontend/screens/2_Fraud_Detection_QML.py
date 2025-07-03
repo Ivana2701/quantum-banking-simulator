@@ -15,7 +15,7 @@ from joblib import load as joblib_load
 load_dotenv()
 
 st.set_page_config(page_title="Fraud Detection QML", layout="wide")
-st.title("🧠 Fraud Detection: Quantum vs Classical Models")
+st.title("Fraud Detection: Quantum vs Classical Models")
 
 # --- Helper functions ---
 @st.cache_data
@@ -54,7 +54,7 @@ def load_model_and_predict(tx_vector, model_path):
     return int(model.predict(tx_vector)[0])
 
 # --- UI: ROC Comparison ---
-st.subheader("📈 ROC Curve Comparison")
+st.subheader("ROC Curve Comparison")
 
 try:
     qsvm = load_metrics("backend/metrics_data/quantum_qsvm.json")
@@ -75,7 +75,7 @@ except Exception as e:
 
 # --- UI: Live Prediction Demo ---
 st.markdown("---")
-st.subheader("🔮 Live Fraud Prediction")
+st.subheader("Live Fraud Prediction")
 
 try:
     df = get_transaction_data()
@@ -89,9 +89,9 @@ try:
 
     st.markdown(f"### 💳 Transaction {tx_id} is classified as:")
     if prediction == 1:
-        st.error("❌ Fraudulent")
+        st.error("Fraudulent")
     else:
-        st.success("✅ Legitimate")
+        st.success("Legitimate")
 
 except Exception as e:
     st.warning("Live prediction unavailable.")

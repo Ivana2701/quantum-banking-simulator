@@ -8,7 +8,7 @@ from screens import employee_experiments
 API_URL = "http://localhost:8000"
 
 def show_employee_dashboard():
-    st.title("👩‍💼 Employee Dashboard")
+    st.title("Employee Dashboard")
     
     if "token" not in st.session_state or not st.session_state.token:
         st.error("Please login first")
@@ -17,11 +17,11 @@ def show_employee_dashboard():
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     
     # Create tabs for different functionalities
-    tab1, tab2, tab3 = st.tabs(["📊 Transactions", "🔐 Quantum Security Demo", "🧪 ML Experiments"])
+    tab1, tab2, tab3 = st.tabs(["Transactions", "Quantum Security Demo", "ML Experiments"])
     
     with tab1:
-        st.subheader("📊 All System Transactions")
-        st.info("🔓 **Employee Access**: Transaction amounts are decrypted for monitoring purposes")
+        st.subheader("All System Transactions")
+        st.info("Employee Access: Transaction amounts are decrypted for monitoring purposes")
         
         # Date filter
         from datetime import datetime, timedelta
@@ -39,7 +39,7 @@ def show_employee_dashboard():
                 key="dash_to_date"
             )
         
-        if st.button("🔄 Load Transactions", use_container_width=True):
+        if st.button("Load Transactions", use_container_width=True):
             st.rerun()
         
         # Load all transactions with decrypted amounts
@@ -89,52 +89,52 @@ def show_employee_dashboard():
                     )
                     
                     # Summary statistics
-                    st.markdown("### 📈 Transaction Statistics")
+                    st.markdown("### Transaction Statistics")
                     col1, col2, col3, col4 = st.columns(4)
                     
                     with col1:
-                        st.metric("📊 Total Transactions", len(transactions))
+                        st.metric("Total Transactions", len(transactions))
                     
                     with col2:
                         fraud_count = len([tx for tx in transactions if tx.get("is_fraud", False)])
-                        st.metric("🚨 Fraud Alerts", fraud_count)
+                        st.metric("Fraud Alerts", fraud_count)
                     
                     with col3:
                         amounts = [tx.get("amount", 0) for tx in transactions if tx.get("amount") is not None]
                         if amounts:
                             total_volume = sum(amounts)
-                            st.metric("💰 Total Volume", f"${total_volume:.2f}")
+                            st.metric("Total Volume", f"${total_volume:.2f}")
                         else:
-                            st.metric("💰 Total Volume", "N/A")
+                            st.metric("Total Volume", "N/A")
                     
                     with col4:
                         if amounts:
                             avg_amount = sum(amounts) / len(amounts)
-                            st.metric("📊 Average Amount", f"${avg_amount:.2f}")
+                            st.metric("Average Amount", f"${avg_amount:.2f}")
                         else:
-                            st.metric("📊 Average Amount", "N/A")
+                            st.metric("Average Amount", "N/A")
                     
                 else:
-                    st.info("📊 No transactions found for the selected date range")
+                    st.info("No transactions found for the selected date range")
                     
             elif response.status_code == 403:
-                st.error("❌ Access denied. Employee privileges required.")
+                st.error("Access denied. Employee privileges required.")
             else:
-                st.error(f"❌ Failed to load transactions. Status code: {response.status_code}")
+                st.error(f"Failed to load transactions. Status code: {response.status_code}")
                 
         except requests.exceptions.RequestException as e:
-            st.error(f"❌ Connection error: {str(e)}")
+            st.error(f"Connection error: {str(e)}")
             st.info("Make sure the backend server is running on http://localhost:8000")
         except Exception as e:
-            st.error(f"❌ An error occurred: {str(e)}")
+            st.error(f"An error occurred: {str(e)}")
     
     with tab2:
-        st.subheader("🔐 Post-Quantum Cryptography Security")
+        st.subheader("Post-Quantum Cryptography Security")
         st.info("This tab demonstrates the quantum-resistant security features used in the banking system.")
         
         # Post-quantum cryptography information
         st.markdown("""
-        ### 🔐 Post-Quantum Cryptographic Algorithms
+        ### Post-Quantum Cryptographic Algorithms
         
         Our banking system uses NIST-selected post-quantum cryptographic algorithms to ensure security against both classical and quantum computer attacks:
         
@@ -153,7 +153,7 @@ def show_employee_dashboard():
         - Keys derived from Kyber-encapsulated shared secrets
         - PBKDF2 key derivation for additional security
         
-        ### 🔒 Security Features
+        ### Security Features
         
         - **Quantum-Resistant**: Algorithms are designed to resist quantum computer attacks
         - **Forward Secrecy**: New keys generated for each transaction
@@ -161,21 +161,21 @@ def show_employee_dashboard():
         - **Encrypted Storage**: Customer balances are encrypted at rest
         """)
         
-        if st.button("🔐 Demo: Key Generation", use_container_width=True):
+        if st.button("Demo: Key Generation", use_container_width=True):
             with st.spinner("Generating post-quantum keys..."):
                 try:
                     response = requests.post(f"{API_URL}/transactions/quantum/demo-key-generation", timeout=10)
                     if response.status_code == 200:
                         result = response.json()
                         if result.get("success"):
-                            st.success("✅ Post-quantum keys generated successfully!")
+                            st.success("Post-quantum keys generated successfully!")
                             
                             # Display key generation results
                             kyber_info = result["algorithms"]["kyber"]
                             dilithium_info = result["algorithms"]["dilithium"]
                             
-                            with st.expander("🔍 **Key Generation Details**"):
-                                st.markdown("### 🔑 CRYSTALS-Kyber (Key Encapsulation)")
+                            with st.expander("**Key Generation Details**"):
+                                st.markdown("### CRYSTALS-Kyber (Key Encapsulation)")
                                 col_k1, col_k2 = st.columns(2)
                                 with col_k1:
                                     st.metric("Public Key Size", f"{kyber_info['public_key_size']:,} bytes")
@@ -184,7 +184,7 @@ def show_employee_dashboard():
                                     st.metric("Security Level", kyber_info['security_level'])
                                     st.metric("Generation Time", f"{result['performance']['total_time']}s")
                                 
-                                st.markdown("### ✍️ CRYSTALS-Dilithium (Digital Signatures)")
+                                st.markdown("### CRYSTALS-Dilithium (Digital Signatures)")
                                 col_d1, col_d2 = st.columns(2)
                                 with col_d1:
                                     st.metric("Public Key Size", f"{dilithium_info['public_key_size']:,} bytes")
@@ -193,7 +193,7 @@ def show_employee_dashboard():
                                     st.metric("Security Level", dilithium_info['security_level'])
                                     st.metric("Library", result['implementation_details']['library'])
                                 
-                                st.markdown("### 🛡️ Security Features")
+                                st.markdown("### Security Features")
                                 st.info(f"**Quantum Resistance**: {result['implementation_details']['quantum_resistance']}")
                                 st.info(f"**Standards**: {result['implementation_details']['standardization']}")
                                 
@@ -208,32 +208,32 @@ def show_employee_dashboard():
                                     for feature in result['performance']['dilithium_features']:
                                         st.markdown(f"• {feature}")
                         else:
-                            st.error(f"❌ Key generation failed: {result.get('message', 'Unknown error')}")
+                            st.error(f"Key generation failed: {result.get('message', 'Unknown error')}")
                     else:
-                        st.error(f"❌ Server error: {response.status_code}")
+                        st.error(f"Server error: {response.status_code}")
                 except requests.exceptions.RequestException as e:
-                    st.error(f"❌ Connection error: {str(e)}")
+                    st.error(f"Connection error: {str(e)}")
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                    st.error(f"Error: {str(e)}")
         
-        if st.button("📝 Demo: Digital Signature", use_container_width=True):
+        if st.button("Demo: Digital Signature", use_container_width=True):
             with st.spinner("Creating and verifying digital signature..."):
                 try:
                     response = requests.post(f"{API_URL}/transactions/quantum/demo-digital-signature", timeout=10)
                     if response.status_code == 200:
                         result = response.json()
                         if result.get("success"):
-                            st.success("✅ Digital signature demo completed!")
+                            st.success("Digital signature demo completed!")
                             
                             # Display signature results
                             sig_details = result["signature_details"]
                             transaction = result["transaction_data"]
                             
-                            with st.expander("🔍 **Digital Signature Details**"):
-                                st.markdown("### 📄 Transaction Data Signed")
+                            with st.expander("**Digital Signature Details**"):
+                                st.markdown("### Transaction Data Signed")
                                 st.json(transaction)
                                 
-                                st.markdown("### ✍️ Signature Information")
+                                st.markdown("### Signature Information")
                                 col_s1, col_s2 = st.columns(2)
                                 with col_s1:
                                     st.metric("Algorithm", sig_details['algorithm'])
@@ -242,36 +242,36 @@ def show_employee_dashboard():
                                     st.metric("Verification", sig_details['verification_result'])
                                     st.metric("Total Time", f"{result['performance']['total_time']}s")
                                 
-                                st.markdown("### 🔐 Security Properties")
+                                st.markdown("### Security Properties")
                                 security = result["security_properties"]
                                 for prop, desc in security.items():
                                     st.markdown(f"**{prop.replace('_', ' ').title()}**: {desc}")
                                 
-                                st.markdown("### 🌍 Real-World Applications")
+                                st.markdown("### Real-World Applications")
                                 for app in result["real_world_applications"]:
                                     st.markdown(f"• {app}")
                         else:
-                            st.error(f"❌ Signature demo failed: {result.get('message', 'Unknown error')}")
+                            st.error(f"Signature demo failed: {result.get('message', 'Unknown error')}")
                     else:
-                        st.error(f"❌ Server error: {response.status_code}")
+                        st.error(f"Server error: {response.status_code}")
                 except requests.exceptions.RequestException as e:
-                    st.error(f"❌ Connection error: {str(e)}")
+                    st.error(f"Connection error: {str(e)}")
                 except Exception as e:
-                    st.error(f"❌ Error: {str(e)}")
+                    st.error(f"Error: {str(e)}")
         
         # Security status
         st.markdown("""
-        ### 📊 Security Status
+        ### Security Status
         """)
         
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.metric("🔐 Encryption", "Active", help="AES-256 encryption active")
+            st.metric("Encryption", "Active", help="AES-256 encryption active")
         with col2:
-            st.metric("🔑 Key Exchange", "Quantum-Safe", help="CRYSTAL-Kyber in use")
+            st.metric("Key Exchange", "Quantum-Safe", help="CRYSTAL-Kyber in use")
         with col3:
-            st.metric("📝 Signatures", "Post-Quantum", help="CRYSTAL-DILITHIUM active")
+            st.metric("Signatures", "Post-Quantum", help="CRYSTAL-DILITHIUM active")
     
     with tab3:
         employee_experiments.main()

@@ -32,10 +32,10 @@ def initialize_session():
     
     # Debug: Show current session state (only for admin users)
     if auth_manager.is_debug_enabled():
-        st.write("🔍 DEBUG - Authentication Settings:")
+        st.write("DEBUG - Authentication Settings:")
         st.write(f"Token expiration: {auth_manager.token_expire_minutes} minutes")
         st.write(f"Session file: {auth_manager.session_file}")
-        st.write("🔍 DEBUG - Current session state:")
+        st.write("DEBUG - Current session state:")
         st.write(f"Token: {st.session_state.token[:20] + '...' if st.session_state.token else 'None'}")
         st.write(f"Account type: {st.session_state.account_type}")
         st.write(f"Auth manager session: {auth_manager._get_stored_session() is not None}")
@@ -62,15 +62,15 @@ def initialize_session():
                     
                     # Debug: Show successful restoration (only for admin users)
                     if auth_manager.is_debug_enabled():
-                        st.success(f"✅ Session restored for {user_data.get('username')}")
+                        st.success(f"Session restored for {user_data.get('username')}")
             else:
                 # Debug: Show why validation failed (only for admin users)
                 if auth_manager.is_debug_enabled():
-                    st.warning("❌ Session validation failed")
+                    st.warning("Session validation failed")
         except Exception as e:
             # Debug: Show any errors (only for admin users)
             if auth_manager.is_debug_enabled():
-                st.error(f"🚨 Session restoration error: {e}")
+                st.error(f"Session restoration error: {e}")
 
 # Initialize session state
 initialize_session()
@@ -78,7 +78,7 @@ initialize_session()
 # Add debug toggle in sidebar (only for admin users)
 if st.session_state.token and st.session_state.account_type == "admin":
     if st.sidebar.checkbox("Enable Auth Debug", key="debug_auth"):
-        st.sidebar.write("🔍 Debug mode enabled")
+        st.sidebar.write("Debug mode enabled")
 
 # sidebar navigation
 if st.session_state.token is None:
