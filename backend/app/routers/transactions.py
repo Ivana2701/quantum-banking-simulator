@@ -290,9 +290,7 @@ def test_bb84_protocol(
 
 @router.post("/quantum/demo-bb84", response_model=dict)
 def demo_bb84_protocol(
-    request: dict,
-    current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    request: dict
 ):
     """Demo BB84 protocol with custom parameters from frontend"""
     try:
@@ -351,87 +349,7 @@ def demo_bb84_protocol(
     except Exception as e:
         logger.error(f"BB84 demo failed: {e}")
         raise HTTPException(status_code=500, detail=f"BB84 demo failed: {str(e)}")
-
-@router.post("/quantum/demo-full-protocol", response_model=dict)
-def demo_full_protocol(
-    current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Demonstrate the complete hybrid post-quantum protocol"""
-    try:
-        protocol = get_protocol_instance()
-        start_time = time.time()
-        
-        # Phase 1: Session establishment
-        phase1_start = time.time()
-        session_info = protocol.establish_session_keys(current_user["username"])
-        phase1_time = time.time() - phase1_start
-        
-        # Phase 2: Transaction encryption
-        phase2_start = time.time()
-        test_transaction = {
-            "amount": 100.50,
-            "to_account_id": 999,
-            "description": "Demo transaction"
-        }
-        encrypted_data = protocol.encrypt_transaction_data(
-            session_info["session_id"], 
-            test_transaction
-        )
-        phase2_time = time.time() - phase2_start
-        
-        # Phase 3: Digital signature
-        phase3_start = time.time()
-        signature = protocol.sign_transaction(test_transaction)
-        phase3_time = time.time() - phase3_start
-        
-        # Phase 4: Verification
-        phase4_start = time.time()
-        is_valid = protocol.verify_transaction_signature(test_transaction, signature)
-        phase4_time = time.time() - phase4_start
-        
-        # Phase 5: Decryption
-        phase5_start = time.time()
-        decrypted_data = protocol.decrypt_transaction_data(encrypted_data)
-        phase5_time = time.time() - phase5_start
-        
-        total_time = time.time() - start_time
-        
-        return {
-            "success": True,
-            "total_time": total_time,
-            "bb84_time": phase1_time * 0.6,  # Estimate BB84 portion
-            "kyber_time": phase1_time * 0.4,  # Estimate Kyber portion
-            "phases": {
-                "session_establishment": {
-                    "time": phase1_time,
-                    "session_id": session_info["session_id"][:8] + "...",
-                    "protocols": ["BB84", "Kyber", "HKDF"]
-                },
-                "data_encryption": {
-                    "time": phase2_time,
-                    "algorithm": "AES-256-GCM",
-                    "data_size": len(json.dumps(test_transaction))
-                },
-                "digital_signature": {
-                    "time": phase3_time,
-                    "algorithm": "CRYSTALS-Dilithium",
-                    "signature_length": len(signature)
-                },
-                "signature_verification": {
-                    "time": phase4_time,
-                    "result": "Valid" if is_valid else "Invalid"
-                },
-                "data_decryption": {
-                    "time": phase5_time,
-                    "success": decrypted_data == test_transaction
-                }
-            }
-        }
-    except Exception as e:
-        logger.error(f"Full protocol demo failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Demo failed: {str(e)}")
-
+    
 # Health check endpoint for quantum readiness
 @router.get("/quantum/health", response_model=dict)
 def quantum_health_check():

@@ -212,6 +212,7 @@ def show_customer_transactions():
     
     with tab2:
         st.subheader("📋 Your Transaction History")
+        st.info("💰 **Customer View**: Your transaction amounts are decrypted for your viewing")
         
         # Date filter
         col1, col2, col3 = st.columns(3)
@@ -248,17 +249,31 @@ def show_customer_transactions():
                     st.markdown("### 📤 Sent Transactions")
                     sent_df = pd.DataFrame(transactions_data["sent"])
                     sent_df["type"] = "Sent"
-                    sent_df["created_at"] = pd.to_datetime(sent_df["created_at"]).dt.strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # Convert to datetime for sorting, then sort by latest first
+                    sent_df["created_at"] = pd.to_datetime(sent_df["created_at"])
+                    sent_df = sent_df.sort_values("created_at", ascending=False)
+                    
+                    # Format datetime without milliseconds
+                    sent_df["created_at"] = sent_df["created_at"].dt.strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # Format amount column - amounts should be decrypted for customers
+                    if "amount" in sent_df.columns:
+                        sent_df["amount"] = sent_df["amount"].apply(lambda x: f"${x:.2f}" if pd.notna(x) and x > 0 else "Error")
                     
                     # Rename columns for better display
                     display_sent = sent_df.rename(columns={
                         "transaction_id": "ID",
                         "to_account_id": "To Account",
+                        "amount": "Amount",
                         "created_at": "Date & Time",
                         "is_fraud": "Fraud Check"
                     })
                     
-                    st.dataframe(display_sent[["ID", "To Account", "Date & Time", "Fraud Check"]], use_container_width=True)
+                    # Select columns to display (include Amount if available)
+                    columns_to_show = ["ID", "To Account", "Amount", "Date & Time", "Fraud Check"]
+                    
+                    st.dataframe(display_sent[columns_to_show], use_container_width=True)
                 else:
                     st.info("📤 No sent transactions found")
                 
@@ -267,17 +282,31 @@ def show_customer_transactions():
                     st.markdown("### 📥 Received Transactions")
                     received_df = pd.DataFrame(transactions_data["received"])
                     received_df["type"] = "Received"
-                    received_df["created_at"] = pd.to_datetime(received_df["created_at"]).dt.strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # Convert to datetime for sorting, then sort by latest first
+                    received_df["created_at"] = pd.to_datetime(received_df["created_at"])
+                    received_df = received_df.sort_values("created_at", ascending=False)
+                    
+                    # Format datetime without milliseconds
+                    received_df["created_at"] = received_df["created_at"].dt.strftime('%Y-%m-%d %H:%M:%S')
+                    
+                    # Format amount column - amounts should be decrypted for customers
+                    if "amount" in received_df.columns:
+                        received_df["amount"] = received_df["amount"].apply(lambda x: f"${x:.2f}" if pd.notna(x) and x > 0 else "Error")
                     
                     # Rename columns for better display
                     display_received = received_df.rename(columns={
                         "transaction_id": "ID",
                         "from_account_id": "From Account",
+                        "amount": "Amount",
                         "created_at": "Date & Time",
                         "is_fraud": "Fraud Check"
                     })
                     
-                    st.dataframe(display_received[["ID", "From Account", "Date & Time", "Fraud Check"]], use_container_width=True)
+                    # Select columns to display (include Amount if available)
+                    columns_to_show = ["ID", "From Account", "Amount", "Date & Time", "Fraud Check"]
+                    
+                    st.dataframe(display_received[columns_to_show], use_container_width=True)
                 else:
                     st.info("📥 No received transactions found")
                 

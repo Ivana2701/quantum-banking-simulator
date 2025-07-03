@@ -9,7 +9,7 @@ from screens.transactions import show_customer_transactions, show_employee_trans
 from screens.dashboard import show_employee_dashboard
 from screens.admin_dashboard import show_admin_dashboard
 from screens.qb_learn import show_qb_learn
-from screens.quantum_security import show_quantum_security_dashboard, show_quantum_demo
+from screens.quantum_security import show_quantum_security_dashboard
 from utils.auth_manager import auth_manager
 from utils.quantum_session_manager import quantum_session_manager
 
@@ -119,7 +119,7 @@ else:
         elif page == "Transactions":
             show_employee_transactions()
     elif st.session_state.account_type == "admin":
-        dashboard_pages = ["Home", "Quantum Demo"]
+        dashboard_pages = ["Home"]
         page = st.sidebar.radio("Dashboard", dashboard_pages)
         if st.sidebar.button("Logout"):
             # Clean up quantum session before logout
@@ -128,8 +128,6 @@ else:
             auth_manager.logout()  # Use auth_manager for proper logout
         if page == "Home":
             show_admin_dashboard()
-        elif page == "Quantum Demo":
-            show_quantum_demo()
     else:
         # logout if account type is unknown
         auth_manager.logout()  # Use auth_manager for proper logout
