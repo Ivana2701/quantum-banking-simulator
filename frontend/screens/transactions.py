@@ -355,22 +355,22 @@ def show_employee_transactions():
         st.info("🔓 **Employee Access**: Transaction amounts are decrypted for monitoring purposes")
         
         # Date filter
-        col1, col2, col3 = st.columns(3)
+        col1, col2 = st.columns(2)
         with col1:
             from_date = st.date_input(
                 "From Date", 
                 value=datetime.now().date() - timedelta(days=7),
-                key="emp_from_date"
+                key="dash_from_date"
             )
         with col2:
             to_date = st.date_input(
                 "To Date", 
                 value=datetime.now().date(),
-                key="emp_to_date"
+                key="dash_to_date"
             )
-        with col3:
-            if st.button("🔄 Load Transactions"):
-                st.rerun()
+        
+        if st.button("🔄 Load Transactions", use_container_width=True):
+            st.rerun()
         
         # Load all transactions with decrypted amounts
         try:
@@ -402,12 +402,18 @@ def show_employee_transactions():
                         "is_fraud": "Fraud Alert"
                     })
                     
+                    # Add Created By column if account_id exists, otherwise use from_account_id as fallback
+                    if "account_id" in df.columns:
+                        display_df["Created By"] = df["account_id"]
+                    else:
+                        display_df["Created By"] = df["from_account_id"]  # Fallback to sender account
+                    
                     # Format amount column
                     if "Amount ($)" in display_df.columns:
                         display_df["Amount ($)"] = display_df["Amount ($)"].apply(lambda x: f"${x:.2f}" if pd.notna(x) else "Encrypted")
                     
                     st.dataframe(
-                        display_df[["ID", "From Account", "To Account", "Amount ($)", "Date & Time", "Fraud Alert"]], 
+                        display_df[["ID", "From Account", "To Account", "Amount ($)", "Created By", "Date & Time", "Fraud Alert"]], 
                         use_container_width=True
                     )
                     
@@ -489,8 +495,14 @@ def show_employee_transactions():
                                     "amount": "Amount ($)",
                                     "created_at": "Date & Time"
                                 })
+                                # Add Created By column if account_id exists
+                                if "account_id" in sent_transactions.columns:
+                                    sent_display["Created By"] = sent_transactions["account_id"]
+                                else:
+                                    sent_display["Created By"] = sent_transactions["from_account_id"]  # Fallback
+                                
                                 sent_display["Amount ($)"] = sent_display["Amount ($)"].apply(lambda x: f"${x:.2f}" if pd.notna(x) else "Encrypted")
-                                st.dataframe(sent_display[["ID", "To Account", "Amount ($)", "Date & Time"]], use_container_width=True)
+                                st.dataframe(sent_display[["ID", "To Account", "Amount ($)", "Created By", "Date & Time"]], use_container_width=True)
                             
                             if not received_transactions.empty:
                                 st.markdown("#### 📥 Received Transactions")
@@ -500,8 +512,14 @@ def show_employee_transactions():
                                     "amount": "Amount ($)",
                                     "created_at": "Date & Time"
                                 })
+                                # Add Created By column if account_id exists
+                                if "account_id" in received_transactions.columns:
+                                    received_display["Created By"] = received_transactions["account_id"]
+                                else:
+                                    received_display["Created By"] = received_transactions["from_account_id"]  # Fallback
+                                
                                 received_display["Amount ($)"] = received_display["Amount ($)"].apply(lambda x: f"${x:.2f}" if pd.notna(x) else "Encrypted")
-                                st.dataframe(received_display[["ID", "From Account", "Amount ($)", "Date & Time"]], use_container_width=True)
+                                st.dataframe(received_display[["ID", "From Account", "Amount ($)", "Created By", "Date & Time"]], use_container_width=True)
                         else:
                             st.info(f"No transactions found for account {account_id}")
                     else:
