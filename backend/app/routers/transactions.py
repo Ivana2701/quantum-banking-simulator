@@ -508,3 +508,153 @@ def process_secure_employee_transaction(
             pass  # If signing fails, return without signature
         
         return SecureTransactionResponse(**error_response)
+
+# Demo endpoints for PQC features
+
+@router.post("/quantum/demo-key-generation", response_model=dict)
+def demo_key_generation():
+    """Demo endpoint for post-quantum key generation"""
+    try:
+        import time
+        start_time = time.time()
+        
+        from quantum_encryption.hybrid_pqc_protocol import get_protocol_instance
+        protocol = get_protocol_instance()
+        
+        # Generate fresh Kyber keypair
+        import oqs
+        with oqs.KeyEncapsulation('Kyber1024') as kem:
+            public_key = kem.generate_keypair()
+            private_key = kem.export_secret_key()
+            
+        # Generate fresh Dilithium keypair  
+        with oqs.Signature('Dilithium5') as signer:
+            dilithium_public_key = signer.generate_keypair()
+            dilithium_private_key = signer.export_secret_key()
+        
+        end_time = time.time()
+        
+        return {
+            "success": True,
+            "message": "Post-quantum cryptographic keys generated successfully",
+            "algorithms": {
+                "kyber": {
+                    "name": "CRYSTALS-Kyber1024",
+                    "type": "Key Encapsulation Mechanism (KEM)",
+                    "public_key_size": len(public_key),
+                    "private_key_size": len(private_key),
+                    "security_level": "NIST Level 5 (≈AES-256)"
+                },
+                "dilithium": {
+                    "name": "CRYSTALS-Dilithium5", 
+                    "type": "Digital Signature Algorithm",
+                    "public_key_size": len(dilithium_public_key),
+                    "private_key_size": len(dilithium_private_key),
+                    "security_level": "NIST Level 5 (≈AES-256)"
+                }
+            },
+            "performance": {
+                "total_time": round(end_time - start_time, 4),
+                "kyber_features": [
+                    "Quantum-resistant key encapsulation",
+                    "Based on Module Learning With Errors (MLWE)",
+                    "Standardized by NIST (FIPS 203)",
+                    "Optimized for high security level"
+                ],
+                "dilithium_features": [
+                    "Quantum-resistant digital signatures",
+                    "Based on Module Learning With Errors (MLWE)",
+                    "Standardized by NIST (FIPS 204)",
+                    "Deterministic signatures with strong security"
+                ]
+            },
+            "implementation_details": {
+                "library": "liboqs (Open Quantum Safe)",
+                "quantum_resistance": "Secure against both classical and quantum attacks",
+                "standardization": "NIST Post-Quantum Cryptography Standards",
+                "use_cases": ["Secure key exchange", "Transaction authentication", "Long-term security"]
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Key generation demo failed: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Key generation demo failed"
+        }
+
+@router.post("/quantum/demo-digital-signature", response_model=dict)
+def demo_digital_signature():
+    """Demo endpoint for post-quantum digital signatures"""
+    try:
+        import time
+        import json
+        
+        start_time = time.time()
+        
+        # Sample transaction data
+        transaction_data = {
+            "transaction_id": "demo_tx_12345",
+            "from_account": 1001,
+            "to_account": 1002,
+            "amount": 500.00,
+            "timestamp": datetime.utcnow().isoformat(),
+            "description": "Demo transaction for signature verification"
+        }
+        
+        # Generate signature using Dilithium
+        import oqs
+        with oqs.Signature('Dilithium5') as signer:
+            public_key = signer.generate_keypair()
+            private_key = signer.export_secret_key()
+            
+            # Sign the transaction
+            message = json.dumps(transaction_data, sort_keys=True).encode('utf-8')
+            signature = signer.sign(message)
+            
+            # Verify the signature
+            is_valid = signer.verify(message, signature, public_key)
+        
+        end_time = time.time()
+        
+        return {
+            "success": True,
+            "message": "Digital signature demo completed successfully",
+            "transaction_data": transaction_data,
+            "signature_details": {
+                "algorithm": "CRYSTALS-Dilithium5",
+                "signature_size": len(signature),
+                "public_key_size": len(public_key),
+                "private_key_size": len(private_key),
+                "verification_result": "✅ VALID" if is_valid else "❌ INVALID",
+                "security_level": "NIST Level 5 (≈AES-256)"
+            },
+            "performance": {
+                "total_time": round(end_time - start_time, 4),
+                "signing_time": "< 0.001s (estimated)",
+                "verification_time": "< 0.001s (estimated)"
+            },
+            "security_properties": {
+                "quantum_resistance": "Secure against Shor's algorithm",
+                "classical_security": "Based on lattice problems",
+                "signature_uniqueness": "Deterministic signatures for same input",
+                "non_repudiation": "Cryptographic proof of authenticity",
+                "integrity": "Detects any message tampering"
+            },
+            "real_world_applications": [
+                "Transaction authentication in banking",
+                "Legal document signing",
+                "Software code signing",
+                "Certificate authority operations",
+                "Blockchain and cryptocurrency transactions"
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Digital signature demo failed: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Digital signature demo failed"
+        }

@@ -161,26 +161,103 @@ def show_employee_dashboard():
         - **Encrypted Storage**: Customer balances are encrypted at rest
         """)
         
-        # Security demonstration
-        col1, col2 = st.columns(2)
+        if st.button("🔐 Demo: Key Generation", use_container_width=True):
+            with st.spinner("Generating post-quantum keys..."):
+                try:
+                    response = requests.post(f"{API_URL}/transactions/quantum/demo-key-generation", timeout=10)
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get("success"):
+                            st.success("✅ Post-quantum keys generated successfully!")
+                            
+                            # Display key generation results
+                            kyber_info = result["algorithms"]["kyber"]
+                            dilithium_info = result["algorithms"]["dilithium"]
+                            
+                            with st.expander("🔍 **Key Generation Details**"):
+                                st.markdown("### 🔑 CRYSTALS-Kyber (Key Encapsulation)")
+                                col_k1, col_k2 = st.columns(2)
+                                with col_k1:
+                                    st.metric("Public Key Size", f"{kyber_info['public_key_size']:,} bytes")
+                                    st.metric("Private Key Size", f"{kyber_info['private_key_size']:,} bytes")
+                                with col_k2:
+                                    st.metric("Security Level", kyber_info['security_level'])
+                                    st.metric("Generation Time", f"{result['performance']['total_time']}s")
+                                
+                                st.markdown("### ✍️ CRYSTALS-Dilithium (Digital Signatures)")
+                                col_d1, col_d2 = st.columns(2)
+                                with col_d1:
+                                    st.metric("Public Key Size", f"{dilithium_info['public_key_size']:,} bytes")
+                                    st.metric("Private Key Size", f"{dilithium_info['private_key_size']:,} bytes")
+                                with col_d2:
+                                    st.metric("Security Level", dilithium_info['security_level'])
+                                    st.metric("Library", result['implementation_details']['library'])
+                                
+                                st.markdown("### 🛡️ Security Features")
+                                st.info(f"**Quantum Resistance**: {result['implementation_details']['quantum_resistance']}")
+                                st.info(f"**Standards**: {result['implementation_details']['standardization']}")
+                                
+                                # Show features
+                                col_feat1, col_feat2 = st.columns(2)
+                                with col_feat1:
+                                    st.markdown("**Kyber Features:**")
+                                    for feature in result['performance']['kyber_features']:
+                                        st.markdown(f"• {feature}")
+                                with col_feat2:
+                                    st.markdown("**Dilithium Features:**")
+                                    for feature in result['performance']['dilithium_features']:
+                                        st.markdown(f"• {feature}")
+                        else:
+                            st.error(f"❌ Key generation failed: {result.get('message', 'Unknown error')}")
+                    else:
+                        st.error(f"❌ Server error: {response.status_code}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"❌ Connection error: {str(e)}")
+                except Exception as e:
+                    st.error(f"❌ Error: {str(e)}")
         
-        with col1:
-            if st.button("🔐 Demo: Key Generation"):
-                with st.spinner("Generating post-quantum keys..."):
-                    import time
-                    time.sleep(1)  # Simulate processing
-                    st.success("✅ CRYSTAL-Kyber keypair generated!")
-                    st.success("✅ CRYSTAL-DILITHIUM keypair generated!")
-                    st.info("🔑 Keys would be stored securely in production")
-        
-        with col2:
-            if st.button("📝 Demo: Digital Signature"):
-                with st.spinner("Creating digital signature..."):
-                    import time
-                    time.sleep(1)  # Simulate processing
-                    st.success("✅ Transaction signed with DILITHIUM!")
-                    st.success("✅ Signature verified successfully!")
-                    st.info("🛡️ Transaction integrity guaranteed")
+        if st.button("📝 Demo: Digital Signature", use_container_width=True):
+            with st.spinner("Creating and verifying digital signature..."):
+                try:
+                    response = requests.post(f"{API_URL}/transactions/quantum/demo-digital-signature", timeout=10)
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get("success"):
+                            st.success("✅ Digital signature demo completed!")
+                            
+                            # Display signature results
+                            sig_details = result["signature_details"]
+                            transaction = result["transaction_data"]
+                            
+                            with st.expander("🔍 **Digital Signature Details**"):
+                                st.markdown("### 📄 Transaction Data Signed")
+                                st.json(transaction)
+                                
+                                st.markdown("### ✍️ Signature Information")
+                                col_s1, col_s2 = st.columns(2)
+                                with col_s1:
+                                    st.metric("Algorithm", sig_details['algorithm'])
+                                    st.metric("Signature Size", f"{sig_details['signature_size']:,} bytes")
+                                with col_s2:
+                                    st.metric("Verification", sig_details['verification_result'])
+                                    st.metric("Total Time", f"{result['performance']['total_time']}s")
+                                
+                                st.markdown("### 🔐 Security Properties")
+                                security = result["security_properties"]
+                                for prop, desc in security.items():
+                                    st.markdown(f"**{prop.replace('_', ' ').title()}**: {desc}")
+                                
+                                st.markdown("### 🌍 Real-World Applications")
+                                for app in result["real_world_applications"]:
+                                    st.markdown(f"• {app}")
+                        else:
+                            st.error(f"❌ Signature demo failed: {result.get('message', 'Unknown error')}")
+                    else:
+                        st.error(f"❌ Server error: {response.status_code}")
+                except requests.exceptions.RequestException as e:
+                    st.error(f"❌ Connection error: {str(e)}")
+                except Exception as e:
+                    st.error(f"❌ Error: {str(e)}")
         
         # Security status
         st.markdown("""
