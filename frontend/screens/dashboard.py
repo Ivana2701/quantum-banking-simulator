@@ -7,68 +7,6 @@ from screens import employee_experiments
 
 API_URL = "http://localhost:8000"
 
-def show_customer_dashboard():
-    st.title("🏦 Customer Dashboard")
-    hdr = {"Authorization": f"Bearer {st.session_state.token}"}
-
-    # balance
-    bal = requests.get(f"{API_URL}/customer/balance", headers=hdr)
-    if bal.status_code == 200:
-        st.metric("Balance", bal.json().get("encrypted_balance"))
-    else:
-        st.error("Could not fetch balance.")
-
-    # send money
-    st.subheader("Send Money")
-    
-    # Check if quantum-safe protocol is enabled
-    use_quantum = get_cached_quantum_safe_setting()
-    
-    # Display current security mode
-    if use_quantum:
-        st.info("🔐 **Quantum-Safe Mode**: Transactions use post-quantum cryptography")
-    else:
-        st.warning("⚠️ **Standard Mode**: Using traditional cryptography")
-    
-    to_id = st.text_input("Recipient Account ID")
-    amt = st.number_input("Amount", min_value=0.01, step=0.01)
-    if st.button("Send"):
-        if use_quantum:
-            # Use quantum-safe protocol
-            with st.spinner("🔐 Processing quantum-safe transaction..."):
-                success, error, result = quantum_session_manager.send_secure_transaction(
-                    st.session_state.token,
-                    int(to_id),
-                    float(amt),
-                    "Dashboard transaction"
-                )
-                
-                if success:
-                    st.success("✅ Quantum-safe transaction successful!")
-                    if result and "transaction_id" in result:
-                        st.info(f"🆔 Transaction ID: {result['transaction_id']}")
-                else:
-                    st.error(f"❌ Quantum transaction failed: {error}")
-        else:
-            # Use standard protocol
-            r = requests.post(
-                f"{API_URL}/customer/transfer",
-                headers=hdr,
-                json={"to_account_id": int(to_id), "amount": amt}
-            )
-            if r.status_code == 200:
-                st.success("Sent!")
-            else:
-                st.error(f"Failed: {r.text}")
-
-    # transactions
-    st.subheader("Transactions")
-    tx = requests.get(f"{API_URL}/customer/transactions", headers=hdr)
-    if tx.status_code == 200:
-        st.write(tx.json())
-    else:
-        st.error("Could not fetch transactions.")
-
 def show_employee_dashboard():
     st.title("👩‍💼 Employee Dashboard")
     
