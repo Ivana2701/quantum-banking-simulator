@@ -15,7 +15,7 @@ from app.core.security import get_password_hash
 
 def create_admin_user():
     """Create an admin user with username 'admin' and password 'adminpass'"""
-    print("🔧 Creating admin user...")
+    print("Creating admin user...")
     
     db = SessionLocal()
     account_service = AccountService()
@@ -24,7 +24,7 @@ def create_admin_user():
         # Check if admin user already exists
         existing_admin = account_service.get_by_username(db, "admin")
         if existing_admin:
-            print("⚠️  Admin user already exists!")
+            print("Admin user already exists!")
             print(f"   Username: {existing_admin.username}")
             print(f"   Account Type: {existing_admin.account_type}")
             print(f"   Account ID: {existing_admin.account_id}")
@@ -43,21 +43,21 @@ def create_admin_user():
         hashed_password = get_password_hash(admin_payload.password)
         
         # Create the admin account using the create_admin function
-        print("👤 Creating admin account...")
+        print("Creating admin account...")
         admin_account = account_service.create_admin(
             db=db,
             payload=admin_payload,
             hashed_password=hashed_password
         )
         
-        print("✅ Admin user created successfully!")
+        print("Admin user created successfully!")
         print(f"   Username: {admin_account.username}")
         print(f"   Account ID: {admin_account.account_id}")
         
         return admin_account
         
     except Exception as e:
-        print(f"❌ Error creating admin user: {str(e)}")
+        print(f"Error creating admin user: {str(e)}")
         db.rollback()
         raise
     finally:

@@ -235,10 +235,10 @@ class QuantumSessionManager:
         try:
             headers = {"Authorization": f"Bearer {auth_token}"}
             
-            print(f"🔐 DEBUG: Starting quantum secure transaction")
-            print(f"📍 Session ID: {session.session_id}")
-            print(f"💰 Amount: ${amount}")
-            print(f"🎯 To Account: {to_account_id}")
+            print(f"DEBUG: Starting quantum secure transaction")
+            print(f"Session ID: {session.session_id}")
+            print(f"Amount: ${amount}")
+            print(f"To Account: {to_account_id}")
             
             # Step 1: Create encrypted and signed transaction package
             transaction_create_data = {
@@ -246,7 +246,7 @@ class QuantumSessionManager:
                 "amount": amount
             }
             
-            print(f"🔒 DEBUG: Creating encrypted transaction package...")
+            print(f"DEBUG: Creating encrypted transaction package...")
             create_response = requests.post(
                 f"{API_URL}/transactions/create-secure-transaction",
                 headers=headers,
@@ -255,19 +255,19 @@ class QuantumSessionManager:
                 timeout=30
             )
             
-            print(f"📦 DEBUG: Encryption response status: {create_response.status_code}")
+            print(f"DEBUG: Encryption response status: {create_response.status_code}")
             
             if create_response.status_code != 200:
                 error_msg = f"Failed to create secure transaction package: {create_response.text}"
-                print(f"❌ DEBUG: {error_msg}")
+                print(f"DEBUG: {error_msg}")
                 return False, error_msg, None
             
             encrypted_transaction_package = create_response.json()
-            print(f"✅ DEBUG: Transaction encrypted and signed successfully")
-            print(f"📋 DEBUG: Package keys: {list(encrypted_transaction_package.keys())}")
+            print(f"DEBUG: Transaction encrypted and signed successfully")
+            print(f"DEBUG: Package keys: {list(encrypted_transaction_package.keys())}")
             
             # Step 2: Submit the encrypted transaction package for execution
-            print(f"🚀 DEBUG: Executing encrypted transaction...")
+            print(f"DEBUG: Executing encrypted transaction...")
             execute_response = requests.post(
                 f"{API_URL}/transactions/secure-transaction",
                 headers=headers,
@@ -275,25 +275,25 @@ class QuantumSessionManager:
                 timeout=30
             )
             
-            print(f"⚡ DEBUG: Execution response status: {execute_response.status_code}")
+            print(f"DEBUG: Execution response status: {execute_response.status_code}")
             
             if execute_response.status_code == 200:
                 result = execute_response.json()
-                print(f"🎉 DEBUG: Transaction executed successfully!")
-                print(f"🆔 DEBUG: Transaction ID: {result.get('transaction_id', 'N/A')}")
+                print(f"DEBUG: Transaction executed successfully!")
+                print(f"DEBUG: Transaction ID: {result.get('transaction_id', 'N/A')}")
                 return True, None, result
             else:
                 error_msg = f"Transaction execution failed: {execute_response.text}"
-                print(f"❌ DEBUG: {error_msg}")
+                print(f"DEBUG: {error_msg}")
                 return False, error_msg, None
                 
         except requests.exceptions.RequestException as e:
             error_msg = f"Connection error: {str(e)}"
-            print(f"🌐 DEBUG: {error_msg}")
+            print(f"DEBUG: {error_msg}")
             return False, error_msg, None
         except Exception as e:
             error_msg = f"Transaction error: {str(e)}"
-            print(f"💥 DEBUG: {error_msg}")
+            print(f"DEBUG: {error_msg}")
             return False, error_msg, None
     
     def verify_transaction(

@@ -72,8 +72,16 @@ def view_transactions(
     db: Session = Depends(get_db)
 ):
     """View customer transactions - requires customer role"""
-    # Customers see their sent and received transactions (without decrypted amounts)
+    # Customers see their sent and received transactions (with decrypted amounts for their own transactions)
     acct = acct_svc.get_account_by_id(db, user.account_id)
     sent = tx_svc.get_sent_transactions(db, acct.account_id, from_date, to_date)
     received = tx_svc.get_received_transactions(db, acct.account_id, from_date, to_date)
+    
+    # Decrypt amounts for customer's own transactions
+    for tx in sent:
+        tx.amount = tx_svc.decrypt_transaction_amount(db, tx, user.account_id)
+    
+    for tx in received:
+        tx.amount = tx_svc.decrypt_transaction_amount(db, tx, user.account_id)
+    
     return TransactionBundle(sent=sent, received=received)

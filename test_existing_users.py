@@ -15,7 +15,7 @@ def test_existing_users():
     # Common passwords to try
     common_passwords = ["password", "123456", "admin", "test", "alice", "bob", "carol", "ilia"]
     
-    print("🔍 Testing existing users with common passwords...")
+    print("Testing existing users with common passwords...")
     print("=" * 60)
     
     successful_logins = []
@@ -46,7 +46,7 @@ def test_existing_users():
                         user_data = user_response.json()
                         role = user_data.get("account_type")
                         
-                        print(f"✅ SUCCESS: {username}/{password} - Role: {role}")
+                        print(f"SUCCESS: {username}/{password} - Role: {role}")
                         successful_logins.append({
                             "username": username,
                             "password": password,
@@ -58,22 +58,22 @@ def test_existing_users():
             except Exception as e:
                 continue  # Try next password
         else:
-            print(f"❌ No successful login for {username}")
+            print(f"No successful login for {username}")
     
     print("\n" + "=" * 60)
-    print("📋 SUCCESSFUL LOGIN CREDENTIALS:")
+    print("SUCCESSFUL LOGIN CREDENTIALS:")
     print("=" * 60)
     
     if successful_logins:
         for login in successful_logins:
-            print(f"👤 Username: {login['username']}")
-            print(f"🔑 Password: {login['password']}")
-            print(f"🎭 Role: {login['role']}")
-            print(f"🎫 Token: {login['token']}")
+            print(f"Username: {login['username']}")
+            print(f"Password: {login['password']}")
+            print(f"Role: {login['role']}")
+            print(f"Token: {login['token']}")
             print("-" * 40)
     else:
-        print("❌ No successful logins found!")
-        print("💡 You may need to create test users or check the database.")
+        print("No successful logins found!")
+        print("You may need to create test users or check the database.")
 
 if __name__ == "__main__":
     test_existing_users()

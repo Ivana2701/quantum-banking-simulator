@@ -25,7 +25,7 @@ class Quantum100ComparisonVisualizer:
         
     def load_all_metrics(self):
         """Load all available metrics from JSON files"""
-        print("📊 Loading all model metrics...")
+        print("Loading all model metrics...")
         
         # Load quantum-inspired 100-qubit results
         quantum_100_path = os.path.join(self.metrics_dir, "quantum_inspired_100.json")
@@ -105,12 +105,12 @@ class Quantum100ComparisonVisualizer:
                 except Exception as e:
                     print(f"Warning: Could not load {model}: {e}")
         
-        print(f"✅ Loaded {len(self.results)} models")
+        print(f"Loaded {len(self.results)} models")
         return self.results
     
     def create_performance_comparison_chart(self):
         """Create comprehensive performance comparison chart"""
-        print("📈 Creating performance comparison chart...")
+        print("Creating performance comparison chart...")
         
         # Prepare data
         models = list(self.results.keys())
@@ -118,7 +118,7 @@ class Quantum100ComparisonVisualizer:
         
         # Create figure
         fig, axes = plt.subplots(2, 3, figsize=(20, 12))
-        fig.suptitle('🔬 Quantum-Inspired 100-Qubit vs All Models Performance Comparison', 
+        fig.suptitle('Quantum-Inspired 100-Qubit vs All Models Performance Comparison', 
                      fontsize=16, fontweight='bold', y=0.98)
         
         # Color coding
@@ -180,11 +180,11 @@ class Quantum100ComparisonVisualizer:
                    dpi=300, bbox_inches='tight')
         plt.show()
         
-        print("✅ Performance comparison chart saved!")
+        print("Performance comparison chart saved!")
     
     def create_radar_chart(self):
         """Create radar chart comparing model performance"""
-        print("🎯 Creating radar chart...")
+        print("Creating radar chart...")
         
         # Select key models for radar chart
         key_models = [
@@ -234,7 +234,7 @@ class Quantum100ComparisonVisualizer:
         ax.grid(True)
         
         # Add title and legend
-        plt.title('🔬 Quantum-Inspired 100-Qubit vs All Models - Radar Chart', 
+        plt.title('Quantum-Inspired 100-Qubit vs All Models - Radar Chart', 
                  fontsize=16, fontweight='bold', pad=20)
         plt.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
         
@@ -245,11 +245,11 @@ class Quantum100ComparisonVisualizer:
                    dpi=300, bbox_inches='tight')
         plt.show()
         
-        print("✅ Radar chart saved!")
+        print("Radar chart saved!")
     
     def create_accuracy_evolution_chart(self):
         """Create chart showing accuracy evolution from quantum to quantum-inspired"""
-        print("📈 Creating accuracy evolution chart...")
+        print("Creating accuracy evolution chart...")
         
         # Define model categories and their accuracies
         categories = {
@@ -275,7 +275,7 @@ class Quantum100ComparisonVisualizer:
                    fontsize=12, fontweight='bold')
         
         # Customize plot
-        ax.set_title('🚀 Accuracy Evolution: From Quantum to Quantum-Inspired 100-Qubit', 
+        ax.set_title('Accuracy Evolution: From Quantum to Quantum-Inspired 100-Qubit', 
                     fontsize=16, fontweight='bold', pad=20)
         ax.set_ylabel('Accuracy', fontsize=12)
         ax.set_ylim(0, 1.05)
@@ -299,11 +299,11 @@ class Quantum100ComparisonVisualizer:
                    dpi=300, bbox_inches='tight')
         plt.show()
         
-        print("✅ Accuracy evolution chart saved!")
+        print("Accuracy evolution chart saved!")
     
     def create_feature_complexity_chart(self):
         """Create chart showing feature complexity progression"""
-        print("🔬 Creating feature complexity chart...")
+        print("Creating feature complexity chart...")
         
         # Define complexity levels
         complexities = {
@@ -335,7 +335,7 @@ class Quantum100ComparisonVisualizer:
         bars1[2].set_edgecolor('red')
         bars1[2].set_linewidth(3)
         
-        ax1.set_title('🔬 Feature Complexity Evolution', fontsize=14, fontweight='bold')
+        ax1.set_title('Feature Complexity Evolution', fontsize=14, fontweight='bold')
         ax1.set_ylabel('Number of Features', fontsize=12)
         ax1.tick_params(axis='x', rotation=45)
         ax1.grid(True, alpha=0.3)
@@ -356,7 +356,7 @@ class Quantum100ComparisonVisualizer:
             ax2.annotate(cat, (feature_counts[i], accuracies[i]), 
                         xytext=(10, 10), textcoords='offset points', fontsize=10)
         
-        ax2.set_title('📊 Accuracy vs Feature Complexity', fontsize=14, fontweight='bold')
+        ax2.set_title('Accuracy vs Feature Complexity', fontsize=14, fontweight='bold')
         ax2.set_xlabel('Number of Features', fontsize=12)
         ax2.set_ylabel('Accuracy', fontsize=12)
         ax2.grid(True, alpha=0.3)
@@ -370,11 +370,11 @@ class Quantum100ComparisonVisualizer:
                    dpi=300, bbox_inches='tight')
         plt.show()
         
-        print("✅ Feature complexity chart saved!")
+        print("Feature complexity chart saved!")
     
     def create_summary_table(self):
         """Create summary table of all results"""
-        print("📋 Creating summary table...")
+        print("Creating summary table...")
         
         # Prepare data for table
         table_data = []
@@ -433,7 +433,7 @@ class Quantum100ComparisonVisualizer:
                 for j in range(len(row)):
                     table[(i+1, j)].set_facecolor('#E6F3F7')
         
-        plt.title('🏆 Complete Model Performance Summary\nQuantum-Inspired 100-Qubit vs All Models', 
+        plt.title('Complete Model Performance Summary\nQuantum-Inspired 100-Qubit vs All Models', 
                  fontsize=16, fontweight='bold', pad=20)
         
         plt.tight_layout()
@@ -443,11 +443,11 @@ class Quantum100ComparisonVisualizer:
                    dpi=300, bbox_inches='tight')
         plt.show()
         
-        print("✅ Summary table saved!")
+        print("Summary table saved!")
     
     def create_all_visualizations(self):
         """Create all visualizations"""
-        print("🎨 Creating comprehensive visualizations...")
+        print("Creating comprehensive visualizations...")
         
         # Load metrics
         self.load_all_metrics()
@@ -460,18 +460,18 @@ class Quantum100ComparisonVisualizer:
         self.create_summary_table()
         
         print("\n🎉 All visualizations completed!")
-        print(f"📁 Check the '{self.output_dir}' directory for all charts")
+        print(f"Check the '{self.output_dir}' directory for all charts")
 
 def main():
     """Main function to run all visualizations"""
-    print("🚀 Starting Quantum-Inspired 100-Qubit Visualization Suite")
+    print("Starting Quantum-Inspired 100-Qubit Visualization Suite")
     print("="*70)
     
     visualizer = Quantum100ComparisonVisualizer()
     visualizer.create_all_visualizations()
     
     print("\n✅ Visualization suite completed!")
-    print("🔬 Quantum-Inspired 100-Qubit results have been compared with all previous models!")
+    print("Quantum-Inspired 100-Qubit results have been compared with all previous models!")
 
 if __name__ == "__main__":
     main() 

@@ -5,7 +5,7 @@ import time
 
 # Enhanced Quantum Security Demonstration (BB84 + PQC + AES)
 def quantum_security_simulation():
-    st.title("🔐 Quantum-Safe Banking Security Demonstration")
+    st.title("Quantum-Safe Banking Security Demonstration")
 
     st.markdown("""
     ## 🛡️ Quantum Security Overview
@@ -26,11 +26,11 @@ def quantum_security_simulation():
 
     st.markdown("---")
 
-    eve_interception = st.checkbox("🔴 Eve intercepts photons (simulate QKD interception)", key="eve_checkbox")
+    eve_interception = st.checkbox("Eve intercepts photons (simulate QKD interception)", key="eve_checkbox")
 
-    if st.button("🚀 Run Quantum Security Simulation"):
+    if st.button("Run Quantum Security Simulation"):
 
-        st.header("1️⃣ BB84 Quantum Key Distribution")
+        st.header("1. BB84 Quantum Key Distribution")
         alice_bits = np.random.randint(0, 2, size=10)
         alice_bases = np.random.choice(['+', 'x'], size=10)
         bob_bases = np.random.choice(['+', 'x'], size=10)
@@ -78,26 +78,26 @@ def quantum_security_simulation():
         bob_key = df_results.loc[matched_indices, "Bob Measured Bit"].values
 
         if eve_interception and not np.array_equal(alice_key, bob_key):
-            st.error("🚨 Interception detected in QKD! Errors found.")
+            st.error("Interception detected in QKD! Errors found.")
         else:
-            st.success("✅ QKD secure key established without interception.")
+            st.success("QKD secure key established without interception.")
 
         st.markdown("---")
-        st.header("2️⃣ Post-Quantum Cryptography (Kyber) Key Exchange")
+        st.header("Post-Quantum Cryptography (Kyber) Key Exchange")
         pqc_shared_secret = "a4f7c1e2d3b8f901"  # Simulated shared secret
         pqc_ciphertext = "f39c8e12a9bc6d5..."  # Simulated ciphertext
         st.info(f"Kyber ciphertext: {pqc_ciphertext}")
         st.success(f"Kyber-generated shared secret: {pqc_shared_secret}")
 
         st.markdown("---")
-        st.header("3️⃣ AES Encryption of Transaction")
+        st.header("AES Encryption of Transaction")
         original_transaction = "Send $1000 to Account XYZ"
         aes_encrypted_transaction = "e4a9f..."  # Simulated encrypted data
         st.write(f"Original transaction: {original_transaction}")
         st.info(f"AES encrypted transaction: {aes_encrypted_transaction}")
 
         st.markdown("---")
-        st.header("🔒 Final Quantum-Secure Transaction")
-        st.success("✅ Transaction successfully encrypted with quantum-safe technology!")
+        st.header("Final Quantum-Secure Transaction")
+        st.success("Transaction successfully encrypted with quantum-safe technology!")
 
 

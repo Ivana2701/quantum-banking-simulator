@@ -224,7 +224,7 @@ class AdvancedCreditCardQSVM:
         
         # Print results
         print(f"\n{'='*50}")
-        print(f"📊 {model_name} Results")
+        print(f"{model_name} Results")
         print(f"{'='*50}")
         print(f"Accuracy:  {accuracy:.4f}")
         print(f"Precision: {precision:.4f}")
@@ -295,7 +295,7 @@ class AdvancedCreditCardQSVM:
 
 def run_advanced_creditcard_qsvm():
     """Main function to run the advanced credit card QSVM"""
-    print("🚀 Starting Advanced Credit Card Fraud Detection with Quantum SVM")
+    print("Starting Advanced Credit Card Fraud Detection with Quantum SVM")
     print("="*70)
     
     # Create model with maximum qubits

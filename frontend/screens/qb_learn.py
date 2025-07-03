@@ -4,6 +4,8 @@ from PIL import Image
 import os
 import base64
 import streamlit.components.v1 as components
+import requests
+import time
 
 # Optional imports for interactive BB84 simulation
 try:
@@ -19,46 +21,50 @@ except ImportError as e:
     QUANTUM_AVAILABLE = False
     st.warning(f"Some quantum simulation features unavailable. Install missing packages: {e}")
 
+# API configuration
+API_URL = "http://localhost:8000"
+
 def show_qb_learn():
-    st.title("🎓 QB-Learn: THE Quantum Banking Learning Platform")
+    st.title("QB-Learn: THE Quantum Banking Learning Platform")
 
     # --- Tabs for different visualizations ---
     tabs = st.tabs([
         " Interactive BB84",
-        "🔒 Transaction Security",
-        "🧬 Quantum 100 Performance",
-        "📊 Performance Comparison",
-        "📚 Learn More"
+        "BB84 Key Distribution",
+        "Transaction Security",
+        "Quantum 100 Performance",
+        "Performance Comparison",
+        "Learn More"
     ])
 
     # --- Tab 1: Interactive BB84 Simulation ---
     with tabs[0]:
-        st.header("🚀 Interactive BB84 Quantum Key Distribution")
+        st.header("Interactive BB84 Quantum Key Distribution")
         st.markdown("""
         Experience the full BB84 protocol with interactive controls, visual animations, and quantum circuit generation.
         This simulation shows exactly how quantum mechanics protects your banking transactions.
         """)
         
         if not QUANTUM_AVAILABLE:
-            st.error("❌ Interactive BB84 simulation requires additional packages.")
+            st.error("Interactive BB84 simulation requires additional packages.")
             st.markdown("""
             To enable this feature, install the required packages:
             ```bash
             pip install numpy pandas qiskit matplotlib
             ```
             """)
-            st.info("📚 For now, check out the other tabs for quantum banking education!")
+            st.info("For now, check out the other tabs for quantum banking education!")
         else:
             # Sidebar-style controls in the main area
-            st.subheader("🎛️ Simulation Settings")
+            st.subheader("Simulation Settings")
             col1, col2, col3, col4 = st.columns(4)
             
             with col1:
                 num_photons = st.slider("Number of photons (qubits)", 1, 20, 10, key="bb84_photons")
             with col2:
-                manual_mode = st.checkbox("🔧 Manual mode (toggle Alice/Bob bases)", value=False, key="bb84_manual")
+                manual_mode = st.checkbox("Manual mode (toggle Alice/Bob bases)", value=False, key="bb84_manual")
             with col3:
-                eve_interception = st.checkbox("🕵️ Eve intercepts photons", key="bb84_eve")
+                eve_interception = st.checkbox("Eve intercepts photons", key="bb84_eve")
             with col4:
                 view_mode = st.radio("Photon view mode", ["wave", "particle"], horizontal=True, key="bb84_view")
 
@@ -92,7 +98,7 @@ def show_qb_learn():
 
             # Manual toggle UI
             if manual_mode:
-                st.subheader("🎛️ Manual Basis Selection")
+                st.subheader("Manual Basis Selection")
                 cols = st.columns(2)
                 with cols[0]:
                     st.markdown("#### Alice's Bases")
@@ -112,20 +118,20 @@ def show_qb_learn():
                         )
 
             # ----- Run Simulation -----
-            if st.button("🚀 Run Full Quantum Simulation", key="bb84_run"):
+            if st.button("Run Full Quantum Simulation", key="bb84_run"):
                 df_results = pd.DataFrame(columns=[
                     "Photon", "Alice Bit", "Alice Basis", "Eve Basis", "Eve Bit",
                     "Bob Basis", "Bob Bit", "Bases Match", "Bits Match"
                 ])
                 result_container = st.empty()
 
-                st.markdown("### 🧮 BB84 Protocol Math")
+                st.markdown("### BB84 Protocol Math")
                 st.markdown(r"""
                 - If β = + and b = 0 → \(|0⟩\), if b = 1 → \(|1⟩\)
                 - If β = × and b = 0 → \(|+⟩ = \frac{1}{\sqrt{2}}(|0⟩ + |1⟩)\), if b = 1 → \(|−⟩ = \frac{1}{\sqrt{2}}(|0⟩ - |1⟩)\)
                 """)
 
-                with st.expander("🔬 Interact with a Sample BB84 Circuit"):
+                with st.expander("Interact with a Sample BB84 Circuit"):
                     bit = st.selectbox("Alice's Bit", [0, 1], index=0, key="bb84_bit")
                     basis = st.selectbox("Alice's Basis", ['+', 'x'], index=0, key="bb84_basis")
                     qc_exp = QuantumCircuit(1, 1)
@@ -143,7 +149,7 @@ def show_qb_learn():
                         st.warning(f"Circuit visualization not available: {e}")
                         st.code(str(qc_exp))
 
-                with st.expander("🧭 Visual: Bloch Sphere Basis Overlay"):
+                with st.expander("Visual: Bloch Sphere Basis Overlay"):
                     st.image("https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Bloch_sphere.svg/500px-Bloch_sphere.svg.png", caption="Bloch Sphere showing + and × bases", use_container_width=True)
 
                 for i in range(num_photons):
@@ -213,7 +219,7 @@ def show_qb_learn():
                         st.write(f"**Photon {i+1} Circuit:**")
                         st.code(str(qc))
 
-                    with st.expander(f"🧠 Explain Photon {i+1} Circuit Step-by-Step"):
+                    with st.expander(f"Explain Photon {i+1} Circuit Step-by-Step"):
                         for step in explanation:
                             st.markdown(f"- {step}")
 
@@ -231,41 +237,41 @@ def show_qb_learn():
                     result_container.dataframe(df_results)
                     time.sleep(0.5)
 
-                st.success("✅ BB84 Simulation Complete!")
+                st.success("BB84 Simulation Complete!")
                 sifted = df_results[df_results["Bases Match"] == "✅"]
-                st.markdown(f"🔑 Sifted key: {len(sifted)} bits")
+                st.markdown(f"Sifted key: {len(sifted)} bits")
 
                 if eve_interception and any(sifted["Bits Match"] == "❌"):
-                    st.error("⚠️ Eve was detected! Inconsistencies found.")
+                    st.error("Eve was detected! Inconsistencies found.")
                 else:
-                    st.success("🟢 No eavesdropping detected. Secure key established.")
+                    st.success("No eavesdropping detected. Secure key established.")
 
                 # Only show Post-Quantum Cryptography and AES sections if Eve is NOT intercepting
                 if not eve_interception:
                     st.markdown("---")
-                    st.header("2️⃣ Post-Quantum Cryptography (Kyber)")
+                    st.header("2. Post-Quantum Cryptography (Kyber)")
                     st.markdown("**Sender → encapsulates → ciphertext → receiver decapsulates → shared secret**")
                     col1, col2, col3 = st.columns(3)
                     with col1:
-                        st.write("📨 **Sender**")
+                        st.write("**Sender**")
                         st.code("public_key = generate_kyber_keypair()")
                     with col2:
-                        st.write("🔐 **Encapsulation**")
+                        st.write("**Encapsulation**")
                         st.code("ciphertext, secret = encapsulate(public_key)")
                     with col3:
-                        st.write("📩 **Receiver**")
+                        st.write("**Receiver**")
                         st.code("shared_secret = decapsulate(ciphertext)")
                     st.success("Kyber shared secret: `a4f7c1e2d3b8f901`")
                     st.markdown("**Kyber Math:** c = A·s + e (mod q). Based on the hardness of Module-LWE.**")
 
                     st.markdown("---")
-                    st.header("3️⃣ AES Encryption of Transaction")
+                    st.header("3. AES Encryption of Transaction")
                     original_transaction = "Send $1000 to Account XYZ"
                     aes_encrypted = "e4a9f8d1c9f..."
-                    st.write("📤 Encrypting a financial transaction...")
+                    st.write("Encrypting a financial transaction...")
                     st.code(f"Transaction: {original_transaction}")
                     st.code(f"Encrypted (AES): {aes_encrypted}")
-                    st.success("✅ Encrypted transaction secured with quantum-safe keys!")
+                    st.success("Encrypted transaction secured with quantum-safe keys!")
                     st.markdown(r"""
                     **AES Math:**
                     - SubBytes → ShiftRows → MixColumns → AddRoundKey
@@ -275,8 +281,307 @@ def show_qb_learn():
                     where `E` is AES encryption with key K.
                     """)
 
-    # --- Tab 2: Performance Comparison ---
+    # --- Tab 2: BB84 Key Distribution Demo ---
     with tabs[1]:
+        st.header("BB84 Quantum Key Distribution Demo")
+        st.markdown("""
+        Experience the BB84 protocol with customizable parameters and detailed analysis.
+        This demo connects to our quantum backend to simulate real quantum key distribution.
+        """)
+        
+        
+        col1, col2 = st.columns(2)
+        with col1:
+            key_length = st.slider("Key Length (bits)", min_value=32, max_value=512, value=128, step=32)
+        with col2:
+            error_rate = st.slider("Simulated Channel Error Rate", min_value=0.0, max_value=0.2, value=0.05, step=0.01)
+        
+        if st.button("Run BB84 Demo", type="primary"):
+            with st.spinner("Simulating quantum key distribution..."):
+                try:
+                    response = requests.post(
+                        f"{API_URL}/transactions/quantum/demo-bb84",
+                        json={"key_length": key_length, "error_rate": error_rate},
+                        timeout=30
+                    )
+                    
+                    if response.status_code == 200:
+                        result = response.json()
+                        st.success("BB84 simulation completed!")
+                        
+                        # Display results
+                        col1, col2, col3 = st.columns(3)
+                        with col1:
+                            st.metric("Generated Key Length", f"{result.get('final_key_length', 0)} bits")
+                        with col2:
+                            st.metric("Measured Error Rate", f"{result.get('measured_error_rate', 0):.3f}")
+                        with col3:
+                            st.metric("Security Status", result.get('security_status', 'Unknown'))
+                        
+                        # Enhanced detailed explanation dropdown
+                        with st.expander("**Detailed Protocol Analysis & Behind-the-Scenes**"):
+                            st.markdown("### Complete BB84 Quantum Key Distribution Analysis")
+                            
+                            # Input parameters
+                            st.markdown("**Input Parameters:**")
+                            col_input1, col_input2 = st.columns(2)
+                            with col_input1:
+                                st.markdown(f"- **Requested Key Length**: {key_length} bits")
+                                st.markdown(f"- **Simulated Error Rate**: {error_rate:.1%}")
+                            with col_input2:
+                                st.markdown(f"- **Initial Sequence**: {key_length * 4} qubits")
+                                st.markdown(f"- **Processing Method**: Batched (30 qubits/batch)")
+                            
+                            # Protocol execution breakdown
+                            st.markdown("**Protocol Execution Breakdown:**")
+                            
+                            # Create tabs for different aspects
+                            detail_tab1, detail_tab2, detail_tab3, detail_tab4 = st.tabs([
+                                "Quantum Process", 
+                                "Performance Analysis", 
+                                "Security Validation", 
+                                "Technical Deep Dive"
+                            ])
+                            
+                            with detail_tab1:
+                                st.markdown("#### Quantum Key Distribution Process")
+                                
+                                # Show protocol steps with explanations
+                                if "steps" in result:
+                                    for i, step in enumerate(result["steps"], 1):
+                                        with st.container():
+                                            st.markdown(f"**Step {i}: {step}**")
+                                            
+                                            # Add detailed explanations for each step
+                                            if "Initialize quantum channel" in step:
+                                                st.caption("Set up quantum simulator and prepare for photon transmission")
+                                            elif "Alice generates random bits" in step:
+                                                st.caption("Alice creates random sequence of 0s and 1s, and random basis choices")
+                                            elif "Alice sends encoded qubits" in step:
+                                                st.caption("Qubits encoded using either computational (Z) or Hadamard (X) basis")
+                                            elif "Bob measures" in step:
+                                                st.caption("Bob randomly chooses measurement bases and measures incoming qubits")
+                                            elif "Public basis comparison" in step:
+                                                st.caption("Alice and Bob publicly compare their basis choices (not the measurements)")
+                                            elif "Key sifting" in step:
+                                                st.caption("Only keep measurements where Alice and Bob used the same basis")
+                                            elif "Final key established" in step:
+                                                st.caption("After error correction and privacy amplification")
+                                
+                                # Visual representation
+                                st.markdown("**Process Flow:**")
+                                st.markdown("""
+                                ```
+                                Alice's Random Bits → Quantum Encoding → Quantum Channel 
+                                                                            ↓
+                                Bob's Random Bases ← Quantum Decoding ← Noisy Qubits
+                                                                            ↓
+                                Public Basis Comparison → Key Sifting → Error Check → Final Key
+                                ```
+                                """)
+                            
+                            with detail_tab2:
+                                st.markdown("#### Performance & Efficiency Analysis")
+                                
+                                # Calculate detailed metrics
+                                detailed_metrics = result.get('detailed_metrics', {})
+                                initial_qubits = detailed_metrics.get('initial_qubits', key_length * 4)
+                                final_bits = result.get('final_key_length', 0)
+                                basis_match_rate = detailed_metrics.get('basis_match_rate', 0.5)
+                                actual_efficiency = detailed_metrics.get('key_extraction_efficiency', final_bits / initial_qubits if initial_qubits > 0 else 0)
+                                
+                                metric_col1, metric_col2 = st.columns(2)
+                                with metric_col1:
+                                    st.metric("Initial Qubits", f"{initial_qubits:,}")
+                                    st.metric("Basis Matches", f"{detailed_metrics.get('matching_bases', int(initial_qubits * basis_match_rate)):,}")
+                                    st.metric("Actual Final Bits", f"{final_bits:,}")
+                                
+                                with metric_col2:
+                                    st.metric("Overall Efficiency", f"{actual_efficiency:.1%}")
+                                    st.metric("Execution Time", f"{result.get('execution_time', 0):.3f}s")
+                                    st.metric("Processing Rate", f"{detailed_metrics.get('processing_rate', 0):.0f} qubits/s")
+                                
+                                # Efficiency breakdown
+                                st.markdown("**Efficiency Breakdown:**")
+                                detailed_metrics = result.get('detailed_metrics', {})
+                                basis_match_rate = detailed_metrics.get('basis_match_rate', 0.5)
+                                error_rate_measured = result.get('measured_error_rate', 0)
+                                st.markdown(f"""
+                                - **Basis Matching**: {basis_match_rate:.1%} (actual measurement vs ~50% theoretical)
+                                - **Error Correction**: Reduces available bits by ~{error_rate_measured*100:.1f}%
+                                - **Privacy Amplification**: Additional reduction for information-theoretic security
+                                - **Net Efficiency**: {detailed_metrics.get('key_extraction_efficiency', 0):.1%} of initial qubits become final key bits
+                                """)
+                                
+                                # Performance chart using actual data
+                                st.markdown("**Bit Processing Pipeline:**")
+                                initial_qubits = detailed_metrics.get('initial_qubits', key_length * 4)
+                                matching_bases = detailed_metrics.get('matching_bases', int(initial_qubits * 0.5))
+                                progress_data = {
+                                    "Stage": ["Initial Qubits", "After Basis Sifting", "After Error Correction", "Final Key"],
+                                    "Bits": [
+                                        initial_qubits,
+                                        matching_bases,
+                                        int(matching_bases * (1 - error_rate_measured)),
+                                        final_bits
+                                    ]
+                                }
+                                st.bar_chart(progress_data, x="Stage", y="Bits")
+                            
+                            with detail_tab3:
+                                st.markdown("#### Security Validation & Analysis")
+                                
+                                # Security analysis
+                                error_rate_measured = result.get('measured_error_rate', 0)
+                                detailed_metrics = result.get('detailed_metrics', {})
+                                error_threshold = detailed_metrics.get('error_threshold', 0.11)
+                                
+                                # Security status
+                                if error_rate_measured < error_threshold:
+                                    st.success(f"**SECURE**: Error rate {error_rate_measured:.3f} is below threshold {error_threshold}")
+                                else:
+                                    st.warning(f"**CAUTION**: Error rate {error_rate_measured:.3f} exceeds secure threshold {error_threshold}")
+                                
+                                # Security analysis
+                                st.markdown("**Security Analysis:**")
+                                
+                                security_col1, security_col2 = st.columns(2)
+                                with security_col1:
+                                    st.markdown("**Quantum Security Properties:**")
+                                    st.markdown(f"""
+                                    - **No-Cloning Theorem**: Qubits cannot be perfectly copied
+                                    - **Uncertainty Principle**: Measuring disturbs quantum states
+                                    - **Eavesdropping Detection**: Error rate increase reveals attacks
+                                    - **Information-Theoretic**: Security proven by physics laws
+                                    """)
+                                
+                                with security_col2:
+                                    st.markdown("**Practical Security Level:**")
+                                    security_bits = detailed_metrics.get('security_bits', min(result.get('final_key_length', 0), 256))
+                                    st.markdown(f"""
+                                    - **Effective Security**: {security_bits}-bit equivalent
+                                    - **Attack Resistance**: ~2^{security_bits} operations required
+                                    - **Quantum-Safe**: Resistant to Shor's algorithm
+                                    - **Future-Proof**: Secure against quantum computers
+                                    """)
+                                
+                                # Protocol success indicator
+                                protocol_success = detailed_metrics.get('protocol_success', error_rate_measured < error_threshold)
+                                if protocol_success:
+                                    st.success("**Protocol executed successfully with acceptable security parameters**")
+                                else:
+                                    st.warning("**Protocol completed but security parameters need attention**")
+                                
+                                # Threat model
+                                st.markdown("**Threat Model Protection:**")
+                                st.info("""
+                                **This protocol protects against:**
+                                - Classical computational attacks (factoring, discrete log)
+                                - Quantum attacks (Shor's algorithm, Grover's algorithm)
+                                - Man-in-the-middle attacks (through error rate monitoring)
+                                - Future unknown attack methods (information-theoretic security)
+                                """)
+                            
+                            with detail_tab4:
+                                st.markdown("#### Technical Implementation Details")
+                                
+                                # Implementation specifics
+                                protocol_info = result.get('protocol_info', {})
+                                detailed_metrics = result.get('detailed_metrics', {})
+                                
+                                st.markdown("**Implementation Architecture:**")
+                                
+                                impl_col1, impl_col2 = st.columns(2)
+                                with impl_col1:
+                                    st.markdown("**Quantum Simulation:**")
+                                    st.markdown(f"""
+                                    - **Backend**: {protocol_info.get('quantum_backend', 'IBM Qiskit qasm_simulator')}
+                                    - **Protocol**: {protocol_info.get('name', 'BB84 Quantum Key Distribution')}
+                                    - **Qubit Limit**: {protocol_info.get('batch_size', 30)} qubits per batch (hardware constraint)
+                                    - **Noise Model**: Simulated channel errors at {error_rate:.1%}
+                                    """)
+                                
+                                with impl_col2:
+                                    st.markdown("**Classical Processing:**")
+                                    st.markdown(f"""
+                                    - **Language**: Python with NumPy
+                                    - **Security Type**: {protocol_info.get('type', 'Information-Theoretic Secure')}
+                                    - **Batch Processing**: Memory-efficient for large keys
+                                    - **Error Estimation**: Statistical sampling method
+                                    """)
+                                
+                                # Encoding schemes
+                                if 'encoding_schemes' in protocol_info:
+                                    st.markdown("**Encoding Schemes:**")
+                                    for i, scheme in enumerate(protocol_info['encoding_schemes'], 1):
+                                        st.markdown(f"- **Basis {i-1}**: {scheme}")
+                                
+                                # Protocol parameters with actual values
+                                st.markdown("**Protocol Parameters Used:**")
+                                param_data = {
+                                    "Parameter": [
+                                        "Target Key Length",
+                                        "Error Threshold", 
+                                        "Actual Initial Qubits",
+                                        "Actual Basis Matches",
+                                        "Batch Size",
+                                        "Basis Count"
+                                    ],
+                                    "Value": [
+                                        f"{key_length} bits",
+                                        f"{detailed_metrics.get('error_threshold', 0.11):.1%}",
+                                        f"{detailed_metrics.get('initial_qubits', key_length * 4)} qubits",
+                                        f"{detailed_metrics.get('matching_bases', 'N/A')} qubits",
+                                        f"{protocol_info.get('batch_size', 30)} qubits max",
+                                        f"{protocol_info.get('basis_count', 2)} (Z and X basis)"
+                                    ],
+                                    "Purpose": [
+                                        "Final shared secret size",
+                                        "Security validation limit",
+                                        "Total qubits processed",
+                                        "Qubits after basis sifting",
+                                        "Quantum simulator limitation",
+                                        "BB84 standard encoding"
+                                    ]
+                                }
+                                st.dataframe(param_data, hide_index=True)
+                                
+                                # Mathematical foundations
+                                st.markdown("**Mathematical Foundations:**")
+                                st.markdown("""
+                                **Key Rate Formula (simplified):**
+                                ```
+                                R ≈ 1 - H(e) - f(e)·H(e)
+                                ```
+                                Where:
+                                - R = key generation rate
+                                - H(e) = binary entropy of error rate e  
+                                - f(e) = error correction inefficiency
+                                """)
+                                
+                                # Real implementation notes
+                                st.markdown("**Production Implementation Notes:**")
+                                st.warning("""
+                                **For real-world deployment:**
+                                - Replace simulator with actual quantum hardware
+                                - Implement proper quantum error correction
+                                - Add authenticated classical channel for basis comparison
+                                - Include post-processing for privacy amplification
+                                - Integrate with hardware security modules (HSMs)
+                                """)
+                        
+                        # Show basic protocol steps (keeping existing functionality)
+                        if "steps" in result:
+                            st.markdown("#### Quick Protocol Steps:")
+                            for i, step in enumerate(result["steps"], 1):
+                                st.write(f"{i}. {step}")
+                    else:
+                        st.error(f"Demo failed: {response.text}")
+                except Exception as e:
+                    st.error(f"Demo error: {str(e)}")
+
+    # --- Tab 3: Transaction Security ---
+    with tabs[2]:
         st.header("Transaction Security: Encryption, Hashing, and Signing")
         st.markdown("""
         In secure banking systems, protecting transaction data is critical. Here's how different cryptographic techniques are used:
@@ -286,7 +591,7 @@ def show_qb_learn():
         - **Digital Signatures**: Prove the authenticity and integrity of a transaction. Only the sender can create a valid signature, and anyone can verify it.
         """)
         st.markdown("---")
-        with st.expander("🔐 AES Encryption Example (Python)"):
+        with st.expander("AES Encryption Example (Python)"):
             st.markdown("""
             Encrypt transaction data using AES-256:
             """)
@@ -307,7 +612,7 @@ def show_qb_learn():
             ''', language="python")
             st.markdown("**Note:** Store the key securely! Only those with the key can decrypt the data.")
         
-        with st.expander("#️⃣ SHA-256 Hashing Example (Python)"):
+        with st.expander("SHA-256 Hashing Example (Python)"):
             st.markdown("""
             Hash transaction data for integrity:
             """)
@@ -319,7 +624,7 @@ def show_qb_learn():
             ''', language="python")
             st.markdown("**Note:** Hashing is one-way. You cannot recover the original data from the hash.")
         
-        with st.expander("✍️ Ed25519 Digital Signature Example (Python)"):
+        with st.expander("Ed25519 Digital Signature Example (Python)"):
             st.markdown("""
             Sign and verify transaction data:
             """)
@@ -340,7 +645,7 @@ def show_qb_learn():
 
         # Interactive widgets
         st.markdown("---")
-        st.subheader("🧪 Try it yourself: Interactive Widgets")
+        st.subheader("Try it yourself: Interactive Widgets")
 
         # 1. Hashing widget
         st.markdown("#### Hash a Message (SHA-256)")
@@ -390,7 +695,7 @@ def show_qb_learn():
             st.code(f"Decrypted message: {decrypted.decode()}", language="text")
 
     # --- Tab 3: Quantum 100 Performance Comparison ---
-    with tabs[2]:
+    with tabs[3]:
         st.header("Quantum 100 Qubit Performance Comparison")
         st.markdown("""
         This visualization shows the performance of quantum-inspired and quantum models on a 100-qubit dataset.
@@ -402,8 +707,8 @@ def show_qb_learn():
         else:
             st.warning("Quantum 100 performance comparison image not found.")
 
-    # --- Tab 4: Transaction Security ---
-    with tabs[3]:
+    # --- Tab 4: Performance Comparison ---
+    with tabs[4]:
         st.header("Model Performance Comparison (QSVM, VQC, Classical)")
         st.markdown("""
         This diagram compares the performance of quantum and classical models for fraud detection.
@@ -416,11 +721,11 @@ def show_qb_learn():
             st.warning("Performance comparison image not found.")
 
     # --- Tab 5: Learn More ---
-    with tabs[4]:
-        st.subheader("📚 Understanding Quantum AI Protection")
+    with tabs[5]:
+        st.subheader("Understanding Quantum AI Protection")
         
         st.markdown("""
-        ### 🤔 How Does Quantum AI Protect Your Money?
+        ### How Does Quantum AI Protect Your Money?
         
         Our bank uses two revolutionary types of AI to keep your transactions safe:
         """)
@@ -429,7 +734,7 @@ def show_qb_learn():
         
         with col1:
             st.markdown("""
-            #### 🧠 **Classical AI**
+            #### **Classical AI**
             - Uses traditional computer algorithms
             - Analyzes patterns in transaction data
             - Fast and reliable for known fraud types
@@ -443,7 +748,7 @@ def show_qb_learn():
         
         with col2:
             st.markdown("""
-            #### ⚛️ **Quantum AI** 
+            #### **Quantum AI** 
             - Uses quantum computing principles
             - Can detect complex, hidden patterns
             - Better at finding new types of fraud
@@ -458,7 +763,7 @@ def show_qb_learn():
         st.markdown("---")
         
         st.markdown("""
-        ### 🔬 **The Science Behind Our Protection**
+        ### **The Science Behind Our Protection**
         
         #### QSVM (Quantum Support Vector Machine)
         """)
@@ -480,7 +785,7 @@ def show_qb_learn():
         st.markdown("---")
         
         st.markdown("""
-        ### 🛡️ **What This Means For You**
+        ### **What This Means For You**
         
         - **Better Protection**: Quantum AI catches fraud that classical systems miss
         - **Faster Detection**: Real-time analysis of every transaction
@@ -488,7 +793,7 @@ def show_qb_learn():
         - **Future-Proof**: Ready for tomorrow's sophisticated fraud attempts
         - **Always Learning**: Our AI gets smarter with every transaction
         
-        ### 🔒 **Your Privacy & Security**
+        ### **Your Privacy & Security**
         
         - Your transaction data is encrypted using quantum-safe methods
         - AI models learn patterns, not personal information
@@ -496,4 +801,4 @@ def show_qb_learn():
         - You maintain complete control over your account
         """)
         
-        st.success("💡 **Bottom Line**: Our quantum-powered AI works 24/7 to protect your money while you focus on what matters most to you!")
+        st.success("**Bottom Line**: Our quantum-powered AI works 24/7 to protect your money while you focus on what matters most to you!")

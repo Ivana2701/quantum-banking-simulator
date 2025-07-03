@@ -40,11 +40,11 @@ class ModelComparisonVisualizer:
                 try:
                     with open(filepath, 'r') as f:
                         self.models_data[model_name] = json.load(f)
-                    print(f"✅ Loaded {model_name}")
+                    print(f"Loaded {model_name}")
                 except Exception as e:
-                    print(f"❌ Error loading {model_name}: {e}")
+                    print(f"Error loading {model_name}: {e}")
             else:
-                print(f"⚠️  {model_name} metrics not found")
+                print(f"{model_name} metrics not found")
     
     def create_performance_comparison(self, save_path="./qsvm_vqc_performance_comparison.png"):
         """Create comprehensive performance comparison visualization"""
@@ -73,7 +73,7 @@ class ModelComparisonVisualizer:
         
         # Create figure with subplots
         fig, axes = plt.subplots(2, 3, figsize=(20, 12))
-        fig.suptitle('🎯 Credit Card Fraud Detection: Model Performance Comparison', 
+        fig.suptitle('Credit Card Fraud Detection: Model Performance Comparison', 
                     fontsize=16, fontweight='bold', y=0.98)
         
         # Color coding for model types
@@ -84,7 +84,7 @@ class ModelComparisonVisualizer:
         ax1 = axes[0, 0]
         bars1 = ax1.bar(df['Model'], df['Accuracy'], 
                        color=['#FF6B6B' if 'Quantum' in model else '#45B7D1' for model in df['Model']])
-        ax1.set_title('📊 Accuracy Comparison', fontweight='bold')
+        ax1.set_title('Accuracy Comparison', fontweight='bold')
         ax1.set_ylabel('Accuracy')
         ax1.set_ylim(0, 1)
         ax1.tick_params(axis='x', rotation=45)
@@ -94,7 +94,7 @@ class ModelComparisonVisualizer:
         ax2 = axes[0, 1]
         bars2 = ax2.bar(df['Model'], df['Precision'],
                        color=['#FF6B6B' if 'Quantum' in model else '#45B7D1' for model in df['Model']])
-        ax2.set_title('🎯 Precision Comparison', fontweight='bold')
+        ax2.set_title('Precision Comparison', fontweight='bold')
         ax2.set_ylabel('Precision')
         ax2.set_ylim(0, 1)
         ax2.tick_params(axis='x', rotation=45)
@@ -104,7 +104,7 @@ class ModelComparisonVisualizer:
         ax3 = axes[0, 2]
         bars3 = ax3.bar(df['Model'], df['Recall'],
                        color=['#FF6B6B' if 'Quantum' in model else '#45B7D1' for model in df['Model']])
-        ax3.set_title('🔍 Recall Comparison', fontweight='bold')
+        ax3.set_title('Recall Comparison', fontweight='bold')
         ax3.set_ylabel('Recall')
         ax3.set_ylim(0, 1)
         ax3.tick_params(axis='x', rotation=45)
@@ -114,7 +114,7 @@ class ModelComparisonVisualizer:
         ax4 = axes[1, 0]
         bars4 = ax4.bar(df['Model'], df['F1-Score'],
                        color=['#FF6B6B' if 'Quantum' in model else '#45B7D1' for model in df['Model']])
-        ax4.set_title('⚖️ F1-Score Comparison', fontweight='bold')
+        ax4.set_title('F1-Score Comparison', fontweight='bold')
         ax4.set_ylabel('F1-Score')
         ax4.set_ylim(0, 1)
         ax4.tick_params(axis='x', rotation=45)
@@ -124,7 +124,7 @@ class ModelComparisonVisualizer:
         ax5 = axes[1, 1]
         bars5 = ax5.bar(df['Model'], df['ROC AUC'],
                        color=['#FF6B6B' if 'Quantum' in model else '#45B7D1' for model in df['Model']])
-        ax5.set_title('📈 ROC AUC Comparison', fontweight='bold')
+        ax5.set_title('ROC AUC Comparison', fontweight='bold')
         ax5.set_ylabel('ROC AUC')
         ax5.set_ylim(0, 1)
         ax5.tick_params(axis='x', rotation=45)
@@ -136,7 +136,7 @@ class ModelComparisonVisualizer:
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"📊 Comparison chart saved to: {save_path}")
+        print(f"Comparison chart saved to: {save_path}")
         plt.show()
         
     def _add_value_labels(self, ax, bars):
@@ -164,7 +164,7 @@ class ModelComparisonVisualizer:
         ax.set_xticks(angles[:-1])
         ax.set_xticklabels(metrics)
         ax.set_ylim(0, 1)
-        ax.set_title('🎯 Top Models Radar Chart', fontweight='bold')
+        ax.set_title('Top Models Radar Chart', fontweight='bold')
         ax.legend(loc='upper right', bbox_to_anchor=(1.3, 1.0))
         ax.grid(True)
     
@@ -195,12 +195,12 @@ class ModelComparisonVisualizer:
         plt.plot([0, 1], [0, 1], 'k--', alpha=0.5, label='Random Classifier')
         plt.xlabel('False Positive Rate')
         plt.ylabel('True Positive Rate')
-        plt.title('📈 ROC Curves Comparison', fontweight='bold', fontsize=14)
+        plt.title('ROC Curves Comparison', fontweight='bold', fontsize=14)
         plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.grid(True, alpha=0.3)
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"📈 ROC curves saved to: {save_path}")
+        print(f"ROC curves saved to: {save_path}")
         plt.show()
     
     def create_confusion_matrices(self, save_path="./confusion_matrices.png"):
@@ -223,7 +223,7 @@ class ModelComparisonVisualizer:
         else:
             axes = axes.flatten()
         
-        fig.suptitle('🔍 Confusion Matrices Comparison', fontsize=16, fontweight='bold')
+        fig.suptitle('Confusion Matrices Comparison', fontsize=16, fontweight='bold')
         
         model_idx = 0
         for model_name, metrics in self.models_data.items():
@@ -248,7 +248,7 @@ class ModelComparisonVisualizer:
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"🔍 Confusion matrices saved to: {save_path}")
+        print(f"Confusion matrices saved to: {save_path}")
         plt.show()
     
     def create_summary_table(self, save_path="./model_summary_table.png"):
@@ -304,14 +304,14 @@ class ModelComparisonVisualizer:
             for j in range(len(df.columns)):
                 table[(i, j)].set_facecolor(color)
         
-        plt.title('📋 Model Performance Summary', fontsize=16, fontweight='bold', pad=20)
+        plt.title('Model Performance Summary', fontsize=16, fontweight='bold', pad=20)
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        print(f"📋 Summary table saved to: {save_path}")
+        print(f"Summary table saved to: {save_path}")
         plt.show()
     
     def create_all_visualizations(self):
         """Create all visualizations"""
-        print("🎨 Creating comprehensive model comparison visualizations...")
+        print("Creating comprehensive model comparison visualizations...")
         
         # Ensure output directory exists
         output_dir = Path("./visualizations")
@@ -323,12 +323,12 @@ class ModelComparisonVisualizer:
         self.create_confusion_matrices(str(output_dir / "confusion_matrices.png"))
         self.create_summary_table(str(output_dir / "summary_table.png"))
         
-        print("✅ All visualizations created successfully!")
-        print(f"📁 Check the '{output_dir}' directory for all charts")
+        print("All visualizations created successfully!")
+        print(f"Check the '{output_dir}' directory for all charts")
 
 def main():
     """Main function to run the visualization"""
-    print("🚀 Starting Model Comparison Visualization")
+    print("Starting Model Comparison Visualization")
     print("="*50)
     
     # Create visualizer

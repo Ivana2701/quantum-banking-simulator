@@ -8,7 +8,7 @@ import time
 API_URL = "http://localhost:8000"
 
 def show_employee_customers():
-    st.title("👥 Customer Management")
+    st.title("Customer Management")
     
     if "token" not in st.session_state or not st.session_state.token:
         st.error("Please login first")
@@ -23,10 +23,10 @@ def show_employee_customers():
             customers = response.json()
             
             if customers:
-                st.subheader("📋 All Customers")
+                st.subheader("All Customers")
                 
                 # Username filter
-                username_filter = st.text_input("🔍 Filter by username:", placeholder="Enter username to filter...")
+                username_filter = st.text_input("Filter by username:", placeholder="Enter username to filter...")
                 
                 # Convert to DataFrame for better display
                 customer_data = []
@@ -90,12 +90,12 @@ def show_employee_customers():
                     col1, col2, col3, col4, col5 = st.columns([1, 1, 2, 1, 1])
                     
                     with col1:
-                        if st.button("⏮️ First", key="customers_first") and st.session_state.customer_current_page > 1:
+                        if st.button("First", key="customers_first") and st.session_state.customer_current_page > 1:
                             st.session_state.customer_current_page = 1
                             st.rerun()
                     
                     with col2:
-                        if st.button("◀️ Previous", key="customers_prev") and st.session_state.customer_current_page > 1:
+                        if st.button("Previous", key="customers_prev") and st.session_state.customer_current_page > 1:
                             st.session_state.customer_current_page -= 1
                             st.rerun()
                     
@@ -136,7 +136,7 @@ def show_employee_customers():
                 st.divider()
                 
                 # Money addition section
-                st.subheader("💰 Add Money to Customer Account")
+                st.subheader("Add Money to Customer Account")
                 
                 # Select customer to add money to
                 selected_customer = st.selectbox(
@@ -180,7 +180,7 @@ def show_employee_customers():
                                 
                                 if add_response.status_code == 200:
                                     result = add_response.json()
-                                    show_notification(f"✅ {result['message']}", "success", True)
+                                    show_notification(f"{result['message']}", "success", True)
                                 else:
                                     error_msg = add_response.json().get("detail", "Unknown error")
                                     st.error(f"Failed to add money: {error_msg}")
@@ -191,7 +191,7 @@ def show_employee_customers():
                 
                 # Statistics section
                 st.divider()
-                st.subheader("📊 Customer Statistics")
+                st.subheader("Customer Statistics")
                 
                 col1, col2, col3, col4 = st.columns(4)
                 
@@ -218,25 +218,25 @@ def show_employee_customers():
                     if customers_with_balance > 0:
                         st.metric("Total Balance", f"${total_balance:,.2f}")
                     else:
-                        st.metric("Balances", "🔐 Encrypted")
+                        st.metric("Balances", "Encrypted")
                 with col4:
                     if customers_with_balance > 0:
                         avg_balance = total_balance / customers_with_balance
                         st.metric("Average Balance", f"${avg_balance:,.2f}")
                     else:
-                        st.metric("Encryption", "✅ Active")
+                        st.metric("Encryption", "Active")
                 
                 # Security information
                 st.divider()
-                st.subheader("🔐 Security Information")
+                st.subheader("Security Information")
                 
                 st.info("""
                 **Post-Quantum Cryptography Protection**
                 
                 Customer balances are protected using:
-                - 🔑 **CRYSTAL-Kyber**: Quantum-resistant key encapsulation
-                - 📝 **CRYSTAL-DILITHIUM**: Post-quantum digital signatures  
-                - 🔒 **AES-256**: Military-grade symmetric encryption
+                - **CRYSTAL-Kyber**: Quantum-resistant key encapsulation
+                - **CRYSTAL-DILITHIUM**: Post-quantum digital signatures  
+                - **AES-256**: Military-grade symmetric encryption
                 
                 All balance modifications are cryptographically signed and encrypted for maximum security.
                 """)

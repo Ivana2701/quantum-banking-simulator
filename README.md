@@ -139,7 +139,7 @@ quantum-banking-simulator/
 * OQS (Post-quantum encryption)
 * scikit-learn, imblearn, pandas, matplotlib, seaborn, SQLAlchemy
 
-## 🔄 Transaction Mode Toggle:
+## Transaction Mode Toggle:
 
 - **Demo Mode**: Educational only. Temporarily stores quantum-generated BB84 keys for visual understanding. **Not secure**.
 - **Real Mode**: Production-level security. BB84 keys **never stored or reused**, adhering strictly to quantum encryption security practices.

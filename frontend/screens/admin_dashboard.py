@@ -8,7 +8,7 @@ from components.quantum_improvements import show_quantum_improvements
 API_URL = "http://localhost:8000"
 
 def show_admin_dashboard():
-    st.title("👑 Admin Dashboard")
+    st.title("Admin Dashboard")
     
     if "token" not in st.session_state or not st.session_state.token:
         st.error("Please login first")
@@ -17,7 +17,7 @@ def show_admin_dashboard():
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
     
     # Tabs for admin dashboard
-    tab1, tab2 = st.tabs(["User Management & Stats", "⚛️ Quantum Fraud Detection"])
+    tab1, tab2 = st.tabs(["User Management & Stats", "Quantum Fraud Detection"])
 
     with tab1:
         # Fetch all users
@@ -28,7 +28,7 @@ def show_admin_dashboard():
                 
                 if users:
                     # Role management section (moved to top)
-                    st.subheader("�� Role Management")
+                    st.subheader("Role Management")
                     
                     # Select user to modify
                     selected_user = st.selectbox(
@@ -77,10 +77,10 @@ def show_admin_dashboard():
                     st.divider()  # Add visual separator
                     
                     # All Users section with pagination
-                    st.subheader("📋 All Users")
+                    st.subheader("All Users")
                     
                     # Username filter
-                    username_filter = st.text_input("🔍 Filter by username:", placeholder="Enter username to filter...", key="admin_username_filter")
+                    username_filter = st.text_input("Filter by username:", placeholder="Enter username to filter...", key="admin_username_filter")
                     
                     # Convert to DataFrame for better display
                     user_data = []
@@ -128,12 +128,12 @@ def show_admin_dashboard():
                         col1, col2, col3, col4, col5 = st.columns([1, 1, 2, 1, 1])
                         
                         with col1:
-                            if st.button("⏮️ First", key="admin_first") and st.session_state.admin_current_page > 1:
+                            if st.button("First", key="admin_first") and st.session_state.admin_current_page > 1:
                                 st.session_state.admin_current_page = 1
                                 st.rerun()
                         
                         with col2:
-                            if st.button("◀️ Previous", key="admin_prev") and st.session_state.admin_current_page > 1:
+                            if st.button("Previous", key="admin_prev") and st.session_state.admin_current_page > 1:
                                 st.session_state.admin_current_page -= 1
                                 st.rerun()
                         
@@ -172,7 +172,7 @@ def show_admin_dashboard():
                             st.info("No users match the current filter.")
                     
                     # Statistics section
-                    st.subheader("📊 System Statistics")
+                    st.subheader("System Statistics")
                     
                     col1, col2, col3, col4 = st.columns(4)
                     

@@ -47,7 +47,7 @@ def show_dashboard():
         alice_bits, alice_bases, shared_key = generate_bb84_key()
 
         encrypted = encrypt_with_bb84(user_data, shared_key)
-        st.write("🔐 Encrypted Data Sent to Bank:", encrypted)
+        st.write("Encrypted Data Sent to Bank:", encrypted)
 
         decrypted = decrypt_with_bb84(encrypted, shared_key)
-        st.write("🔓 Bank Employee Decrypted Data:", decrypted)
+        st.write("Bank Employee Decrypted Data:", decrypted)

@@ -15,17 +15,17 @@ def add_test_users_to_postgresql():
     db = SessionLocal()
     
     try:
-        print("🔧 Adding test users to PostgreSQL database...")
+        print("Adding test users to PostgreSQL database...")
         
         # Check existing data
         existing_accounts = db.query(Account).all()
-        print(f"📊 Current accounts in database: {len(existing_accounts)}")
+        print(f"Current accounts in database: {len(existing_accounts)}")
         for acc in existing_accounts:
             print(f"  - {acc.username} (ID: {acc.account_id})")
         
         # Check if roles exist
         existing_roles = db.query(Role).all()
-        print(f"📋 Current roles: {[role.role_name for role in existing_roles]}")
+        print(f"Current roles: {[role.role_name for role in existing_roles]}")
         
         # Create missing roles if needed
         required_roles = ["admin", "customer", "employee"]
@@ -34,7 +34,7 @@ def add_test_users_to_postgresql():
             if not existing_role:
                 role = Role(role_name=role_name)
                 db.add(role)
-                print(f"✅ Created role: {role_name}")
+                print(f"Created role: {role_name}")
         
         db.commit()
         
@@ -43,7 +43,7 @@ def add_test_users_to_postgresql():
         admin_role = db.query(Role).filter(Role.role_name == "admin").first()
         
         if not customer_role:
-            print("❌ No customer role found. Using first available role.")
+            print("No customer role found. Using first available role.")
             customer_role = db.query(Role).first()
         
         # Add test users that don't conflict with existing ones
@@ -81,9 +81,9 @@ def add_test_users_to_postgresql():
                 )
                 
                 db.add(user)
-                print(f"✅ Created test user: '{user_data['username']}' with password: '{user_data['password']}'")
+                print(f"Created test user: '{user_data['username']}' with password: '{user_data['password']}'")
             else:
-                print(f"⚠️  User '{user_data['username']}' already exists")
+                print(f"User '{user_data['username']}' already exists")
         
         db.commit()
         
@@ -100,7 +100,7 @@ def add_test_users_to_postgresql():
         print(f"  (Plus your existing users: alice, bob, carol)")
         
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"Error: {e}")
         db.rollback()
         import traceback
         traceback.print_exc()

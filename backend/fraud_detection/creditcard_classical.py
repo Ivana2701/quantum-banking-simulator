@@ -276,7 +276,7 @@ class CreditCardClassical:
 
 def run_all_classical_models():
     """Run all classical models for comparison"""
-    print("🚀 Starting Credit Card Fraud Detection with Classical ML Models")
+    print("Starting Credit Card Fraud Detection with Classical ML Models")
     print("="*65)
     
     models = ['random_forest', 'svm', 'logistic']
@@ -290,11 +290,11 @@ def run_all_classical_models():
         metrics = classical.train_and_evaluate(sample_size=10000)
         results[model_type] = metrics
         
-        print(f"✅ {model_type.upper()} completed!")
+        print(f"{model_type.upper()} completed!")
     
     # Compare results
     print(f"\n{'='*60}")
-    print("📊 CLASSICAL MODELS COMPARISON")
+    print("CLASSICAL MODELS COMPARISON")
     print(f"{'='*60}")
     print(f"{'Model':<15} {'Accuracy':<10} {'Precision':<10} {'Recall':<10} {'F1-Score':<10} {'ROC AUC':<10}")
     print("-" * 70)

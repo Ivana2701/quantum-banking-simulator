@@ -3,7 +3,7 @@ import streamlit as st
 from utils.auth_manager import auth_manager
 
 def show_login():
-    st.title("🔐 Quantum Banking Login")
+    st.title("Quantum Banking Login")
     
     # Check if already authenticated
     if auth_manager.is_authenticated():
@@ -38,7 +38,7 @@ def show_login():
     # Additional info
     st.markdown("---")
     st.markdown("""
-    **🛡️ Security Features:**
+    **Security Features:**
     - JWT-based authentication with role information
     - Persistent sessions across page refreshes
     - Role-based access control

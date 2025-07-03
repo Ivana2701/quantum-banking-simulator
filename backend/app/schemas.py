@@ -150,6 +150,7 @@ class TransactionCreate(BaseModel):
 
 class TransactionRead(TransactionBase):
     transaction_id: int
+    account_id: int
     created_at: datetime
     amount: Optional[float] = Field(None, description="Decrypted amount (for employees/admins only)")
 

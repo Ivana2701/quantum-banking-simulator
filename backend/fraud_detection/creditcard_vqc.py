@@ -265,7 +265,7 @@ class CreditCardVQC:
         
         # Print results
         print(f"\n{'='*50}")
-        print(f"📊 {model_name} Results")
+        print(f"{model_name} Results")
         print(f"{'='*50}")
         print(f"Accuracy:  {accuracy:.4f}")
         print(f"Precision: {precision:.4f}")
@@ -336,7 +336,7 @@ class CreditCardVQC:
 
 def run_creditcard_vqc():
     """Main function to run the credit card VQC"""
-    print("🚀 Starting Credit Card Fraud Detection with Variational Quantum Classifier")
+    print("Starting Credit Card Fraud Detection with Variational Quantum Classifier")
     print("="*70)
     
     # Create model with increased qubits

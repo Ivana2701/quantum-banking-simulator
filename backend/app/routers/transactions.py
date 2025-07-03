@@ -256,11 +256,12 @@ def test_bb84_protocol(
     try:
         from quantum_encryption.bb84 import BB84Protocol
         
-        bb84 = BB84Protocol()
+        # Create BB84Protocol instance with the specified parameters
+        bb84 = BB84Protocol(key_length=key_length, error_threshold=error_rate)
         start_time = time.time()
         
-        # Run BB84 protocol
-        result = bb84.run_full_protocol(key_length=key_length, error_rate=error_rate)
+        # Run BB84 protocol (only accepts initial_length_multiplier parameter)
+        result = bb84.run_full_protocol(initial_length_multiplier=4)
         
         end_time = time.time()
         
@@ -287,86 +288,68 @@ def test_bb84_protocol(
         logger.error(f"BB84 test failed: {e}")
         raise HTTPException(status_code=500, detail=f"BB84 test failed: {str(e)}")
 
-@router.post("/quantum/demo-full-protocol", response_model=dict)
-def demo_full_protocol(
-    current_user: dict = Depends(get_current_user),
-    db: Session = Depends(get_db)
+@router.post("/quantum/demo-bb84", response_model=dict)
+def demo_bb84_protocol(
+    request: dict
 ):
-    """Demonstrate the complete hybrid post-quantum protocol"""
+    """Demo BB84 protocol with custom parameters from frontend"""
     try:
-        protocol = get_protocol_instance()
+        from quantum_encryption.bb84 import BB84Protocol
+        
+        # Extract parameters from request
+        key_length = request.get("key_length", 128)
+        error_rate = request.get("error_rate", 0.05)
+        
+        # Create BB84Protocol instance with the specified parameters
+        bb84 = BB84Protocol(key_length=key_length, error_threshold=error_rate)
         start_time = time.time()
         
-        # Phase 1: Session establishment
-        phase1_start = time.time()
-        session_info = protocol.establish_session_keys(current_user["username"])
-        phase1_time = time.time() - phase1_start
+        # Run BB84 protocol
+        result = bb84.run_full_protocol(initial_length_multiplier=4)
         
-        # Phase 2: Transaction encryption
-        phase2_start = time.time()
-        test_transaction = {
-            "amount": 100.50,
-            "to_account_id": 999,
-            "description": "Demo transaction"
-        }
-        encrypted_data = protocol.encrypt_transaction_data(
-            session_info["session_id"], 
-            test_transaction
-        )
-        phase2_time = time.time() - phase2_start
-        
-        # Phase 3: Digital signature
-        phase3_start = time.time()
-        signature = protocol.sign_transaction(test_transaction)
-        phase3_time = time.time() - phase3_start
-        
-        # Phase 4: Verification
-        phase4_start = time.time()
-        is_valid = protocol.verify_transaction_signature(test_transaction, signature)
-        phase4_time = time.time() - phase4_start
-        
-        # Phase 5: Decryption
-        phase5_start = time.time()
-        decrypted_data = protocol.decrypt_transaction_data(encrypted_data)
-        phase5_time = time.time() - phase5_start
-        
-        total_time = time.time() - start_time
+        end_time = time.time()
         
         return {
             "success": True,
-            "total_time": total_time,
-            "bb84_time": phase1_time * 0.6,  # Estimate BB84 portion
-            "kyber_time": phase1_time * 0.4,  # Estimate Kyber portion
-            "phases": {
-                "session_establishment": {
-                    "time": phase1_time,
-                    "session_id": session_info["session_id"][:8] + "...",
-                    "protocols": ["BB84", "Kyber", "HKDF"]
-                },
-                "data_encryption": {
-                    "time": phase2_time,
-                    "algorithm": "AES-256-GCM",
-                    "data_size": len(json.dumps(test_transaction))
-                },
-                "digital_signature": {
-                    "time": phase3_time,
-                    "algorithm": "CRYSTALS-Dilithium",
-                    "signature_length": len(signature)
-                },
-                "signature_verification": {
-                    "time": phase4_time,
-                    "result": "Valid" if is_valid else "Invalid"
-                },
-                "data_decryption": {
-                    "time": phase5_time,
-                    "success": decrypted_data == test_transaction
-                }
+            "key_length": len(result["shared_key"]),
+            "final_key_length": len(result["shared_key"]),
+            "error_rate": result["parameters"]["error_rate"],
+            "measured_error_rate": result["parameters"]["error_rate"],
+            "security_level": "High" if result["parameters"]["error_rate"] < 0.1 else "Medium",
+            "security_status": "Secure",
+            "execution_time": end_time - start_time,
+            "steps": [
+                "Initialize quantum channel",
+                "Alice generates random bits and bases",
+                "Alice sends encoded qubits",
+                "Bob measures with random bases", 
+                "Public basis comparison",
+                "Key sifting and error correction",
+                f"Final key established: {len(result['shared_key'])} bits"
+            ],
+            "detailed_metrics": {
+                "initial_qubits": result["parameters"]["initial_bits"],
+                "matching_bases": result["parameters"]["matching_bases"],
+                "basis_match_rate": result["parameters"]["basis_match_rate"],
+                "key_extraction_efficiency": result["parameters"]["key_extraction_efficiency"],
+                "protocol_success": result["parameters"]["protocol_success"],
+                "error_threshold": error_rate,  # The configured threshold
+                "security_bits": min(len(result["shared_key"]), 256),
+                "processing_rate": result["parameters"]["initial_bits"] / (end_time - start_time) if (end_time - start_time) > 0 else 0
+            },
+            "protocol_info": {
+                "name": "BB84 Quantum Key Distribution",
+                "type": "Information-Theoretic Secure",
+                "quantum_backend": "IBM Qiskit qasm_simulator",
+                "batch_size": 30,
+                "basis_count": 2,
+                "encoding_schemes": ["Computational (Z-basis)", "Hadamard (X-basis)"]
             }
         }
     except Exception as e:
-        logger.error(f"Full protocol demo failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Demo failed: {str(e)}")
-
+        logger.error(f"BB84 demo failed: {e}")
+        raise HTTPException(status_code=500, detail=f"BB84 demo failed: {str(e)}")
+    
 # Health check endpoint for quantum readiness
 @router.get("/quantum/health", response_model=dict)
 def quantum_health_check():
@@ -525,3 +508,153 @@ def process_secure_employee_transaction(
             pass  # If signing fails, return without signature
         
         return SecureTransactionResponse(**error_response)
+
+# Demo endpoints for PQC features
+
+@router.post("/quantum/demo-key-generation", response_model=dict)
+def demo_key_generation():
+    """Demo endpoint for post-quantum key generation"""
+    try:
+        import time
+        start_time = time.time()
+        
+        from quantum_encryption.hybrid_pqc_protocol import get_protocol_instance
+        protocol = get_protocol_instance()
+        
+        # Generate fresh Kyber keypair
+        import oqs
+        with oqs.KeyEncapsulation('Kyber1024') as kem:
+            public_key = kem.generate_keypair()
+            private_key = kem.export_secret_key()
+            
+        # Generate fresh Dilithium keypair  
+        with oqs.Signature('Dilithium5') as signer:
+            dilithium_public_key = signer.generate_keypair()
+            dilithium_private_key = signer.export_secret_key()
+        
+        end_time = time.time()
+        
+        return {
+            "success": True,
+            "message": "Post-quantum cryptographic keys generated successfully",
+            "algorithms": {
+                "kyber": {
+                    "name": "CRYSTALS-Kyber1024",
+                    "type": "Key Encapsulation Mechanism (KEM)",
+                    "public_key_size": len(public_key),
+                    "private_key_size": len(private_key),
+                    "security_level": "NIST Level 5 (≈AES-256)"
+                },
+                "dilithium": {
+                    "name": "CRYSTALS-Dilithium5", 
+                    "type": "Digital Signature Algorithm",
+                    "public_key_size": len(dilithium_public_key),
+                    "private_key_size": len(dilithium_private_key),
+                    "security_level": "NIST Level 5 (≈AES-256)"
+                }
+            },
+            "performance": {
+                "total_time": round(end_time - start_time, 4),
+                "kyber_features": [
+                    "Quantum-resistant key encapsulation",
+                    "Based on Module Learning With Errors (MLWE)",
+                    "Standardized by NIST (FIPS 203)",
+                    "Optimized for high security level"
+                ],
+                "dilithium_features": [
+                    "Quantum-resistant digital signatures",
+                    "Based on Module Learning With Errors (MLWE)",
+                    "Standardized by NIST (FIPS 204)",
+                    "Deterministic signatures with strong security"
+                ]
+            },
+            "implementation_details": {
+                "library": "liboqs (Open Quantum Safe)",
+                "quantum_resistance": "Secure against both classical and quantum attacks",
+                "standardization": "NIST Post-Quantum Cryptography Standards",
+                "use_cases": ["Secure key exchange", "Transaction authentication", "Long-term security"]
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Key generation demo failed: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Key generation demo failed"
+        }
+
+@router.post("/quantum/demo-digital-signature", response_model=dict)
+def demo_digital_signature():
+    """Demo endpoint for post-quantum digital signatures"""
+    try:
+        import time
+        import json
+        
+        start_time = time.time()
+        
+        # Sample transaction data
+        transaction_data = {
+            "transaction_id": "demo_tx_12345",
+            "from_account": 1001,
+            "to_account": 1002,
+            "amount": 500.00,
+            "timestamp": datetime.utcnow().isoformat(),
+            "description": "Demo transaction for signature verification"
+        }
+        
+        # Generate signature using Dilithium
+        import oqs
+        with oqs.Signature('Dilithium5') as signer:
+            public_key = signer.generate_keypair()
+            private_key = signer.export_secret_key()
+            
+            # Sign the transaction
+            message = json.dumps(transaction_data, sort_keys=True).encode('utf-8')
+            signature = signer.sign(message)
+            
+            # Verify the signature
+            is_valid = signer.verify(message, signature, public_key)
+        
+        end_time = time.time()
+        
+        return {
+            "success": True,
+            "message": "Digital signature demo completed successfully",
+            "transaction_data": transaction_data,
+            "signature_details": {
+                "algorithm": "CRYSTALS-Dilithium5",
+                "signature_size": len(signature),
+                "public_key_size": len(public_key),
+                "private_key_size": len(private_key),
+                "verification_result": "VALID" if is_valid else "INVALID",
+                "security_level": "NIST Level 5 (≈AES-256)"
+            },
+            "performance": {
+                "total_time": round(end_time - start_time, 4),
+                "signing_time": "< 0.001s (estimated)",
+                "verification_time": "< 0.001s (estimated)"
+            },
+            "security_properties": {
+                "quantum_resistance": "Secure against Shor's algorithm",
+                "classical_security": "Based on lattice problems",
+                "signature_uniqueness": "Deterministic signatures for same input",
+                "non_repudiation": "Cryptographic proof of authenticity",
+                "integrity": "Detects any message tampering"
+            },
+            "real_world_applications": [
+                "Transaction authentication in banking",
+                "Legal document signing",
+                "Software code signing",
+                "Certificate authority operations",
+                "Blockchain and cryptocurrency transactions"
+            ]
+        }
+        
+    except Exception as e:
+        logger.error(f"Digital signature demo failed: {e}")
+        return {
+            "success": False,
+            "error": str(e),
+            "message": "Digital signature demo failed"
+        }

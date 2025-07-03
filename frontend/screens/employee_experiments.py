@@ -37,7 +37,7 @@ class SingleModelTab:
             if "error" in result:
                 st.error(result["error"])
             else:
-                st.write("Prediction:", "❌ Fraudulent" if result["prediction"] == 1 else "✅ Legitimate")
+                st.write("Prediction:", "Fraudulent" if result["prediction"] == 1 else "Legitimate")
                 if result["probability"] is not None:
                     st.write("Probability:", f"{result['probability']:.2%}")
                 st.write(f"**Actual label:** {'Fraud' if actual_label == 1 else 'Not fraud'}")
@@ -85,7 +85,7 @@ class QubitComparisonTab:
             st.warning("Quantum 100 comparison image not found.")
 
 def main():
-    st.title("🧑‍💼 Employee ML Experiments")
+    st.title("Employee ML Experiments")
     tab1, tab2, tab3 = st.tabs([
         "Single Model Prediction",
         "Compare All Models",

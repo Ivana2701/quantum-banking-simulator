@@ -5,7 +5,7 @@ import requests
 API_URL = "http://localhost:8000"
 
 def show_register():
-    st.title("📝 Register")
+    st.title("Register")
     
     # Basic information
     st.subheader("Account Information")
@@ -37,7 +37,7 @@ def show_register():
     
     # Geolocation section
     with st.expander("Location Services (Optional)", expanded=False):
-        st.info("📍 Location information helps us provide better security for your account")
+        st.info("Location information helps us provide better security for your account")
         
         # Initialize session state for location data
         if "user_location" not in st.session_state:
@@ -51,7 +51,7 @@ def show_register():
         
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("📍 Get My Location", help="Uses your browser's location services"):
+            if st.button("Get My Location", help="Uses your browser's location services"):
                 st.session_state.location_requested = True
                 st.session_state.location_found = False
                 
@@ -148,14 +148,14 @@ def show_register():
                 st.components.v1.html(geolocation_js, height=150)
             
             # Display current IP (informational)
-            if st.button("🌐 Check My IP", help="Shows your current IP address"):
+            if st.button("Check My IP", help="Shows your current IP address"):
                 try:
                     ip_response = requests.get("https://api.ipify.org?format=json", timeout=5)
                     if ip_response.status_code == 200:
                         current_ip = ip_response.json().get("ip")
                         st.session_state.user_ip = current_ip  # Store IP in session state
                         st.success(f"Your current IP address: {current_ip}")
-                        st.info("✅ This IP will be saved with your account.")
+                        st.info("This IP will be saved with your account.")
                     else:
                         st.warning("Could not retrieve IP address")
                 except Exception as e:
@@ -230,26 +230,26 @@ def show_register():
         try:
             r = requests.post(f"{API_URL}/accounts/createAccount", json=payload)
         except requests.exceptions.ConnectionError:
-            st.error("❌ **Cannot connect to server**")
+            st.error("**Cannot connect to server**")
             st.error("Please make sure the backend server is running and try again.")
             return
         except requests.exceptions.Timeout:
-            st.error("❌ **Request timed out**")
+            st.error("**Request timed out**")
             st.error("The server is taking too long to respond. Please try again.")
             return
         except Exception as e:
-            st.error(f"❌ **Network error**: {str(e)}")
+            st.error(f"**Network error**: {str(e)}")
             return
 
         if r.status_code == 201:
-            st.success("🎉 **Account created successfully!**")
+            st.success("**Account created successfully!**")
             st.success("You can now log in with your credentials.")
         elif r.status_code == 422:
             # Handle validation errors from the server
             try:
                 error_detail = r.json()
                 if "detail" in error_detail:
-                    st.error("❌ **Validation Error**")
+                    st.error("**Validation Error**")
                     if isinstance(error_detail["detail"], list):
                         for error in error_detail["detail"]:
                             field = error.get("loc", ["unknown"])[-1]
@@ -258,27 +258,27 @@ def show_register():
                     else:
                         st.error(f"• {error_detail['detail']}")
                 else:
-                    st.error("❌ **Please check your input and try again**")
+                    st.error("**Please check your input and try again**")
             except:
-                st.error("❌ **Invalid input format**")
+                st.error("**Invalid input format**")
                 st.error("Please check all fields and try again.")
         elif r.status_code == 400:
             try:
                 error_detail = r.json()
                 if "detail" in error_detail:
-                    st.error("❌ **Registration Failed**")
+                    st.error("**Registration Failed**")
                     st.error(f"• {error_detail['detail']}")
                 else:
-                    st.error("❌ **Bad request**")
+                    st.error("**Bad request**")
                     st.error("Please check your input and try again.")
             except:
-                st.error("❌ **Username might already be taken**")
+                st.error("**Username might already be taken**")
                 st.error("Please try a different username.")
         elif r.status_code == 500:
-            st.error("❌ **Server Error**")
+            st.error("**Server Error**")
             st.error("Something went wrong on our end. Please try again later.")
         else:
-            st.error(f"❌ **Registration failed**")
+            st.error(f"**Registration failed**")
             try:
                 error_detail = r.json()
                 if "detail" in error_detail:

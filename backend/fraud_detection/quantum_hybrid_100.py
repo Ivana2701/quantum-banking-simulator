@@ -69,7 +69,7 @@ class QuantumInspired100Qubit:
     
     def create_quantum_inspired_features(self, X):
         """Create quantum-inspired high-dimensional features"""
-        print("🔬 Creating quantum-inspired features...")
+        print("Creating quantum-inspired features...")
         
         # 1. Polynomial features (quantum superposition simulation)
         print("  - Adding polynomial features (quantum superposition)")
@@ -90,7 +90,7 @@ class QuantumInspired100Qubit:
         # Combine all features
         X_enhanced = np.hstack([X_poly, X_interactions, X_wavelet])
         
-        print(f"🎯 Total quantum-inspired features: {X_enhanced.shape[1]}")
+        print(f"Total quantum-inspired features: {X_enhanced.shape[1]}")
         print(f"   (Simulating {X_enhanced.shape[1]} qubits of information)")
         
         return X_enhanced
@@ -122,7 +122,7 @@ class QuantumInspired100Qubit:
     
     def preprocess_features(self, X, y, test_size=0.2):
         """Advanced preprocessing with quantum-inspired techniques"""
-        print("⚛️ Applying quantum-inspired preprocessing...")
+        print("Applying quantum-inspired preprocessing...")
         
         # Split data
         X_train, X_test, y_train, y_test = train_test_split(
@@ -144,7 +144,7 @@ class QuantumInspired100Qubit:
         X_train_pca = self.pca.fit_transform(X_train_scaled)
         X_test_pca = self.pca.transform(X_test_scaled)
         
-        print(f"📊 Final feature dimensions: {X_train_pca.shape[1]} (simulating {self.feature_dim} qubits)")
+        print(f"Final feature dimensions: {X_train_pca.shape[1]} (simulating {self.feature_dim} qubits)")
         
         # Handle class imbalance
         print("Original training set class distribution:")
@@ -163,7 +163,7 @@ class QuantumInspired100Qubit:
     
     def create_quantum_inspired_models(self):
         """Create ensemble of quantum-inspired models"""
-        print("🔮 Creating quantum-inspired model ensemble...")
+        print("Creating quantum-inspired model ensemble...")
         
         # 1. Quantum-Inspired Random Forest (quantum superposition)
         print("  - Training Quantum-Inspired Random Forest...")
@@ -212,20 +212,20 @@ class QuantumInspired100Qubit:
         """Train the quantum-inspired ensemble"""
         models = self.create_quantum_inspired_models()
         
-        print("🚀 Training quantum-inspired ensemble...")
+        print("Training quantum-inspired ensemble...")
         print(f"   Simulating {self.feature_dim} qubits of computational power")
         
         for name, model in models.items():
             print(f"  - Training {name}...")
             model.fit(X_train, y_train)
         
-        print("✅ Quantum-inspired ensemble training completed!")
+        print("Quantum-inspired ensemble training completed!")
         return models
     
     def evaluate_ensemble(self, X_test, y_test):
         """Evaluate the quantum-inspired ensemble"""
         print(f"\n{'='*60}")
-        print(f"📊 QUANTUM-INSPIRED 100-QUBIT EQUIVALENT RESULTS")
+        print(f"QUANTUM-INSPIRED 100-QUBIT EQUIVALENT RESULTS")
         print(f"{'='*60}")
         
         ensemble_results = {}
@@ -272,7 +272,7 @@ class QuantumInspired100Qubit:
         avg_roc_auc = np.mean([r['roc_auc'] for r in ensemble_results.values()])
         
         print(f"\n{'='*60}")
-        print(f"🎯 ENSEMBLE AVERAGE (100-QUBIT EQUIVALENT)")
+        print(f"ENSEMBLE AVERAGE (100-QUBIT EQUIVALENT)")
         print(f"{'='*60}")
         print(f"Average Accuracy:  {avg_accuracy:.4f}")
         print(f"Average Precision: {avg_precision:.4f}")
@@ -312,9 +312,9 @@ class QuantumInspired100Qubit:
 
 def run_quantum_inspired_100():
     """Main function to run the quantum-inspired 100-qubit equivalent system"""
-    print("🚀 Starting Quantum-Inspired 100-Qubit Equivalent Fraud Detection")
+    print("Starting Quantum-Inspired 100-Qubit Equivalent Fraud Detection")
     print("="*70)
-    print("🔬 This system simulates the power of 100 qubits using:")
+    print("This system simulates the power of 100 qubits using:")
     print("   - High-dimensional feature engineering")
     print("   - Quantum-inspired kernels")
     print("   - Ensemble methods")
@@ -331,7 +331,7 @@ def run_quantum_inspired_100():
     metrics = quantum_system.train_and_evaluate(sample_size=10000)
     
     print("\n✅ Quantum-inspired 100-qubit equivalent training completed!")
-    print("🎯 This represents the theoretical power of 100 qubits!")
+    print("This represents the theoretical power of 100 qubits!")
     return metrics
 
 if __name__ == "__main__":
