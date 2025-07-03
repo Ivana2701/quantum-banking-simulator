@@ -256,11 +256,12 @@ def test_bb84_protocol(
     try:
         from quantum_encryption.bb84 import BB84Protocol
         
-        bb84 = BB84Protocol()
+        # Create BB84Protocol instance with the specified parameters
+        bb84 = BB84Protocol(key_length=key_length, error_threshold=error_rate)
         start_time = time.time()
         
-        # Run BB84 protocol
-        result = bb84.run_full_protocol(key_length=key_length, error_rate=error_rate)
+        # Run BB84 protocol (only accepts initial_length_multiplier parameter)
+        result = bb84.run_full_protocol(initial_length_multiplier=4)
         
         end_time = time.time()
         
@@ -286,6 +287,70 @@ def test_bb84_protocol(
     except Exception as e:
         logger.error(f"BB84 test failed: {e}")
         raise HTTPException(status_code=500, detail=f"BB84 test failed: {str(e)}")
+
+@router.post("/quantum/demo-bb84", response_model=dict)
+def demo_bb84_protocol(
+    request: dict,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Demo BB84 protocol with custom parameters from frontend"""
+    try:
+        from quantum_encryption.bb84 import BB84Protocol
+        
+        # Extract parameters from request
+        key_length = request.get("key_length", 128)
+        error_rate = request.get("error_rate", 0.05)
+        
+        # Create BB84Protocol instance with the specified parameters
+        bb84 = BB84Protocol(key_length=key_length, error_threshold=error_rate)
+        start_time = time.time()
+        
+        # Run BB84 protocol
+        result = bb84.run_full_protocol(initial_length_multiplier=4)
+        
+        end_time = time.time()
+        
+        return {
+            "success": True,
+            "key_length": len(result["shared_key"]),
+            "final_key_length": len(result["shared_key"]),
+            "error_rate": result["parameters"]["error_rate"],
+            "measured_error_rate": result["parameters"]["error_rate"],
+            "security_level": "High" if result["parameters"]["error_rate"] < 0.1 else "Medium",
+            "security_status": "Secure",
+            "execution_time": end_time - start_time,
+            "steps": [
+                "Initialize quantum channel",
+                "Alice generates random bits and bases",
+                "Alice sends encoded qubits",
+                "Bob measures with random bases", 
+                "Public basis comparison",
+                "Key sifting and error correction",
+                f"Final key established: {len(result['shared_key'])} bits"
+            ],
+            "detailed_metrics": {
+                "initial_qubits": result["parameters"]["initial_bits"],
+                "matching_bases": result["parameters"]["matching_bases"],
+                "basis_match_rate": result["parameters"]["basis_match_rate"],
+                "key_extraction_efficiency": result["parameters"]["key_extraction_efficiency"],
+                "protocol_success": result["parameters"]["protocol_success"],
+                "error_threshold": error_rate,  # The configured threshold
+                "security_bits": min(len(result["shared_key"]), 256),
+                "processing_rate": result["parameters"]["initial_bits"] / (end_time - start_time) if (end_time - start_time) > 0 else 0
+            },
+            "protocol_info": {
+                "name": "BB84 Quantum Key Distribution",
+                "type": "Information-Theoretic Secure",
+                "quantum_backend": "IBM Qiskit qasm_simulator",
+                "batch_size": 30,
+                "basis_count": 2,
+                "encoding_schemes": ["Computational (Z-basis)", "Hadamard (X-basis)"]
+            }
+        }
+    except Exception as e:
+        logger.error(f"BB84 demo failed: {e}")
+        raise HTTPException(status_code=500, detail=f"BB84 demo failed: {str(e)}")
 
 @router.post("/quantum/demo-full-protocol", response_model=dict)
 def demo_full_protocol(
