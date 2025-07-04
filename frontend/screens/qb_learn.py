@@ -714,7 +714,7 @@ def show_qb_learn():
         This diagram compares the performance of quantum and classical models for fraud detection.
         Observe how quantum models (QSVM, VQC) perform relative to classical approaches.
         """)
-        img_path = os.path.join("backend", "fraud_detection", "visualizations", "qsvm_vqc_performance_comparison.png")
+        img_path = os.path.join("backend", "fraud_detection", "visualizations", "modelcomp100qubit.png")
         if os.path.exists(img_path):
             st.image(Image.open(img_path), caption="Performance Comparison: Quantum vs Classical Models", use_column_width=True)
         else:
@@ -770,7 +770,9 @@ def show_qb_learn():
         st.latex(r"K(x_i, x_j) = |\langle \phi(x_i) | \phi(x_j) \rangle|^2")
         st.markdown("""
         This equation shows how quantum AI compares transactions in a special "quantum space" 
-        where fraud patterns become easier to spot.
+        where fraud patterns become easier to spot. Here, ϕ(x) is the quantum feature map 
+        that converts your classical data into a quantum state.
+         The measured “fidelity” ∣⟨ϕ(xi​)∣ϕ(xj​)⟩∣2 serves as the kernel value for the subsequent SVM.
         """)
         
         st.markdown("""
@@ -779,7 +781,10 @@ def show_qb_learn():
         st.latex(r"|\psi(\vec{x}, \vec{\theta})\rangle = U(\vec{\theta}) \cdot \Phi(\vec{x}) |0\rangle")
         st.markdown("""
         This represents how we encode your transaction data into quantum states 
-        that our AI can analyze for suspicious patterns.
+        that our AI can analyze for suspicious patterns. 
+        First, Φ(x) encodes the data into the initial state ∣0⟩, 
+        then U(θ) (approximate circuit) further parameterizes the state. 
+        The measurements on ∣ψ⟩ provide the class membership.
         """)
         
         st.markdown("---")

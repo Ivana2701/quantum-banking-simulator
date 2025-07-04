@@ -40,16 +40,16 @@ This document describes the implementation of a hybrid post-quantum secure proto
 ```
 Client                                    Bank
   |                                        |
-  |-- Session Establishment Request ------>|
+  |-------Sitzungsaufbau-Anfrage---------->|
   |    (client_id, protocol_version)       |
   |                                        |
-  |<------- BB84 QKD Protocol ------------>|
-  |    (quantum key: K_QKD)                |
+  |<------- BB84 QKD Protokol ------------>|
+  |       (quantum Schlüssel: K_QKD)       |
   |                                        |
-  |<-- Kyber Key Exchange ---------------->|
-  |    (shared secret: K_Kyber)            |
+  |<-- Kyber-Schlüsselaustausch ---------->|
+  | (gemeinsames Geheimnis: K_Kyber)       |
   |                                        |
-  |<-- Session Response -------------------|
+  |<-- -Session-Antwort -------------------|
   |    (session_id, public_keys, params)   |
   |                                        |
   | K_session = HKDF(K_QKD || K_Kyber)     |
@@ -58,22 +58,22 @@ Client                                    Bank
 ### 2. Secure Transaction Processing
 
 ```
-Client                                    Bank
-  |                                        |
-  |-- Encrypted Transaction Request ------>|
-  |    AES-GCM(transaction, K_session)     |
-  |    + Dilithium_Sign(ciphertext)        |
-  |                                        |
-  |                                        |-- Verify Signature
-  |                                        |-- Decrypt Transaction
-  |                                        |-- Process Transaction
-  |                                        |
-  |<-- Encrypted Response -----------------|
-  |    AES-GCM(response, K_session)        |
-  |    + Dilithium_Sign(response)          |
-  |                                        |
-  |-- Verify Response Signature           |
-  |-- Decrypt Response                    |
+Client                                       Bank
+  |                                            |
+  |--Verschlüsselte Transaktionsanforderung--->|
+  |      AES-GCM(transaction, K_session)       |
+  |      + Dilithium_Sign(ciphertext)          |
+  |                                            |
+  |                                            |-- Signatur überprüfen
+  |                                            |-- Transaktion entschlüsseln
+  |                                            |-- Transaktion bearbeiten
+  |                                            |
+  |<-----Verschlüsselte Antwort ---------------|
+  |      AES-GCM(response, K_session)          |
+  |      + Dilithium_Sign(response)            |
+  |                                            |
+  |----- Antwort-Signatur überprüfen           |  
+  |  --Antwort entschlüsseln                   |  
 ```
 
 ## API Endpoints
